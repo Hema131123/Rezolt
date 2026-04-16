@@ -23,7 +23,7 @@
   --accent-soft: rgba(228, 190, 71, 0.1);
   --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.03);
   --shadow-lg: 0 20px 40px rgba(15, 23, 42, 0.08);
-  var(--soft-shadow): var(--shadow-sm);
+  --soft-shadow: var(--shadow-sm);
   
   --fluid: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
