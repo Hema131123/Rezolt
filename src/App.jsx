@@ -5284,6 +5284,9 @@ export default function App() {
 
     const syncSessionUser = async (authUser, nextPage) => {
       try {
+        // Yield execution thread by 150ms so Supabase can safely resolve and drop its native initialization locks before Database queries run
+        await new Promise(r => setTimeout(r, 150));
+
         // Ensure login feels instant, then hydrate richer data in background.
         if (!cancelled) {
           setUser({ id: authUser.id, name: authUser.email.split("@")[0], email: authUser.email, credits: 3, plan: "starter" });
