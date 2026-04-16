@@ -5303,43 +5303,42 @@ export default function App() {
       }
     };
 
-    const init = async () => {
-      try {
-        const recoveryFlow = typeof window !== "undefined" && /type=recovery/i.test(`${window.location.hash}${window.location.search}`);
-        const { data: { session } } = await supabase.auth.getSession();
-        if (cancelled) return;
-        if (session?.user) {
-          await syncSessionUser(session.user, recoveryFlow ? "reset-password" : "dashboard");
-        } else {
-          setPage("landing");
-        }
-      } catch (e) {
-        console.error("Session restore failed:", e);
-        setPage("landing");
-      } finally {
-        if (!cancelled) {
-          clearTimeout(bootTimeoutId);
-          setBooting(false);
-        }
-      }
-    };
-    init();
+    const recoveryFlow = typeof window !== "undefined" && /type=recovery/i.test(`${window.location.hash}${window.location.search}`);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_OUT") { setUser(null); setHistory([]); setPage("landing"); return; }
-      if (!session?.user) return;
+      // Clear boot lock the moment Supabase answers natively
+      if (!cancelled) {
+        clearTimeout(bootTimeoutId);
+        setBooting(false);
+      }
+
+      if (event === "SIGNED_OUT") { 
+        setUser(null); 
+        setHistory([]); 
+        setPage("landing"); 
+        return; 
+      }
+      
+      if (!session?.user) {
+        if (event === "INITIAL_SESSION") setPage("landing");
+        return;
+      }
+
       if (event === "PASSWORD_RECOVERY") {
         await syncSessionUser(session.user, "reset-password");
         return;
       }
-      if (event === "SIGNED_IN") {
-        await syncSessionUser(session.user, "dashboard");
+      
+      if (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
+        // Only force routing on the first payload if they were cold-booting, otherwise maintain their active tab
+        await syncSessionUser(session.user, event === "INITIAL_SESSION" ? (recoveryFlow ? "reset-password" : "dashboard") : undefined);
       }
     });
+
     return () => {
       cancelled = true;
       clearTimeout(bootTimeoutId);
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, []);
 
