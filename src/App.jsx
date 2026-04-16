@@ -5322,7 +5322,7 @@ export default function App() {
       }
       
       if (!session?.user) {
-        if (event === "INITIAL_SESSION") setPage("landing");
+        if (event === "INITIAL_SESSION") setPage(prev => prev === "loading" ? "landing" : prev);
         return;
       }
 
@@ -5335,6 +5335,14 @@ export default function App() {
         // Only force routing on the first payload if they were cold-booting, otherwise maintain their active tab
         await syncSessionUser(session.user, event === "INITIAL_SESSION" ? (recoveryFlow ? "reset-password" : "dashboard") : undefined);
       }
+    });
+
+    // Fallback: If no cache exists, INITIAL_SESSION may silently not broadcast fast enough. 
+    // This perfectly bypasses the old lock conflict because it fails silently backwards to 'landing'.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!cancelled && !session?.user) setPage(p => p === "loading" ? "landing" : p);
+    }).catch(() => {
+      if (!cancelled) setPage(p => p === "loading" ? "landing" : p);
     });
 
     return () => {
