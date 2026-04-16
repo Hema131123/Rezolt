@@ -5265,7 +5265,7 @@ function TermsPage({ setPage }) {
 }
 
 export default function App() {
-  const [page, setPage] = useState("loading");
+  const [page, setPage] = useState("landing");
   const [user, setUser] = useState(null);
   const [history, setHistory] = useState([]);
   const [booting, setBooting] = useState(true);
