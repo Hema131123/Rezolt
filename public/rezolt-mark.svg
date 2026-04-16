@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Rezolt mark">
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="#FFFFFF" stroke="#031D40" stroke-width="3.6"/>
+  <path d="M21 48V17h12c8 0 13 4 13 10s-4 10-10 12l10 9" fill="none" stroke="#031D40" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M21 32h12" fill="none" stroke="#E4BE47" stroke-width="3.8" stroke-linecap="round"/>
+</svg>

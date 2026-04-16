@@ -1,0 +1,341 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* ==========================================================================
+   Ultra-Sleek Dynamic Aesthetic - Flawless Light & Dark Blue Mode
+   ========================================================================== */
+
+:root {
+  --app-bg: #F4F5F7;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  
+  --surface: #FFFFFF;
+  --surface2: #F8FAFC;
+  --border: rgba(15, 23, 42, 0.08);
+  
+  --coral-accent: #FF5A5A;
+  --gold-500: #E4BE47;
+  --navy-800: #0f172a;
+  --navy-600: #1e293b;
+  
+  --grad: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --accent-soft: rgba(228, 190, 71, 0.1);
+  --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.03);
+  --shadow-lg: 0 20px 40px rgba(15, 23, 42, 0.08);
+  var(--soft-shadow): var(--shadow-sm);
+  
+  --fluid: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* 🔵 DARK MODE RESPONSIVE SETTINGS 🔵 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --app-bg: #0f172a;
+    --text-primary: #F8FAFC;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    
+    --surface: rgba(30, 41, 59, 0.8);
+    --surface2: rgba(51, 65, 85, 0.6);
+    --border: rgba(248, 250, 252, 0.1);
+    
+    --navy-800: #E4BE47; /* Flip primary buttons to Gold in dark mode for contrast */
+    --grad: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+    --accent-soft: rgba(228, 190, 71, 0.05);
+    
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* Force legacy component variables universally onto modern unified tokens bypassing JS injections */
+html, body, #root, .fade-in, .page-pad, .panel-shell {
+  --text: var(--text-primary);
+  --text-mid: var(--text-secondary);
+  --text-faint: var(--text-muted);
+  --accent: var(--gold-500);
+  --bg: var(--app-bg);
+  --surface-strong: var(--surface);
+  --surface3: var(--surface2);
+}
+
+/* Base Body Update */
+body {
+  background-color: var(--app-bg) !important;
+  color: var(--text-primary) !important;
+  font-family: 'Inter', sans-serif !important;
+  transition: background-color 0.4s var(--fluid), color 0.4s var(--fluid);
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Outfit', sans-serif !important;
+  letter-spacing: -0.02em !important;
+  font-weight: 600 !important;
+}
+
+/* =========================================
+   Ultra-Clean Navigation
+   ========================================= */
+.floating-island-nav, .topbar-pad {
+  position: sticky !important;
+  top: 0 !important;
+  background: var(--surface) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid var(--border) !important;
+  box-shadow: none !important;
+  padding: 16px 32px !important;
+  z-index: 1000;
+  width: 100% !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+  transform: none !important;
+  left: 0 !important;
+  transition: all 0.4s var(--fluid);
+}
+
+.page-pad, [style*="padding: 40px"] {
+  padding-top: 40px !important;
+}
+
+/* =========================================
+   Bento / Grid Layout 
+   ========================================= */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.bento-tile, .card-hover, .feature-card, .panel-shell {
+  background: var(--surface) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: all 0.4s var(--fluid) !important;
+}
+
+/* Subtle hover lift */
+.bento-tile:hover, .card-hover:hover, .feature-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: var(--shadow-lg) !important;
+  border-color: var(--gold-500) !important;
+}
+
+/* =========================================
+   Pricing Grid Alignment Fix
+   ========================================= */
+
+/* Responsive Stacking for Pricing Grid */
+@media (max-width: 900px) {
+  .pricing-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.pricing-grid > div {
+  text-align: left !important;
+  align-items: flex-start !important;
+}
+
+/* Force features list to align left */
+.pricing-grid > div > div[style*="alignItems: center"] {
+  justify-content: flex-start !important;
+}
+
+/* =========================================
+   Feature Layout Fix - Centering Orphans
+   ========================================= */
+.feature-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: stretch !important;
+  gap: 24px !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+}
+
+.feature-grid > div {
+  flex: 1 1 calc(25% - 24px) !important;
+  min-width: 250px !important;
+  max-width: calc(25% - 18px) !important;
+}
+
+@media (max-width: 1024px) {
+  .feature-grid > div {
+    max-width: calc(33.3% - 16px) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .feature-grid > div {
+    max-width: 100% !important;
+  }
+}
+
+/* =========================================
+   Modal Centering Fix (Animation Override)
+   ========================================= */
+.modal-enter {
+  animation: modalEnterAnim 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+}
+
+@keyframes modalEnterAnim {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95) !important;
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) !important;
+  }
+}
+
+/* Fix containing block issues trapping position:fixed */
+.fade-in {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  will-change: auto !important;
+  filter: none !important;
+}
+
+/* Enforce left-alignment on hero text and sample modal content */
+.modal-enter, .modal-enter *, .two-col-md, .two-col-md * {
+  text-align: left !important;
+}
+
+.hero-ba-grid > div:first-child,
+.hero-ba-grid > div:first-child * {
+  text-align: left !important;
+}
+
+/* Mobile Warning Injection */
+@media (max-width: 768px) {
+  body::after {
+    content: "Rezolt is best experienced on a Desktop browser. Please switch to a computer for full functionality.";
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--navy-800);
+    color: #fff;
+    padding: 16px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    z-index: 2147483647;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
+    pointer-events: none;
+  }
+}
+
+/* The invisible text fix: Rehydrate popular card styling with strong constraints */
+.pricing-grid > div[style*="var(--grad)"] {
+  background: var(--grad) !important;
+  border: none !important;
+  color: #FFFFFF !important;
+}
+.pricing-grid > div[style*="var(--grad)"] h3,
+.pricing-grid > div[style*="var(--grad)"] div {
+  color: inherit; /* Bleeds white down implicitly */
+}
+
+/* Clean up any pseudo borders from previous themes */
+.bento-tile::before, .card-hover::before, .pricing-grid > div::before, .panel-shell::before {
+  display: none !important;
+}
+
+/* =========================================
+   Buttons
+   ========================================= */
+button {
+  font-family: 'Inter', sans-serif !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-primary, button[style*="background: #031D40"], button[style*="background: var(--accent)"], button[style*='background: O'] {
+  background: var(--navy-800) !important;
+  color: #FFF !important; /* If gold, white might clash. Dark mode handles this cleanly. */
+  border-radius: 8px !important;
+  border: none !important;
+  box-shadow: var(--shadow-sm) !important;
+  font-weight: 600 !important;
+  padding: 12px 24px !important;
+}
+@media (prefers-color-scheme: dark) {
+  .btn-primary, button[style*="background: #031D40"], button[style*="background: var(--accent)"], button[style*='background: O'] {
+    color: #111 !important; /* Dark mode buttons are gold, need dark text */
+  }
+}
+
+.btn-primary:hover:not(:disabled), button[style*="background: #031D40"]:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-lg) !important;
+  filter: brightness(1.1);
+}
+
+/* =========================================
+   Form Inputs
+   ========================================= */
+input, textarea, select {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  padding: 12px 16px !important;
+}
+input:focus, textarea:focus {
+  border-color: var(--gold-500) !important;
+  box-shadow: 0 0 0 2px var(--accent-soft) !important;
+  outline: none !important;
+}
+
+/* =========================================
+   Hero Dark Mode Compatibility overrides
+   ========================================= */
+.hero-gradient {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+.hero-gradient::before, .hero-gradient::after {
+  opacity: 0.05 !important;
+}
+
+/* =========================================
+   Dynamic Global Illegibility / Hover Fixes
+   ========================================= */
+
+@media (prefers-color-scheme: dark) {
+  /* Intercept React inline styles emitting raw #031D40 (dark blue) strings */
+  [style*="color: #031D40"], 
+  [style*="color: rgb(3, 29, 64)"],
+  [style*="color: AC"] {
+    color: var(--text-primary) !important;
+  }
+  
+  [style*="background: #031D40"], 
+  [style*="background: rgb(3, 29, 64)"] {
+    background: var(--surface2) !important;
+    color: var(--text-primary) !important;
+  }
+}
+
+.ghost-btn {
+  background: var(--surface) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.ghost-btn:hover {
+  background: var(--surface2) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
