@@ -5290,10 +5290,9 @@ export default function App() {
           if (nextPage) setPage(nextPage);
         }
 
-        const [profile, kits] = await Promise.all([
-          fetchProfile(authUser.id),
-          fetchKits(authUser.id),
-        ]);
+        // Sequentialize initial fetches to prevent Supabase v2 client auto-refresh lock collision
+        const profile = await fetchProfile(authUser.id);
+        const kits = await fetchKits(authUser.id);
         if (cancelled) return;
         setUser({ id: authUser.id, name: profile?.name || authUser.email.split("@")[0], email: authUser.email, credits: profile?.credits ?? 3, plan: profile?.plan ?? "starter" });
         setHistory(kits.map(k => ({ role: k.role, outputs: k.outputs, date: new Date(k.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) })));
@@ -5347,10 +5346,9 @@ export default function App() {
     setUser(u);
     setPage("dashboard");
 
-    const [profile, kits] = await Promise.all([
-      fetchProfile(u.id),
-      fetchKits(u.id),
-    ]);
+    // Sequentialize fetches to prevent auth lock collisions
+    const profile = await fetchProfile(u.id);
+    const kits = await fetchKits(u.id);
 
     setHistory(kits.map(k => ({ role: k.role, outputs: k.outputs, date: new Date(k.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) })));
     if (profile) {
