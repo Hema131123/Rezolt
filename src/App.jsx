@@ -1979,7 +1979,7 @@ function TopBar({ page, setPage, user, onSignOut }) {
               { key: "articles", label: "Articles", page: "articles" },
               { key: "dashboard", label: "Dashboard", page: "dashboard" },
               { key: "create", label: "Create Kit", page: "generate" },
-              ...(user.email === ADMIN_EMAIL ? [{ key: "admin", label: "Admin", page: "admin" }] : []),
+              ...(user?.email?.trim()?.toLowerCase() === ADMIN_EMAIL.trim().toLowerCase() ? [{ key: "admin", label: "Admin", page: "admin" }] : []),
             ].map(item => (
               <button key={item.key} onClick={() => { setPage(item.page); if (item.scroll) setTimeout(() => document.getElementById(item.scroll)?.scrollIntoView({ behavior: "smooth" }), 100); }} className="nav-item" style={{
                 background: page === item.page && !item.scroll ? "var(--accent-soft)" : "none",
@@ -2098,7 +2098,7 @@ function TopBar({ page, setPage, user, onSignOut }) {
                   { key: "pricing", label: (<><i className="fi fi-sr-badge-dollar" style={{ marginRight: 8 }} />Pricing</>), page: "landing", scroll: "pricing-section" },
                   { key: "articles", label: (<><FiBookOpen style={{ marginRight: 8 }} />Articles</>), page: "articles" },
                   { key: "plans", label: (<><i className="fi fi-sr-badge-dollar" style={{ marginRight: 8 }} />Plans & Billing</>), page: "payment" },
-                  ...(user.email === ADMIN_EMAIL ? [{ key: "admin", label: (<><i className="fi fi-sr-settings-sliders" style={{ marginRight: 8 }} />Admin</>), page: "admin" }] : []),
+                  ...(user?.email?.trim()?.toLowerCase() === ADMIN_EMAIL.trim().toLowerCase() ? [{ key: "admin", label: (<><i className="fi fi-sr-settings-sliders" style={{ marginRight: 8 }} />Admin</>), page: "admin" }] : []),
                 ].map(item => (
                   <button key={item.key} onClick={() => { setPage(item.page); if (item.scroll) setTimeout(() => document.getElementById(item.scroll)?.scrollIntoView({ behavior: "smooth" }), 100); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 14, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 500 }}>{item.label}</button>
                 ))}
@@ -4873,6 +4873,7 @@ function ContactPage({ setPage, user }) {
 // ─── ADMIN PAGE ───────────────────────────────────────────────────────────────
 
 function AdminPage({ user, setPage }) {
+  console.log("AdminPage Rendered. user:", user?.email);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -4909,8 +4910,9 @@ function AdminPage({ user, setPage }) {
   });
 
   const revenue = (stats?.profiles || []).reduce((acc, p) => {
-    if (p.plan === "Pro") return acc + 299;
-    if (p.plan === "unlimited") return acc + 599;
+    const plan = p.plan?.toLowerCase();
+    if (plan === "pro") return acc + 299;
+    if (plan === "unlimited" || plan === "unlimited_monthly") return acc + 599;
     return acc;
   }, 0);
 
@@ -4941,9 +4943,9 @@ function AdminPage({ user, setPage }) {
           {/* Stats cards */}
           <div className="dash-stats" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 36 }}>
             {[
-              { label: "Total Users", value: stats.totalUsers, color: DARK, sub: "signed up" },
-              { label: "Kits Generated", value: stats.totalKits, color: O, sub: "all time" },
-              { label: "Paying Users", value: filtered.filter(p => p.plan !== "starter").length, color: G, sub: "Pro + unlimited" },
+              { label: "Total Users", value: stats?.totalUsers ?? 0, color: DARK, sub: "signed up" },
+              { label: "Kits Generated", value: stats?.totalKits ?? 0, color: O, sub: "all time" },
+              { label: "Paying Users", value: filtered.filter(p => p.plan?.toLowerCase() !== "starter" && p.plan?.toLowerCase() !== "free").length, color: G, sub: "Pro + unlimited" },
               { label: "Est. Revenue", value: `₹${revenue.toLocaleString("en-IN")}`, color: "#7C3AED", sub: "current month" },
             ].map(s => (
               <div key={s.label} style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 12, padding: "20px 22px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
@@ -4956,16 +4958,17 @@ function AdminPage({ user, setPage }) {
 
           {/* Plan breakdown */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 32 }}>
-            {["starter", "Pro", "unlimited"].map(plan => {
-              const count = (stats.profiles || []).filter(p => p.plan === plan).length;
-              const pct = stats.totalUsers > 0 ? Math.round(count / stats.totalUsers * 100) : 0;
+            {["starter", "Pro", "unlimited"].map(planName => {
+              const count = (stats?.profiles || []).filter(p => p.plan?.toLowerCase() === planName.toLowerCase()).length;
+              const total = stats?.totalUsers || 1;
+              const pct = Math.round(count / total * 100);
               return (
-                <div key={plan} style={{ background: PLAN_BG[plan], border: `1px solid ${BORDER}`, borderRadius: 10, padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div key={planName} style={{ background: PLAN_BG[planName] || BG, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: PLAN_COLORS[plan], textTransform: "capitalize", marginBottom: 4 }}>{plan}</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: PLAN_COLORS[planName] || AC, textTransform: "capitalize", marginBottom: 4 }}>{planName}</div>
                     <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 26, fontWeight: 500, color: DARK }}>{count}</div>
                   </div>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: PLAN_COLORS[plan], opacity: 0.4 }}>{pct}%</div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: PLAN_COLORS[planName] || AC, opacity: 0.4 }}>{pct}%</div>
                 </div>
               );
             })}
