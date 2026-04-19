@@ -1934,10 +1934,10 @@ function TopBar({ page, setPage, user, onSignOut }) {
   const creditCount = user?.credits ?? 0;
   const creditLabel = !user
     ? ""
-    : user.plan === "unlimited"
+    : user?.plan === "unlimited"
       ? "Unlimited kits"
-      : `${creditCount} ${user.plan === "Free" ? "free resume" : "kit"}${creditCount === 1 ? "" : "s"} left`;
-  const creditTone = !user ? AC : user.plan === "unlimited" || creditCount > 0 ? AC : ER;
+      : `${creditCount} ${user?.plan === "Free" ? "free resume" : "kit"}${creditCount === 1 ? "" : "s"} left`;
+  const creditTone = !user ? AC : user?.plan === "unlimited" || creditCount > 0 ? AC : ER;
 
   return (
     <>
@@ -2023,7 +2023,7 @@ function TopBar({ page, setPage, user, onSignOut }) {
                       <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>{user.email}</div>
                       <div style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 6, background: "var(--accent-soft)", padding: "3px 10px", borderRadius: 20 }}>
                         <div style={{ width: 6, height: 6, borderRadius: "50%", background: AC }} />
-                        <span style={{ fontSize: 11, fontWeight: 700, color: AC, textTransform: "capitalize" }}>{user.plan || "starter"} · {user.plan === "unlimited" ? "∞" : user.credits} credits</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: AC, textTransform: "capitalize" }}>{user?.plan || "starter"} · {user?.plan === "unlimited" ? "∞" : user?.credits} credits</span>
                       </div>
                     </div>
                     {[
@@ -2834,7 +2834,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
               })}
             </div>
             {(() => {
-              const currentPlan = (user.plan || "Free").toLowerCase();
+              const currentPlan = (user?.plan || "Free").toLowerCase();
               const cardName = p.name.toLowerCase();
               const isCurrentPlan = user && (cardName === currentPlan || (cardName === "unlimited" && currentPlan === "unlimited_monthly"));
               return (
@@ -3479,16 +3479,16 @@ function Dashboard({ user, history, setPage, onBuyCredits }) {
     <div className="fade-in page-pad" style={{ maxWidth: "100%", padding: "44px clamp(16px,5vw,80px) 80px" }}>
       <div style={{ marginBottom: 36 }}>
         <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 34, fontWeight: 400, color: "var(--text)", marginBottom: 4 }}>
-          Welcome back, {user.name.split(" ")[0]}<span style={{ color: AC }}>.</span>
+          Welcome back, {user?.name?.split(" ")[0] || "User"}<span style={{ color: AC }}>.</span>
         </div>
         <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Your human-first career dashboard</div>
       </div>
 
       <div className="dash-stats" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18, marginBottom: 36 }}>
         {[
-          { label: "Credits Left", value: user.plan === "unlimited" ? "∞" : user.credits, color: O, sub: user.plan === "unlimited" ? "unlimited plan" : user.plan === "Free" ? "free resume available" : "Career Kits available" },
+          { label: "Credits Left", value: user?.plan === "unlimited" ? "∞" : user?.credits, color: O, sub: user?.plan === "unlimited" ? "unlimited plan" : user?.plan === "Free" ? "free resume available" : "Career Kits available" },
           { label: "Kits Generated", value: history.length, color: DARK, sub: "total" },
-          { label: "Status", value: user.credits > 0 || user.plan === "unlimited" ? "Active" : "No Credits", color: user.credits > 0 || user.plan === "unlimited" ? G : "#EF4444", sub: user.credits > 0 || user.plan === "unlimited" ? "ready to apply" : "buy credits to continue" },
+          { label: "Status", value: (user?.credits ?? 0) > 0 || user?.plan === "unlimited" ? "Active" : "No Credits", color: (user?.credits ?? 0) > 0 || user?.plan === "unlimited" ? G : "#EF4444", sub: (user?.credits ?? 0) > 0 || user?.plan === "unlimited" ? "ready to apply" : "buy credits to continue" },
         ].map(s => (
           <div key={s.label} style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 24, padding: "24px 26px", boxShadow: "var(--soft-shadow)" }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: FAINT, marginBottom: 10 }}>{s.label}</div>
@@ -3735,10 +3735,10 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
   ];
 
   const isReady = resume.trim().length > 50 && jd.trim().length > 50;
-  const hasCredits = user.plan === "unlimited" || user.credits > 0;
+  const hasCredits = user?.plan === "unlimited" || user?.credits > 0;
   const anyLoading = Object.values(loading).some(Boolean);
   const doneCount = Object.keys(outputs).length;
-  const rawProgress = Math.round((doneCount / Math.max(TABS.filter(t => canAccess(user.plan, t.minPlan)).length, 1)) * 100);
+  const rawProgress = Math.round((doneCount / Math.max(TABS.filter(t => canAccess(user?.plan, t.minPlan)).length, 1)) * 100);
   const progressPct = anyLoading ? Math.max(rawProgress, Math.min(92, 14 + loaderStage * 18)) : rawProgress;
   const activeLoader = loaderStages[Math.min(loaderStage, loaderStages.length - 1)];
   const showResumeBranding = (user?.plan ?? "starter") === "starter";
@@ -3762,7 +3762,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
           : "Add more detail before generating";
   const resumeQualityColor = !resumeTrimmed ? FAINT : resumeScore >= 4 ? "#15803D" : resumeScore >= 2 ? O : ER;
 
-  const accessibleTabs = TABS.filter(t => canAccess(user.plan, t.minPlan));
+  const accessibleTabs = TABS.filter(t => canAccess(user?.plan, t.minPlan));
   const generatableTabs = accessibleTabs.filter(t => PROMPTS[t.id]);
   const loadingTone = {
     resume: "Curating your experience...",
@@ -3864,7 +3864,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
       setSubStep("3/3: Saving results...");
       const successfulCount = Object.values(results).filter(isUsableGeneration).length;
       if (successfulCount > 0) {
-        if (user.plan !== "unlimited") {
+        if (user?.plan !== "unlimited") {
           try {
             await onUseCredit();
           } catch (err) {
@@ -4169,7 +4169,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                 </div>
                 <div style={{ fontSize: 13, color: MUTED }}>
                   <span style={{ color: hasCredits ? G : "#EF4444", fontWeight: 700 }}>
-                    {user.plan === "unlimited" ? "Unlimited kits" : `${user.credits} ${user.plan === "starter" ? "free kit" : "credit"}${user.credits !== 1 ? "s" : ""}`}
+                    {user?.plan === "unlimited" ? "Unlimited kits" : `${user?.credits ?? 0} ${user?.plan === "starter" ? "free kit" : "credit"}${user?.credits !== 1 ? "s" : ""}`}
                   </span> left
                 </div>
                 <button onClick={() => setShowSample(true)} style={{ background: "none", border: "none", color: AC, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", padding: 0 }}>See a sample output</button>
@@ -4250,7 +4250,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
           <div className="tab-pills" style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
             {TABS.map(t => {
               const active = activeTab === t.id;
-              const locked = !canAccess(user.plan, t.minPlan);
+              const locked = !canAccess(user?.plan, t.minPlan);
               const planNeeded = t.minPlan === "Pro" ? "Pro" : "Unlimited";
               return (
                 <button key={t.id} className="tab-pill" onClick={() => setActiveTab(t.id)}
@@ -4278,7 +4278,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                 <span style={{ fontSize: 20 }}>{TABS.find(t => t.id === activeTab)?.icon}</span>
                 <span style={{ fontSize: 15, fontWeight: 700, color: DARK }}>{TABS.find(t => t.id === activeTab)?.label}</span>
                 {outputs[activeTab] && <span style={{ background: "var(--accent-soft)", color: O, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>Ready to review</span>}
-                {outputs[activeTab] && !loading[activeTab] && canAccess(user.plan, TABS.find(t => t.id === activeTab)?.minPlan ?? "starter") && (
+                {outputs[activeTab] && !loading[activeTab] && canAccess(user?.plan, TABS.find(t => t.id === activeTab)?.minPlan ?? "starter") && (
                   <button onClick={() => regenerateTab(activeTab)} title="Regenerate this output" style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: 7, padding: "3px 9px", fontSize: 11, color: MUTED, cursor: "pointer", fontFamily: "inherit", transition: "all .15s" }}>↺ Retry</button>
                 )}
                 {loading[activeTab] && <span style={{ background: "var(--accent-soft)", color: O, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>In progress</span>}
@@ -4316,9 +4316,9 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
               </div>
             </div>
             <div className="output-pad" style={{ padding: "28px 32px 40px" }}>
-              {activeTab === "negotiate" && canAccess(user.plan, "unlimited") ? (
+              {activeTab === "negotiate" && canAccess(user?.plan, "unlimited") ? (
                 <NegotiateTab />
-              ) : !canAccess(user.plan, TABS.find(t => t.id === activeTab)?.minPlan ?? "starter") ? (
+              ) : !canAccess(user?.plan, TABS.find(t => t.id === activeTab)?.minPlan ?? "starter") ? (
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "52px 0", gap: 14, textAlign: "center" }}>
                   <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#FFF7ED", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🔒</div>
                   <div style={{ fontSize: 16, fontWeight: 700, color: DARK }}>
@@ -5033,7 +5033,7 @@ function PaymentPage({ user, setUser, setPage }) {
     try {
       await fetch(`mailto:hello@rezolt.in`);
     } catch { }
-    const subject = encodeURIComponent("Cancel Unlimited Subscription — " + user.email);
+    const subject = encodeURIComponent("Cancel Unlimited Subscription — " + (user?.email || "Account"));
     const body = encodeURIComponent(
       `Hi Rezolt team,\n\nPlease cancel my Unlimited subscription effective immediately.\n\nAccount email: ${user.email}\nUser ID: ${user.id}\n\nThank you.`
     );
@@ -5046,7 +5046,7 @@ function PaymentPage({ user, setUser, setPage }) {
     for (let attempt = 0; attempt < 5; attempt++) {
       const profile = await fetchProfile(user.id).catch(() => null);
       const latestCredits = profile?.credits ?? user.credits ?? 0;
-      const latestPlan = profile?.plan ?? user.plan;
+      const latestPlan = profile?.plan ?? user?.plan;
       const synced = plan.type === "subscription"
         ? latestPlan === "unlimited"
         : latestCredits > (user.credits ?? 0);
@@ -5149,7 +5149,7 @@ function PaymentPage({ user, setUser, setPage }) {
       <div style={{ marginBottom: 36, textAlign: "center" }}>
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: O, marginBottom: 12 }}>Upgrade</div>
         <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 32, fontWeight: 500, color: DARK, marginBottom: 8 }}>Choose your plan</div>
-        <div style={{ fontSize: 14, color: MUTED }}>You currently have <strong style={{ color: user.credits > 0 ? G : "#EF4444" }}>{user.credits} credit{user.credits !== 1 ? "s" : ""}</strong> remaining</div>
+        <div style={{ fontSize: 14, color: MUTED }}>You currently have <strong style={{ color: (user?.credits ?? 0) > 0 ? G : "#EF4444" }}>{user?.credits ?? 0} credit{(user?.credits ?? 0) !== 1 ? "s" : ""}</strong> remaining</div>
       </div>
 
       <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20, maxWidth: 860, margin: "0 auto" }}>
@@ -5364,13 +5364,13 @@ export default function App() {
 
         // Ensure login feels instant, then hydrate richer data in background.
         if (!cancelled) {
-          setUser({ id: authUser.id, name: authUser.email.split("@")[0], email: authUser.email, credits: 1, plan: "Free" });
+          setUser({ id: authUser?.id, name: authUser?.email?.split("@")[0], email: authUser?.email, credits: 1, plan: "Free" });
           if (nextPage) setPage(nextPage);
         }
 
         // Sequentialize initial fetches to prevent Supabase v2 client auto-refresh lock collision
-        const profile = await fetchProfile(authUser.id);
-        const kits = await fetchKits(authUser.id);
+        const profile = await fetchProfile(authUser?.id);
+        const kits = await fetchKits(authUser?.id);
         if (cancelled) return;
         setUser({ id: authUser.id, name: profile?.name || authUser.email.split("@")[0], email: authUser.email, credits: profile?.credits ?? 1, plan: profile?.plan ?? "Free" });
         setHistory(kits.map(k => ({ role: k.role, outputs: k.outputs, date: new Date(k.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) })));
@@ -5478,8 +5478,8 @@ export default function App() {
   };
 
   const handleUseCredit = async () => {
-    if (!user?.id || user.plan === "unlimited") return;
-    const next = await decrementCredits(user.id, user.credits);
+    if (!user?.id || user?.plan === "unlimited") return;
+    const next = await decrementCredits(user?.id, user?.credits);
     setUser(prev => ({ ...prev, credits: next }));
     // Re-fetch from DB to confirm actual value
     const profile = await fetchProfile(user.id);
