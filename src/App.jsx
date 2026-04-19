@@ -4881,22 +4881,42 @@ function AdminPage({ user, setPage }) {
   const [planFilter, setPlanFilter] = useState("all");
 
   useEffect(() => {
-    if (!user || user.email?.trim().toLowerCase() !== ADMIN_EMAIL.trim().toLowerCase()) {
+    if (!user || user?.email?.trim()?.toLowerCase() !== ADMIN_EMAIL.trim().toLowerCase()) {
       console.log("Admin blocked. Logged in as:", user?.email, "| Expected:", ADMIN_EMAIL);
       setPage("dashboard");
       return;
     }
-    fetchAdminStats().then(s => {
-      console.log("Admin stats loaded:", s);
-      setStats(s);
-      setLoading(false);
-    }).catch(e => {
-      console.error("Admin stats error:", e);
-      setError(e?.message || "Failed to load admin data. This usually happens if you're not the primary owner or Supabase RLS policies are too restrictive.");
-      setStats({ totalUsers: 0, totalKits: 0, profiles: [] });
-      setLoading(false);
-    });
-  }, []);
+
+    let mounted = true;
+    const timeout = setTimeout(() => {
+      if (mounted && loading) {
+        console.warn("AdminPage: Data load timed out after 10s.");
+        setError("Request timed out. The database might be responding slowly due to high volume or network issues.");
+        setLoading(false);
+      }
+    }, 10000);
+
+    const load = async () => {
+      try {
+        const s = await fetchAdminStats();
+        if (!mounted) return;
+        clearTimeout(timeout);
+        console.log("Admin stats loaded successfully.");
+        setStats(s);
+        setError(null);
+        setLoading(false);
+      } catch (e) {
+        if (!mounted) return;
+        clearTimeout(timeout);
+        console.error("Admin stats error:", e);
+        setError(e?.message || "Failed to load admin data.");
+        setLoading(false);
+      }
+    };
+
+    load();
+    return () => { mounted = false; clearTimeout(timeout); };
+  }, [user]);
 
   if (!user || user.email?.trim().toLowerCase() !== ADMIN_EMAIL.trim().toLowerCase()) return null;
 
@@ -4933,10 +4953,11 @@ function AdminPage({ user, setPage }) {
           <div style={{ width: 32, height: 32, borderRadius: "50%", border: `3px solid ${BORDER}`, borderTopColor: O, animation: "spin 0.8s linear infinite" }} />
         </div>
       ) : error ? (
-        <div style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "24px", color: "#B91C1C", textAlign: "center" }}>
-          <div style={{ fontSize: 24, marginBottom: 12 }}>⚠</div>
-          <div style={{ fontWeight: 700, marginBottom: 4 }}>Admin Loading Failed</div>
-          <div style={{ fontSize: 13, opacity: 0.8 }}>{error}</div>
+        <div style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "32px 24px", color: "#B91C1C", textAlign: "center" }}>
+          <div style={{ fontSize: 32, marginBottom: 16 }}>⚠</div>
+          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Admin Loading Failed</div>
+          <div style={{ fontSize: 14, opacity: 0.8, maxWidth: 400, margin: "0 auto 24px", lineHeight: 1.6 }}>{error}</div>
+          <button onClick={() => window.location.reload()} style={{ background: "#B91C1C", color: "white", border: "none", borderRadius: 8, padding: "10px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Retry Load</button>
         </div>
       ) : (
         <>
@@ -5224,19 +5245,28 @@ function PaymentPage({ user, setUser, setPage }) {
 
 async function fetchAdminStats() {
   try {
-    const [usersRes, kitsRes, profilesRes] = await Promise.all([
-      supabase.from("profiles").select("*", { count: "exact", head: true }),
-      supabase.from("kits").select("*", { count: "exact", head: true }),
-      supabase.from("profiles").select("id, name, email, plan, credits, created_at").order("created_at", { ascending: false }),
-    ]);
+    console.log("fetchAdminStats: Starting sequential load...");
+    
+    console.log("fetchAdminStats: Fetching user count...");
+    const usersRes = await supabase.from("profiles").select("*", { count: "exact", head: true });
+    if (usersRes.error) console.error("Admin user count error:", usersRes.error);
+    
+    console.log("fetchAdminStats: Fetching kit count...");
+    const kitsRes = await supabase.from("kits").select("*", { count: "exact", head: true });
+    if (kitsRes.error) console.error("Admin kit count error:", kitsRes.error);
+    
+    console.log("fetchAdminStats: Fetching profiles list...");
+    const profilesRes = await supabase.from("profiles").select("id, name, email, plan, credits, created_at").order("created_at", { ascending: false });
     if (profilesRes.error) console.error("Admin profiles error:", profilesRes.error);
+    
+    console.log("fetchAdminStats: Load complete.");
     return {
       totalUsers: usersRes.count || 0,
       totalKits: kitsRes.count || 0,
       profiles: profilesRes.data || [],
     };
   } catch (e) {
-    console.error("fetchAdminStats failed:", e);
+    console.error("fetchAdminStats failed fatally:", e);
     return { totalUsers: 0, totalKits: 0, profiles: [] };
   }
 }
