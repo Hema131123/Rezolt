@@ -11,17 +11,21 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
-async function fetchWithAuth(url, options = {}) {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.access_token) {
-    throw new Error("Please sign in to continue.");
+async function fetchWithAuth(url, options = {}, token = null) {
+  let accessToken = token;
+
+  // Try provided token, then session check
+  if (!accessToken) {
+    try {
+      const { data } = await supabase.auth.getSession();
+      accessToken = data?.session?.access_token;
+    } catch (e) {
+      console.warn("Manual session check failed in fetchWithAuth");
+    }
   }
 
-  const headers = {
-    ...(options.headers || {}),
-    Authorization: `Bearer ${session.access_token}`,
-  };
-
+  if (!accessToken) throw new Error("Please sign in to continue.");
+  const headers = { ...options.headers, Authorization: `Bearer ${accessToken}` };
   return fetch(url, { ...options, headers });
 }
 
@@ -90,17 +94,17 @@ const N2 = "#08284F"; // supporting navy
 const AC = "#031D40"; // requested replacement accent
 const LB = "#A4B4C9"; // muted navy tint
 const PB = "#E4BE47"; // premium gold highlight
-const G  = AC; // success uses the brand color
+const G = AC; // success uses the brand color
 const ER = "#EF4444"; // error
 
 // Legacy aliases (used throughout components)
-const O     = AC;
-const DARK  = "var(--text-primary)";
-const MID   = "var(--text-secondary)";
+const O = AC;
+const DARK = "var(--text-primary)";
+const MID = "var(--text-secondary)";
 const MUTED = "var(--text-muted)";
 const FAINT = "var(--text-muted)";
 const BORDER = "var(--border)";
-const BG    = "var(--app-bg)";
+const BG = "var(--app-bg)";
 const WHITE = "var(--surface)";
 const RESUME_FONT = "'Calibri', 'Carlito', 'Segoe UI', Arial, sans-serif";
 
@@ -183,9 +187,11 @@ async function openRazorpay({ planId, amount, name, description, prefill, onSucc
         },
       },
     };
+    console.log("Razorpay opening with options:", { key: RZP_KEY, amount: orderAmountPaise, order_id: orderId });
     const rzp = new window.Razorpay(options);
-    rzp.on("payment.failed", () => resolve(false));
+    rzp.on("payment.failed", (resp) => { console.error("Payment failed:", resp); resolve(false); });
     rzp.open();
+    console.log("Razorpay rzp.open() called");
   });
 }
 
@@ -193,14 +199,14 @@ async function openRazorpay({ planId, amount, name, description, prefill, onSucc
 // ─── TABS ─────────────────────────────────────────────────────────────────────
 
 const TABS = [
-  { id: "resume", iconClass: "fi fi-sr-file", label: "Resume", minPlan: "starter" },
+  { id: "resume", iconClass: "fi fi-sr-file", label: "Resume", minPlan: "Free" },
   { id: "cover", iconClass: "fi fi-sr-envelope", label: "Cover Letter", minPlan: "starter" },
   { id: "referral", iconClass: "fi fi-sr-handshake", label: "Referral", minPlan: "starter" },
-  { id: "interview", iconClass: "fi fi-sr-bullseye", label: "Interview Prep", minPlan: "Pro" },
-  { id: "reach", iconClass: "fi fi-sr-search", label: "Find & Reach", minPlan: "Pro" },
+  { id: "interview", iconClass: "fi fi-sr-bullseye", label: "Interview Prep", minPlan: "starter" },
+  { id: "reach", iconClass: "fi fi-sr-search", label: "Find & Reach", minPlan: "starter" },
   { id: "negotiate", iconClass: "fi fi-sr-badge-dollar", label: "Negotiate", minPlan: "unlimited" },
 ];
-const PLAN_ORDER = ["starter", "Pro", "unlimited"];
+const PLAN_ORDER = ["Free", "starter", "Pro", "unlimited"];
 const canAccess = (userPlan, minPlan) => PLAN_ORDER.indexOf(userPlan ?? "starter") >= PLAN_ORDER.indexOf(minPlan);
 const ADMIN_EMAIL = "hema.manoharan13@outlook.com";
 const MAX_RESUME_CHARS = 12000;
@@ -233,15 +239,15 @@ function isUsableGeneration(text) {
 // ─── PROMPTS ──────────────────────────────────────────────────────────────────
 
 const TEMPLATE_INSTRUCTIONS = {
-  creative:  "STYLE: Use a creative, modern layout. Lead with a bold professional summary. Use clear section dividers. Skills as grouped tags. Emphasise achievements with strong metrics.",
-  modern:    "STYLE: Clean minimal layout. Short punchy summary (2-3 sentences). Prioritise whitespace. No fluff. Bullet points tight and action-led.",
-  bold:      "STYLE: Bold, ATS-heavy format. Name prominent at top. Section headers in ALL CAPS and underlined with dashes. Dense, keyword-rich content throughout.",
-  classic:   "STYLE: Traditional formal format. Name centred at top. Use formal language. Objective statement instead of summary. Conservative section ordering: Summary, Experience, Education, Skills.",
-  elegant:   "STYLE: Sophisticated two-tone layout. Serif-style writing. Elevated vocabulary. Use full sentences for bullet points, not fragments. Professional and polished throughout.",
-  compact:   "STYLE: Two-column dense format. Left column: contact, skills, education. Right column: summary and experience. Maximum information density. Keep bullets to one line each.",
-  minimal:   "STYLE: Ultra-clean. Extreme whitespace. Only the most essential information. Maximum 3 bullets per role. Summary one sentence only. No clutter whatsoever.",
-  tech:      "STYLE: Developer/tech format. Lead with technical skills. GitHub/portfolio links prominent. Bullet points focus on technologies, systems built, and scale. Use technical terminology confidently.",
-  warm:      "STYLE: Friendly approachable tone. Use first person where natural. Highlight teamwork, collaboration, and culture fit alongside achievements. Warm professional language throughout.",
+  creative: "STYLE: Use a creative, modern layout. Lead with a bold professional summary. Use clear section dividers. Skills as grouped tags. Emphasise achievements with strong metrics.",
+  modern: "STYLE: Clean minimal layout. Short punchy summary (2-3 sentences). Prioritise whitespace. No fluff. Bullet points tight and action-led.",
+  bold: "STYLE: Bold, ATS-heavy format. Name prominent at top. Section headers in ALL CAPS and underlined with dashes. Dense, keyword-rich content throughout.",
+  classic: "STYLE: Traditional formal format. Name centred at top. Use formal language. Objective statement instead of summary. Conservative section ordering: Summary, Experience, Education, Skills.",
+  elegant: "STYLE: Sophisticated two-tone layout. Serif-style writing. Elevated vocabulary. Use full sentences for bullet points, not fragments. Professional and polished throughout.",
+  compact: "STYLE: Two-column dense format. Left column: contact, skills, education. Right column: summary and experience. Maximum information density. Keep bullets to one line each.",
+  minimal: "STYLE: Ultra-clean. Extreme whitespace. Only the most essential information. Maximum 3 bullets per role. Summary one sentence only. No clutter whatsoever.",
+  tech: "STYLE: Developer/tech format. Lead with technical skills. GitHub/portfolio links prominent. Bullet points focus on technologies, systems built, and scale. Use technical terminology confidently.",
+  warm: "STYLE: Friendly approachable tone. Use first person where natural. Highlight teamwork, collaboration, and culture fit alongside achievements. Warm professional language throughout.",
 };
 
 const PROMPTS = {
@@ -491,7 +497,7 @@ ${jd}`,
 // ─── RESUME TEMPLATE RENDERER ────────────────────────────────────────────────
 
 function parseResumeSections(text) {
-  const clean = text.replace(/\*\*(.*?)\*\*/g,"$1").replace(/\*(.*?)\*/g,"$1").replace(/^#{1,3}\s*/gm,"").replace(/---/g,"").replace(/\u2014/g,",");
+  const clean = text.replace(/\*\*(.*?)\*\*/g, "$1").replace(/\*(.*?)\*/g, "$1").replace(/^#{1,3}\s*/gm, "").replace(/---/g, "").replace(/\u2014/g, ",");
   const lines = clean.split("\n");
   const sections = {};
   let currentSection = "header";
@@ -582,14 +588,14 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
       <div style={{ display: "flex", gap: 0, fontFamily: "inherit", minHeight: 400, borderRadius: 12, overflow: "hidden", border: "1px solid var(--border)" }}>
         <div style={{ width: 185, flexShrink: 0, background: "linear-gradient(180deg,#001B48,#02457A)", padding: "24px 16px" }}>
           <div style={{ width: 52, height: 52, borderRadius: "50%", background: photoUrl ? "transparent" : "#02457A", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 700, color: "white", marginBottom: 12 }}>
-            {photoUrl ? <img src={photoUrl} alt="Photo" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (name[0]||"?")}
+            {photoUrl ? <img src={photoUrl} alt="Photo" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (name[0] || "?")}
           </div>
           <div style={{ fontSize: 13, fontWeight: 700, color: "white", marginBottom: 3, lineHeight: 1.3 }}>{name}</div>
           <div style={{ fontSize: 10, color: "#C9D6E4", marginBottom: 16 }}>{contact.split("|")[0]?.trim()}</div>
           <div style={{ fontSize: 9, color: "rgba(255,255,255,.45)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 6 }}>Contact</div>
-          {contact.split("|").map((c,i) => <div key={i} style={{ fontSize: 9, color: "rgba(255,255,255,.7)", marginBottom: 3, wordBreak: "break-all" }}>{c.trim()}</div>)}
+          {contact.split("|").map((c, i) => <div key={i} style={{ fontSize: 9, color: "rgba(255,255,255,.7)", marginBottom: 3, wordBreak: "break-all" }}>{c.trim()}</div>)}
           {location && <div style={{ fontSize: 9, color: "rgba(255,255,255,.6)", marginBottom: 14, marginTop: 4 }}>{location}</div>}
-          {skills && <><div style={{ fontSize: 9, color: "rgba(255,255,255,.45)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 7, marginTop: 12 }}>Key Skills</div><div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>{skills.split(",").slice(0,10).map((sk,i) => <span key={i} style={{ background: "rgba(3,29,64,.28)", color: "#C9D6E4", fontSize: 8, padding: "2px 6px", borderRadius: 3 }}>{sk.trim()}</span>)}</div></>}
+          {skills && <><div style={{ fontSize: 9, color: "rgba(255,255,255,.45)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 7, marginTop: 12 }}>Key Skills</div><div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>{skills.split(",").slice(0, 10).map((sk, i) => <span key={i} style={{ background: "rgba(3,29,64,.28)", color: "#C9D6E4", fontSize: 8, padding: "2px 6px", borderRadius: 3 }}>{sk.trim()}</span>)}</div></>}
         </div>
         <div style={{ flex: 1, padding: "24px 20px", background: "white", minWidth: 0 }}>
           {summary && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#02457A", marginBottom: 7, borderBottom: "1.5px solid #02457A", paddingBottom: 4, display: "inline-block" }}>Professional Summary</div><p style={{ fontSize: 11, color: "#374151", lineHeight: 1.8, marginBottom: 18 }}>{summary}</p></>}
@@ -607,12 +613,12 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
       <div style={{ border: "1px solid var(--border)", borderRadius: 12, overflow: "hidden" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "20px 24px", borderBottom: "1px solid var(--border)", background: "var(--surface2)" }}>
           <div style={{ width: 48, height: 48, borderRadius: "50%", background: photoUrl ? "transparent" : "#374151", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 700, color: "white", flexShrink: 0 }}>
-            {photoUrl ? <img src={photoUrl} alt="Photo" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : name[0]||"?"}
+            {photoUrl ? <img src={photoUrl} alt="Photo" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : name[0] || "?"}
           </div>
           <div><div style={{ fontSize: 18, fontWeight: 700, color: "var(--text)" }}>{name}</div><div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>{contact}{location ? ` · ${location}` : ""}</div></div>
         </div>
         <div style={{ padding: "20px 24px", background: "var(--surface)" }}>
-          {skills && <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>{skills.split(",").slice(0,12).map((sk,i) => <span key={i} style={{ background: "var(--surface2)", color: "var(--text-mid)", fontSize: 11, padding: "3px 10px", borderRadius: 20, border: "1px solid var(--border)" }}>{sk.trim()}</span>)}</div>}
+          {skills && <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>{skills.split(",").slice(0, 12).map((sk, i) => <span key={i} style={{ background: "var(--surface2)", color: "var(--text-mid)", fontSize: 11, padding: "3px 10px", borderRadius: 20, border: "1px solid var(--border)" }}>{sk.trim()}</span>)}</div>}
           {summary && <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85, marginBottom: 18 }}>{summary}</p>}
           {experience && <><div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>Experience</div>{renderLines(experience, "#374151")}</>}
           {education && <><div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8, marginTop: 16 }}>Education</div>{renderLines(education, "#374151")}</>}
@@ -695,7 +701,7 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
           </div>
           <div style={{ width: 160, flexShrink: 0, padding: "18px 16px" }}>
             {location && <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 14 }}>{location}</div>}
-            {skills && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--text-muted)", marginBottom: 7 }}>Skills</div><div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginBottom: 14 }}>{skills.split(",").map((sk,i) => <span key={i} style={{ background: "var(--surface2)", color: "var(--text-mid)", fontSize: 9, padding: "2px 6px", borderRadius: 3, border: "1px solid var(--border)" }}>{sk.trim()}</span>)}</div></>}
+            {skills && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--text-muted)", marginBottom: 7 }}>Skills</div><div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginBottom: 14 }}>{skills.split(",").map((sk, i) => <span key={i} style={{ background: "var(--surface2)", color: "var(--text-mid)", fontSize: 9, padding: "2px 6px", borderRadius: 3, border: "1px solid var(--border)" }}>{sk.trim()}</span>)}</div></>}
             {education && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--text-muted)", marginBottom: 6 }}>Education</div>{renderLines(education, "var(--text-muted)")}</>}
             {certs && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--text-muted)", marginBottom: 6, marginTop: 12 }}>Certifications</div>{renderLines(certs, "var(--text-muted)")}</>}
           </div>
@@ -713,7 +719,7 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
           <div style={{ fontSize: 28, fontWeight: 300, color: "var(--text)", letterSpacing: "-.03em" }}>{name}</div>
           <div style={{ fontSize: 12, color: "var(--text-faint)", marginTop: 6, letterSpacing: ".02em" }}>{contact}{location ? ` · ${location}` : ""}</div>
         </div>
-        {summary && <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 2, marginBottom: 32, fontWeight: 300 }}>{summary.split(".").slice(0,2).join(".")}.</p>}
+        {summary && <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 2, marginBottom: 32, fontWeight: 300 }}>{summary.split(".").slice(0, 2).join(".")}.</p>}
         {experience && <><div style={{ fontSize: 9, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 14 }}>Experience</div>{renderLines(experience, "var(--text-faint)")}</>}
         {skills && <><div style={{ fontSize: 9, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 10, marginTop: 28 }}>Skills</div><div style={{ fontSize: 12, color: "var(--text-mid)", lineHeight: 2, fontWeight: 300 }}>{skills}</div></>}
         {education && <><div style={{ fontSize: 9, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 10, marginTop: 28 }}>Education</div>{renderLines(education, "var(--text-faint)")}</>}
@@ -730,10 +736,10 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
           <div style={{ fontSize: 18, fontWeight: 700, color: "#C9D6E4" }}>{name}</div>
           <div style={{ fontSize: 11, color: "#8b949e", marginTop: 5 }}>{contact}{location ? ` // ${location}` : ""}</div>
         </div>
-        {skills && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#C9D6E4", marginBottom: 8 }}>{">"} Stack</div><div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 18 }}>{skills.split(",").map((sk,i) => <span key={i} style={{ background: "#161b22", border: "1px solid #30363d", color: "#E2EAF3", fontSize: 10, padding: "3px 9px", borderRadius: 4 }}>{sk.trim()}</span>)}</div></>}
+        {skills && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#C9D6E4", marginBottom: 8 }}>{">"} Stack</div><div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 18 }}>{skills.split(",").map((sk, i) => <span key={i} style={{ background: "#161b22", border: "1px solid #30363d", color: "#E2EAF3", fontSize: 10, padding: "3px 9px", borderRadius: 4 }}>{sk.trim()}</span>)}</div></>}
         {summary && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#C9D6E4", marginBottom: 8 }}>{">"} About</div><p style={{ fontSize: 11, color: "#8b949e", lineHeight: 1.8, marginBottom: 18 }}>{summary}</p></>}
-        {experience && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#C9D6E4", marginBottom: 10 }}>{">"} Experience</div>{experience.split("\n").filter(l=>l.trim()).map((l,i) => { const t = l.trim(); if (t.startsWith("•")||t.startsWith("-")) return <div key={i} style={{ fontSize: 11, color: "#8b949e", marginBottom: 5, paddingLeft: 14 }}>{"// "}{t.replace(/^[•\-]\s*/,"")}</div>; if (t.includes("|")) return <div key={i} style={{ fontSize: 12, color: "#e6edf3", fontWeight: 700, marginTop: 12, marginBottom: 4 }}>{t}</div>; return t ? <div key={i} style={{ fontSize: 11, color: "#C9D6E4", marginBottom: 3 }}>{t}</div> : null; })}</>}
-        {education && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#C9D6E4", marginBottom: 8, marginTop: 18 }}>{">"} Education</div>{education.split("\n").filter(l=>l.trim()).map((l,i) => <div key={i} style={{ fontSize: 11, color: "#8b949e", marginBottom: 4 }}>{l.trim()}</div>)}</>}
+        {experience && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#C9D6E4", marginBottom: 10 }}>{">"} Experience</div>{experience.split("\n").filter(l => l.trim()).map((l, i) => { const t = l.trim(); if (t.startsWith("•") || t.startsWith("-")) return <div key={i} style={{ fontSize: 11, color: "#8b949e", marginBottom: 5, paddingLeft: 14 }}>{"// "}{t.replace(/^[•\-]\s*/, "")}</div>; if (t.includes("|")) return <div key={i} style={{ fontSize: 12, color: "#e6edf3", fontWeight: 700, marginTop: 12, marginBottom: 4 }}>{t}</div>; return t ? <div key={i} style={{ fontSize: 11, color: "#C9D6E4", marginBottom: 3 }}>{t}</div> : null; })}</>}
+        {education && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#C9D6E4", marginBottom: 8, marginTop: 18 }}>{">"} Education</div>{education.split("\n").filter(l => l.trim()).map((l, i) => <div key={i} style={{ fontSize: 11, color: "#8b949e", marginBottom: 4 }}>{l.trim()}</div>)}</>}
       </div>
     </div>
   );
@@ -744,13 +750,13 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
       {badge}
       <div style={{ background: "#fffbf5", borderRadius: 10, border: "1px solid #fde68a", overflow: "hidden" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 22px", borderBottom: "2px solid #fde68a" }}>
-          <div style={{ width: 48, height: 48, borderRadius: "50%", background: "linear-gradient(135deg,#f59e0b,#d97706)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 700, color: "white", flexShrink: 0 }}>{name[0]||"?"}</div>
+          <div style={{ width: 48, height: 48, borderRadius: "50%", background: "linear-gradient(135deg,#f59e0b,#d97706)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, fontWeight: 700, color: "white", flexShrink: 0 }}>{name[0] || "?"}</div>
           <div><div style={{ fontSize: 18, fontWeight: 700, color: "#78350f" }}>{name}</div><div style={{ fontSize: 12, color: "#d97706", marginTop: 3 }}>{contact}{location ? ` · ${location}` : ""}</div></div>
         </div>
         <div style={{ padding: "20px 22px" }}>
           {summary && <div style={{ background: "#fef3c7", border: "1px solid #fde68a", borderRadius: 10, padding: "12px 16px", marginBottom: 18 }}><p style={{ fontSize: 12, color: "#374151", lineHeight: 1.85, margin: 0 }}>{summary}</p></div>}
           {experience && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "#92400e", marginBottom: 10 }}>Experience</div>{renderLines(experience, "#d97706")}</>}
-          {skills && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "#92400e", marginBottom: 8, marginTop: 16 }}>Skills</div><div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{skills.split(",").map((sk,i) => <span key={i} style={{ background: "#fde68a", color: "#92400e", fontSize: 11, padding: "3px 10px", borderRadius: 20 }}>{sk.trim()}</span>)}</div></>}
+          {skills && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "#92400e", marginBottom: 8, marginTop: 16 }}>Skills</div><div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{skills.split(",").map((sk, i) => <span key={i} style={{ background: "#fde68a", color: "#92400e", fontSize: 11, padding: "3px 10px", borderRadius: 20 }}>{sk.trim()}</span>)}</div></>}
           {education && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "#92400e", marginBottom: 8, marginTop: 16 }}>Education</div>{renderLines(education, "#d97706")}</>}
         </div>
       </div>
@@ -907,13 +913,13 @@ function OutreachQuickActions({ type, text }) {
 
   const options = type === "referral"
     ? [
-        { id: "warm", label: "Warm contact", body: referralWarm || followUpDm || connectionNote },
-        { id: "cold", label: "Cold outreach", body: referralCold || connectionNote || coldBody },
-      ]
+      { id: "warm", label: "Warm contact", body: referralWarm || followUpDm || connectionNote },
+      { id: "cold", label: "Cold outreach", body: referralCold || connectionNote || coldBody },
+    ]
     : [
-        { id: "warm", label: "Warm follow-up", body: followUpDm || connectionNote },
-        { id: "cold", label: "Cold InMail", body: [coldSubject, coldBody].filter(Boolean).join("\n\n") || connectionNote },
-      ];
+      { id: "warm", label: "Warm follow-up", body: followUpDm || connectionNote },
+      { id: "cold", label: "Cold InMail", body: [coldSubject, coldBody].filter(Boolean).join("\n\n") || connectionNote },
+    ];
 
   const selected = options.find(item => item.id === variant) || options[0];
 
@@ -924,7 +930,7 @@ function OutreachQuickActions({ type, text }) {
       await navigator.clipboard.writeText(payload);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
-    } catch {}
+    } catch { }
   };
 
   const launchLinkedIn = () => {
@@ -1930,7 +1936,7 @@ function TopBar({ page, setPage, user, onSignOut }) {
     ? ""
     : user.plan === "unlimited"
       ? "Unlimited kits"
-      : `${creditCount} ${user.plan === "starter" ? "free kit" : "credit"}${creditCount === 1 ? "" : "s"} left`;
+      : `${creditCount} ${user.plan === "Free" ? "free resume" : "kit"}${creditCount === 1 ? "" : "s"} left`;
   const creditTone = !user ? AC : user.plan === "unlimited" || creditCount > 0 ? AC : ER;
 
   return (
@@ -2156,7 +2162,8 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
   };
 
   const templates = [
-    { id: "creative", name: "Creative", desc: "Sidebar · Blue accents", best: "Analytics, HR, Tech",
+    {
+      id: "creative", name: "Creative", desc: "Sidebar · Blue accents", best: "Analytics, HR, Tech",
       header: "linear-gradient(135deg,#001B48,#02457A)", headerTxt: "white",
       preview: (
         <div style={{ display: "flex", gap: 6, minHeight: 100, padding: 12, background: "#F0F7FF" }}>
@@ -2164,19 +2171,20 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
             <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#02457A", margin: "0 auto 5px" }} />
             <div style={{ height: 2, background: "rgba(255,255,255,.3)", borderRadius: 1, marginBottom: 3 }} />
             <div style={{ height: 2, background: "rgba(255,255,255,.15)", borderRadius: 1, width: "80%", marginBottom: 8 }} />
-            {[100,85,70].map((w,i) => <div key={i} style={{ height: 4, background: "rgba(3,29,64,.35)", borderRadius: 2, width: w+"%", marginBottom: 3 }} />)}
+            {[100, 85, 70].map((w, i) => <div key={i} style={{ height: 4, background: "rgba(3,29,64,.35)", borderRadius: 2, width: w + "%", marginBottom: 3 }} />)}
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ height: 6, background: "#001B48", borderRadius: 2, marginBottom: 3, width: "70%" }} />
             <div style={{ height: 3, background: "#02457A", borderRadius: 2, marginBottom: 7, width: "40%" }} />
-            {[100,85,70].map((w,i) => <div key={i} style={{ height: 2, background: "#CBD5E1", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+            {[100, 85, 70].map((w, i) => <div key={i} style={{ height: 2, background: "#CBD5E1", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
             <div style={{ height: 4, background: "#001B48", borderRadius: 2, marginBottom: 4, width: "50%", marginTop: 7 }} />
-            {[100,80].map((w,i) => <div key={i} style={{ height: 2, background: "#CBD5E1", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+            {[100, 80].map((w, i) => <div key={i} style={{ height: 2, background: "#CBD5E1", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
           </div>
         </div>
       )
     },
-    { id: "modern", name: "Modern", desc: "Clean · Minimal", best: "Any industry",
+    {
+      id: "modern", name: "Modern", desc: "Clean · Minimal", best: "Any industry",
       header: "#F8FAFC", headerTxt: "#374151",
       preview: (
         <div style={{ minHeight: 100, padding: 12, background: "white" }}>
@@ -2185,13 +2193,14 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
             <div><div style={{ height: 5, background: "#111827", borderRadius: 2, width: 65, marginBottom: 3 }} /><div style={{ height: 3, background: "#CBD5E1", borderRadius: 1, width: 42 }} /></div>
           </div>
           <div style={{ height: 1, background: "#E2E8F0", marginBottom: 7 }} />
-          {[100,85,68].map((w,i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+          {[100, 85, 68].map((w, i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
           <div style={{ height: 4, background: "#111827", borderRadius: 2, marginBottom: 4, width: "44%", marginTop: 7 }} />
-          {[100,80].map((w,i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+          {[100, 80].map((w, i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
         </div>
       )
     },
-    { id: "bold", name: "Bold", desc: "Header-first · ATS-heavy", best: "Corporate, Finance",
+    {
+      id: "bold", name: "Bold", desc: "Header-first · ATS-heavy", best: "Corporate, Finance",
       header: "#F8FAFC", headerTxt: "#374151",
       preview: (
         <div style={{ minHeight: 100, padding: 12, background: "white" }}>
@@ -2199,15 +2208,16 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
             <div style={{ height: 4, background: "rgba(255,255,255,.85)", borderRadius: 2, width: "55%" }} />
           </div>
           <div style={{ display: "flex", gap: 5, marginBottom: 7 }}>
-            {[30,22].map((w,i) => <div key={i} style={{ height: 3, background: i===0?"#111827":"#CBD5E1", borderRadius: 1, width: w+"%" }} />)}
+            {[30, 22].map((w, i) => <div key={i} style={{ height: 3, background: i === 0 ? "#111827" : "#CBD5E1", borderRadius: 1, width: w + "%" }} />)}
           </div>
-          {[100,88,72].map((w,i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+          {[100, 88, 72].map((w, i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
           <div style={{ height: 4, background: "#111827", borderRadius: 2, marginBottom: 4, width: "48%", marginTop: 7 }} />
-          {[100,83].map((w,i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+          {[100, 83].map((w, i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
         </div>
       )
     },
-    { id: "classic", name: "Classic", desc: "Centered header · Traditional", best: "Government, Law, Banking",
+    {
+      id: "classic", name: "Classic", desc: "Centered header · Traditional", best: "Government, Law, Banking",
       header: "#F8FAFC", headerTxt: "#374151",
       preview: (
         <div style={{ minHeight: 100, padding: 12, background: "white" }}>
@@ -2217,13 +2227,14 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
             <div style={{ height: 1, background: "#CBD5E1", width: "80%", margin: "0 auto" }} />
           </div>
           <div style={{ height: 3, background: "#1E3A5F", borderRadius: 2, marginBottom: 5, width: "35%", marginTop: 8 }} />
-          {[100,88,75].map((w,i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+          {[100, 88, 75].map((w, i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
           <div style={{ height: 3, background: "#1E3A5F", borderRadius: 2, marginBottom: 5, width: "35%", marginTop: 7 }} />
-          {[100,82].map((w,i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+          {[100, 82].map((w, i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
         </div>
       )
     },
-    { id: "elegant", name: "Elegant", desc: "Serif · Sophisticated", best: "Consulting, PR, Management",
+    {
+      id: "elegant", name: "Elegant", desc: "Serif · Sophisticated", best: "Consulting, PR, Management",
       header: "linear-gradient(135deg,#2C1810,#78350F)", headerTxt: "#fef3c7",
       preview: (
         <div style={{ display: "flex", gap: 0, minHeight: 100, background: "white", padding: 12 }}>
@@ -2233,46 +2244,49 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
             <div style={{ height: 3, background: "#C9A96E", borderRadius: 2, marginBottom: 8, width: "45%" }} />
             <div style={{ height: 1, background: "#C9A96E", opacity: 0.4, marginBottom: 7 }} />
             <div style={{ height: 3, background: "#78350F", borderRadius: 2, marginBottom: 5, width: "42%" }} />
-            {[100,86,72].map((w,i) => <div key={i} style={{ height: 2, background: "#D1C5B8", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+            {[100, 86, 72].map((w, i) => <div key={i} style={{ height: 2, background: "#D1C5B8", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
           </div>
         </div>
       )
     },
-    { id: "compact", name: "Compact", desc: "Two-column · Dense", best: "Senior roles, info-heavy",
+    {
+      id: "compact", name: "Compact", desc: "Two-column · Dense", best: "Senior roles, info-heavy",
       header: "#F8FAFC", headerTxt: "#374151",
       preview: (
         <div style={{ minHeight: 100, padding: 12, background: "white", display: "flex", gap: 8 }}>
           <div style={{ flex: 1 }}>
             <div style={{ height: 5, background: "#111827", borderRadius: 2, marginBottom: 5 }} />
-            {[100,90,80].map((w,i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+            {[100, 90, 80].map((w, i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
             <div style={{ height: 3, background: "#374151", borderRadius: 2, marginBottom: 4, width: "60%", marginTop: 7 }} />
-            {[100,85].map((w,i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+            {[100, 85].map((w, i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
           </div>
           <div style={{ width: 1, background: "#E2E8F0" }} />
           <div style={{ width: 75, flexShrink: 0 }}>
             <div style={{ height: 3, background: "#374151", borderRadius: 2, marginBottom: 5, width: "70%" }} />
             <div style={{ display: "flex", flexWrap: "wrap", gap: 2, marginBottom: 7 }}>
-              {[48,44,100].map((w,i) => <div key={i} style={{ height: 9, background: "#F1F5F9", borderRadius: 3, width: w+"%" }} />)}
+              {[48, 44, 100].map((w, i) => <div key={i} style={{ height: 9, background: "#F1F5F9", borderRadius: 3, width: w + "%" }} />)}
             </div>
             <div style={{ height: 3, background: "#374151", borderRadius: 2, marginBottom: 4, width: "80%" }} />
-            {[100,90].map((w,i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+            {[100, 90].map((w, i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
           </div>
         </div>
       )
     },
-    { id: "minimal", name: "Minimal", desc: "Ultra clean · Whitespace", best: "Design, Creative industries",
+    {
+      id: "minimal", name: "Minimal", desc: "Ultra clean · Whitespace", best: "Design, Creative industries",
       header: "#FAFAFA", headerTxt: "#374151",
       preview: (
         <div style={{ minHeight: 100, padding: 16, background: "white" }}>
           <div style={{ height: 7, background: "#111827", borderRadius: 1, marginBottom: 4, width: "55%" }} />
           <div style={{ height: 3, background: "#D1D5DB", borderRadius: 1, marginBottom: 20, width: "35%" }} />
-          {[100,88,72].map((w,i) => <div key={i} style={{ height: 2, background: "#F3F4F6", borderRadius: 1, marginBottom: 3, width: w+"%" }} />)}
+          {[100, 88, 72].map((w, i) => <div key={i} style={{ height: 2, background: "#F3F4F6", borderRadius: 1, marginBottom: 3, width: w + "%" }} />)}
           <div style={{ height: 2, background: "#D1D5DB", borderRadius: 1, marginBottom: 5, width: "32%", marginTop: 12 }} />
-          {[100,80].map((w,i) => <div key={i} style={{ height: 2, background: "#F3F4F6", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+          {[100, 80].map((w, i) => <div key={i} style={{ height: 2, background: "#F3F4F6", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
         </div>
       )
     },
-    { id: "tech", name: "Tech", desc: "Dark · Developer style", best: "Engineering, Data Science",
+    {
+      id: "tech", name: "Tech", desc: "Dark · Developer style", best: "Engineering, Data Science",
       header: "#0d1117", headerTxt: "#e6edf3",
       preview: (
         <div style={{ minHeight: 100, padding: 12, background: "#0d1117" }}>
@@ -2280,14 +2294,15 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
           <div style={{ height: 3, background: "#30363d", borderRadius: 1, marginBottom: 2, width: "50%" }} />
           <div style={{ height: 1, background: "#21262d", marginBottom: 7 }} />
           <div style={{ display: "flex", gap: 3, marginBottom: 7, flexWrap: "wrap" }}>
-            {[28,22,32].map((w,i) => <div key={i} style={{ height: 10, background: "#161b22", border: "1px solid #30363d", borderRadius: 4, width: w+"%" }} />)}
+            {[28, 22, 32].map((w, i) => <div key={i} style={{ height: 10, background: "#161b22", border: "1px solid #30363d", borderRadius: 4, width: w + "%" }} />)}
           </div>
           <div style={{ height: 3, background: "#C9D6E4", borderRadius: 2, marginBottom: 4, width: "40%", opacity: 0.6 }} />
-          {[100,88,72].map((w,i) => <div key={i} style={{ height: 2, background: "#21262d", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+          {[100, 88, 72].map((w, i) => <div key={i} style={{ height: 2, background: "#21262d", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
         </div>
       )
     },
-    { id: "warm", name: "Warm", desc: "Earthy · Friendly", best: "Marketing, Sales, NGO",
+    {
+      id: "warm", name: "Warm", desc: "Earthy · Friendly", best: "Marketing, Sales, NGO",
       header: "linear-gradient(135deg,#92400e,#b45309)", headerTxt: "#fef3c7",
       preview: (
         <div style={{ minHeight: 100, padding: 12, background: "#fffbf5" }}>
@@ -2299,9 +2314,9 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
             </div>
           </div>
           <div style={{ height: 1, background: "#fde68a", marginBottom: 7 }} />
-          {[100,85,70].map((w,i) => <div key={i} style={{ height: 2, background: "#fef3c7", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+          {[100, 85, 70].map((w, i) => <div key={i} style={{ height: 2, background: "#fef3c7", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
           <div style={{ height: 3, background: "#92400e", borderRadius: 2, marginBottom: 5, width: "44%", marginTop: 7 }} />
-          {[100,78].map((w,i) => <div key={i} style={{ height: 2, background: "#fef3c7", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+          {[100, 78].map((w, i) => <div key={i} style={{ height: 2, background: "#fef3c7", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
         </div>
       )
     },
@@ -2357,7 +2372,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
               ))}
             </div>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              {[["4.8/5"," average rating from early users"],["60s","average turnaround"],["3 free","starter career kits"]].map(([v,l]) => (
+              {[["4.8/5", " average rating from early users"], ["60s", "average turnaround"], ["3 free", "starter career kits"]].map(([v, l]) => (
                 <div key={v} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", background: "rgba(255,255,255,.82)", border: "1px solid rgba(3,29,64,.06)", borderRadius: 999 }}>
                   <span style={{ fontSize: 18, fontWeight: 700, color: PB }}>{v}</span>
                   <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{l}</span>
@@ -2390,9 +2405,9 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
               {/* Arrow */}
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 40, gap: 5 }}>
                 <div style={{ background: "linear-gradient(135deg,#031D40,#08284F)", borderRadius: "50%", width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 16px rgba(3,29,64,.45)", animation: "arrowPulse 1.2s ease-in-out infinite" }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9,18 15,12 9,6"/></svg>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9,18 15,12 9,6" /></svg>
                 </div>
-                <div style={{ fontSize: 8, color: "var(--text-muted)", textAlign: "center", fontWeight: 700, lineHeight: 1.4 }}>Career<br/>Partner</div>
+                <div style={{ fontSize: 8, color: "var(--text-muted)", textAlign: "center", fontWeight: 700, lineHeight: 1.4 }}>Career<br />Partner</div>
               </div>
 
               {/* After */}
@@ -2409,20 +2424,20 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
                     <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#02457A", margin: "0 auto 6px" }} />
                     <div style={{ height: 2, background: "rgba(255,255,255,.35)", borderRadius: 1, marginBottom: 3 }} />
                     <div style={{ height: 2, background: "rgba(255,255,255,.18)", borderRadius: 1, width: "80%", marginBottom: 9 }} />
-                    {[100,85,70].map((w,i) => <div key={i} style={{ height: 4, background: "rgba(3,29,64,.35)", borderRadius: 2, width: w+"%", marginBottom: 3 }} />)}
+                    {[100, 85, 70].map((w, i) => <div key={i} style={{ height: 4, background: "rgba(3,29,64,.35)", borderRadius: 2, width: w + "%", marginBottom: 3 }} />)}
                   </div>
                   <div style={{ flex: 1, padding: 10 }}>
                     <div style={{ height: 6, background: "#001B48", borderRadius: 2, marginBottom: 3, width: "75%" }} />
                     <div style={{ height: 3, background: "#02457A", borderRadius: 2, marginBottom: 8, width: "45%" }} />
-                    {[100,90,75].map((w,i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+                    {[100, 90, 75].map((w, i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
                     <div style={{ height: 3, background: "#001B48", borderRadius: 2, marginBottom: 5, width: "50%", marginTop: 8 }} />
-                    {[100,85,70].map((w,i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+                    {[100, 85, 70].map((w, i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
                     <div style={{ height: 3, background: "#001B48", borderRadius: 2, marginBottom: 5, width: "55%", marginTop: 8 }} />
-                    {[100,80].map((w,i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w+"%" }} />)}
+                    {[100, 80].map((w, i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
                   </div>
                 </div>
                 <div style={{ padding: "7px 10px", background: "#F4F7FB", borderTop: "1px solid rgba(3,29,64,.1)", display: "flex", alignItems: "center", gap: 5 }}>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                   <span style={{ fontSize: 9, color: "#02457A", fontWeight: 600 }}>ATS Optimized ✓</span>
                 </div>
               </div>
@@ -2464,7 +2479,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
             { num: "03", kicker: "Review and send", title: "Review your full kit", desc: "Get resume, cover letter, outreach, and prep materials in one place — ready for a human final pass.", foot: "Built in under a minute" },
           ].map((s, i) => (
             <div key={i} className="card-hover grid-item" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 24, padding: "28px 24px", position: "relative", overflow: "hidden", boxShadow: "var(--soft-shadow)" }}>
-              
+
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 18 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
                   <span style={{ width: 28, height: 3, borderRadius: 999, background: "var(--grad)", display: "inline-block", flexShrink: 0 }} />
@@ -2491,7 +2506,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
 
           {/* Sample tabs */}
           <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 14, flexWrap: "wrap" }}>
-            {[["resume","Resume"],["cover","Cover Letter"],["referral","Referral DM"]].map(([id, label]) => (
+            {[["resume", "Resume"], ["cover", "Cover Letter"], ["referral", "Referral DM"]].map(([id, label]) => (
               <button key={id} className="tab-pill pill-btn" onClick={() => setSampleTab(id)} style={{
                 padding: "9px 20px", borderRadius: 30, fontSize: 13, fontWeight: sampleTab === id ? 700 : 600, cursor: "pointer", fontFamily: "inherit", border: "none", transition: "all .18s ease",
                 background: sampleTab === id ? N1 : "var(--surface)",
@@ -2532,7 +2547,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
                       <div style={{ fontSize: 9, color: "rgba(255,255,255,.65)", marginBottom: 10 }}>Bangalore, KA</div>
                       <div style={{ fontSize: 8, color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4 }}>Skills</div>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-                        {["Power BI","Naukri","HRBP","SQL"].map(s => <span key={s} style={{ background: "rgba(3,29,64,.28)", color: "#C9D6E4", fontSize: 8, padding: "2px 5px", borderRadius: 3 }}>{s}</span>)}
+                        {["Power BI", "Naukri", "HRBP", "SQL"].map(s => <span key={s} style={{ background: "rgba(3,29,64,.28)", color: "#C9D6E4", fontSize: 8, padding: "2px 5px", borderRadius: 3 }}>{s}</span>)}
                       </div>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -2544,11 +2559,11 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
                         <span style={{ fontSize: 9, color: "#C9D6E4" }}>2020 – Present</span>
                       </div>
                       <div style={{ fontSize: 10, color: "#02457A", marginBottom: 4 }}>Current Company · Bangalore</div>
-                      <div style={{ fontSize: 9, color: "var(--text-mid)", lineHeight: 1.65 }}>• Reduced time-to-hire by 28% across 40+ analytics and engineering roles<br/>• Built Power BI WFH dashboard tracking 150+ headcount across 4 quarters<br/>• Executed MOUs with Dayananda Sagar College and MIT Pune — 12 hires in FY2024</div>
+                      <div style={{ fontSize: 9, color: "var(--text-mid)", lineHeight: 1.65 }}>• Reduced time-to-hire by 28% across 40+ analytics and engineering roles<br />• Built Power BI WFH dashboard tracking 150+ headcount across 4 quarters<br />• Executed MOUs with Dayananda Sagar College and MIT Pune — 12 hires in FY2024</div>
                     </div>
                   </div>
                   <div style={{ marginTop: 16, padding: "10px 14px", background: "var(--bg)", borderRadius: 8, display: "flex", alignItems: "center", gap: 8 }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={AC} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={AC} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12,6 12,12 16,14" /></svg>
                     <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Generated in <strong style={{ color: N1 }}>58 seconds</strong> · Tailored to the exact job description</span>
                   </div>
                 </div>
@@ -2575,7 +2590,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
                   <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85, marginBottom: 14 }}>With 4.5 years building talent pipelines for pharma analytics functions, I bring exactly what the HRBP Manager role requires — domain fluency you cannot onboard, and execution speed your team can rely on from day one.</p>
                   <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85, marginBottom: 14 }}>At my current organisation, I reduced time-to-hire by 28% across 40+ analytics and engineering roles by restructuring sourcing channels. I also built a Power BI WFH dashboard covering 150+ headcount — giving me a dual lens on both talent strategy and HR data storytelling.</p>
                   <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85, marginBottom: 20 }}>I would welcome a conversation about how my background aligns with your team&apos;s priorities. Available for an interview at your convenience.</p>
-                  <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85 }}>Warm regards,<br/><strong style={{ color: "var(--text)" }}>Priya Sharma</strong></p>
+                  <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85 }}>Warm regards,<br /><strong style={{ color: "var(--text)" }}>Priya Sharma</strong></p>
                 </div>
               </div>
             )}
@@ -2601,8 +2616,8 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
                   <div>
                     <div style={{ display: "inline-block", background: "var(--accent-soft)", color: AC, fontSize: 9, fontWeight: 700, padding: "3px 10px", borderRadius: 4, marginBottom: 12, letterSpacing: ".06em" }}>VERSION 2 · DIRECT MESSAGE</div>
                     <div style={{ background: "var(--bg)", borderLeft: `3px solid ${LB}`, borderRadius: "0 10px 10px 0", padding: "14px 16px", fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85 }}>
-                      Hi Anjali, hope you&apos;re doing well!<br/><br/>
-                      I came across the HRBP Manager opening at [Company] and I&apos;m genuinely excited — it aligns closely with what I&apos;ve been building over 4.5 years in pharma TA and HR analytics.<br/><br/>
+                      Hi Anjali, hope you&apos;re doing well!<br /><br />
+                      I came across the HRBP Manager opening at [Company] and I&apos;m genuinely excited — it aligns closely with what I&apos;ve been building over 4.5 years in pharma TA and HR analytics.<br /><br />
                       Would you be open to referring me or sharing tips on the process? Happy to send my resume directly. Really appreciate it!
                     </div>
                   </div>
@@ -2669,13 +2684,13 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
         </div>
         <div className="feature-grid">
           {[
-            { title: "Resume Rewrite", desc: "ATS-optimized, role-specific, quantified achievements. Ready to send.", plan: "Starter", planColor: LB, planBg: "rgba(3,29,64,0.08)", grad: "linear-gradient(135deg,#001B48,#031D40)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
-            { title: "Cover Letter", desc: "3 paragraphs, confident tone. Reads like you wrote it, not a template.", plan: "Starter", planColor: LB, planBg: "rgba(3,29,64,0.08)", grad: "linear-gradient(135deg,#031D40,#031D40)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> },
-            { title: "Referral Message", desc: "LinkedIn note and DM. Makes it easy for your contact to say yes.", plan: "Starter", planColor: LB, planBg: "rgba(3,29,64,0.08)", grad: "linear-gradient(135deg,#031D40,#08284F)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
-            { title: "Interview Prep", desc: "Top 5 questions with STAR answers based on your actual experience.", plan: "Pro+", planColor: AC, planBg: "var(--accent-soft)", grad: "linear-gradient(135deg,#001B48,#031D40)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> },
-            { title: "Find & Reach", desc: "Exact LinkedIn search query and cold outreach to find the right recruiter.", plan: "Pro+", planColor: AC, planBg: "var(--accent-soft)", grad: "linear-gradient(135deg,#031D40,#08284F)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> },
-            { title: "Salary Negotiation", desc: "Enter offer vs expectation — get a ready-to-use negotiation script.", plan: "Unlimited", planColor: N2, planBg: "rgba(3,29,64,0.08)", grad: "linear-gradient(135deg,#001B48,#031D40,#08284F)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> },
-            { title: "Notice Period", desc: "Verbal script, HR email, LinkedIn — all tailored to your notice period.", plan: "Unlimited", planColor: N2, planBg: "rgba(3,29,64,0.08)", grad: "linear-gradient(135deg,#031D40,#08284F)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
+            { title: "Resume Rewrite", desc: "ATS-optimized, role-specific, quantified achievements. Ready to send.", plan: "Starter", planColor: LB, planBg: "rgba(3,29,64,0.08)", grad: "linear-gradient(135deg,#001B48,#031D40)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14,2 14,8 20,8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg> },
+            { title: "Cover Letter", desc: "3 paragraphs, confident tone. Reads like you wrote it, not a template.", plan: "Starter", planColor: LB, planBg: "rgba(3,29,64,0.08)", grad: "linear-gradient(135deg,#031D40,#031D40)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg> },
+            { title: "Referral Message", desc: "LinkedIn note and DM. Makes it easy for your contact to say yes.", plan: "Starter", planColor: LB, planBg: "rgba(3,29,64,0.08)", grad: "linear-gradient(135deg,#031D40,#08284F)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg> },
+            { title: "Interview Prep", desc: "Top 5 questions with STAR answers based on your actual experience.", plan: "Pro+", planColor: AC, planBg: "var(--accent-soft)", grad: "linear-gradient(135deg,#001B48,#031D40)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg> },
+            { title: "Find & Reach", desc: "Exact LinkedIn search query and cold outreach to find the right recruiter.", plan: "Pro+", planColor: AC, planBg: "var(--accent-soft)", grad: "linear-gradient(135deg,#031D40,#08284F)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg> },
+            { title: "Salary Negotiation", desc: "Enter offer vs expectation — get a ready-to-use negotiation script.", plan: "Unlimited", planColor: N2, planBg: "rgba(3,29,64,0.08)", grad: "linear-gradient(135deg,#001B48,#031D40,#08284F)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg> },
+            { title: "Notice Period", desc: "Verbal script, HR email, LinkedIn — all tailored to your notice period.", plan: "Unlimited", planColor: N2, planBg: "rgba(3,29,64,0.08)", grad: "linear-gradient(135deg,#031D40,#08284F)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg> },
           ].map((f, i) => (
             <div key={i} className="feature-card card-hover grid-item" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "28px 20px 22px", position: "relative" }}>
               <div style={{ position: "absolute", top: 14, right: 14 }}>
@@ -2730,271 +2745,279 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
           <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>Choose a plan that fits your search</h2>
           <p style={{ fontSize: 15, color: "var(--text-muted)", marginTop: 12 }}>Start free, then upgrade only when you want more depth and more outputs.</p>
         </div>
-        <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 16, maxWidth: 1200, margin: "0 auto", alignItems: "stretch" }}>
-          {[  
-            {
-              name: "Free",
-              price: "0",
-              tag: "forever free",
-              popular: false,
-              note: "Try it before you commit",
-              includes: [
-                "1 career kit — one time",
-                "Resume rewrite",
-                { text: "Cover letter + referral message", cross: true },
-                { text: "ATS keyword fit support", cross: true },
-                { text: "Interview Prep + Find & Reach", cross: true },
-              ],
+        {user && <div style={{ textAlign: "center", fontSize: 11, color: "red", marginBottom: 8 }}>DEBUG: user.plan = "{user.plan}"</div>}
+        {[
+          {
+            name: "Free",
+            price: "0",
+            tag: "forever free",
+            popular: false,
+            note: "Try it before you commit",
+            includes: [
+              "1 career kit — one time",
+              "Resume rewrite",
+              { text: "Cover letter + referral message", cross: true },
+              { text: "ATS keyword fit support", cross: true },
+              { text: "Interview Prep + Find & Reach", cross: true },
+            ],
           },
-            {
-              name: "Starter",
-              price: "99",
-              tag: "1 Career kit",
-              popular: false,
-              note: "Best for one strong application",
-              includes: [
-                "1 complete career kit",
-                "Resume rewrite tailored to one role",
-                "Cover letter + referral message",
-                "ATS keyword fit support",
-                "Clean PDF-ready export",
-                "Valid for 30 days",
-              ],
-            },
-            {
-              name: "Pro",
-              price: "299",
-              tag: "5 Career kits",
-              popular: true,
-              note: "Best for active job seekers",
-              includes: [
-                "5 complete career kits",
-                "All 5 outputs per kit",
-                "Interview Prep + Find & Reach",
-                "Faster generation",
-                "Outreach templates with stronger positioning",
-                "Valid for 90 days",
-              ],
-            },
-            {
-              name: "Unlimited",
-              price: "599",
-              tag: "per month",
-              popular: false,
-              note: "Best for ongoing search and negotiation",
-              includes: [
-                "Unlimited career kits",
-                "All 5 outputs + updates",
-                "Salary Negotiation tool",
-                "Notice Period scripts",
-                "First access to new Rezolt features",
-                "Cancel anytime",
-              ],
-            },
-          ].map((p, i) => (
-            <div key={i} style={{ background: p.popular ? "var(--grad)" : "var(--surface)", border: p.popular ? "none" : "1.5px solid var(--border)", borderRadius: 22, padding: "40px 24px 28px", position: "relative", boxShadow: p.popular ? "var(--shadow-lg)" : "var(--shadow-sm)", transition: "transform .25s ease, box-shadow .25s ease", display: "flex", flexDirection: "column", minHeight: "100%", height: "100%" }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.boxShadow = p.popular ? "0 20px 50px rgba(3,29,64,.32)" : "var(--shadow-lg)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = p.popular ? "var(--shadow-lg)" : "var(--shadow-sm)"; }}
-            >
-              {p.popular && <div style={{ position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)", background: PB, color: N1, fontSize: 11, fontWeight: 800, padding: "4px 16px", borderRadius: 20, letterSpacing: ".05em", whiteSpace: "nowrap" }}>BEST VALUE</div>}
-              
-              <div style={{ fontSize: 12, fontWeight: 700, color: p.popular ? "rgba(255,255,255,.65)" : "var(--text-muted)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 10 }}>{p.name}</div>
-              <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 44, fontWeight: 400, color: p.popular ? "white" : "var(--text)", lineHeight: 1, marginBottom: 4 }}>₹{p.price}</div>
-              <div style={{ fontSize: 13, color: p.popular ? "rgba(255,255,255,.6)" : "var(--text-muted)", marginBottom: 10 }}>{p.tag}</div>
-              <div style={{ fontSize: 12, color: p.popular ? "rgba(255,255,255,.78)" : AC, fontWeight: 700, marginBottom: 22 }}>{p.note}</div>
-              <div style={{ flex: 1, marginBottom: 28, display: "grid", gap: 9 }}>
-                {p.includes.map((f, j) => {
-                  const isCross = typeof f === "object" && f.cross;
-                  const text = typeof f === "object" ? f.text : f;
-                  return (
+          {
+            name: "Starter",
+            price: "99",
+            tag: "1 Career kit",
+            popular: false,
+            note: "Best for one strong application",
+            includes: [
+              "1 complete career kit",
+              "Resume rewrite tailored to one role",
+              "Cover letter + referral message",
+              "ATS keyword fit support",
+              "Clean PDF-ready export",
+              "Valid for 30 days",
+            ],
+          },
+          {
+            name: "Pro",
+            price: "299",
+            tag: "5 Career kits",
+            popular: true,
+            note: "Best for active job seekers",
+            includes: [
+              "5 complete career kits",
+              "All 5 outputs per kit",
+              "Interview Prep + Find & Reach",
+              "Faster generation",
+              "Outreach templates with stronger positioning",
+              "Valid for 90 days",
+            ],
+          },
+          {
+            name: "Unlimited",
+            price: "599",
+            tag: "per month",
+            popular: false,
+            note: "Best for ongoing search and negotiation",
+            includes: [
+              "Unlimited career kits",
+              "All 5 outputs + updates",
+              "Salary Negotiation tool",
+              "Notice Period scripts",
+              "First access to new Rezolt features",
+              "Cancel anytime",
+            ],
+          },
+        ].map((p, i) => (
+          <div key={i} style={{ background: p.popular ? "var(--grad)" : "var(--surface)", border: p.popular ? "none" : "1.5px solid var(--border)", borderRadius: 22, padding: "40px 24px 28px", position: "relative", boxShadow: p.popular ? "var(--shadow-lg)" : "var(--shadow-sm)", transition: "transform .25s ease, box-shadow .25s ease", display: "flex", flexDirection: "column", minHeight: "100%", height: "100%" }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.boxShadow = p.popular ? "0 20px 50px rgba(3,29,64,.32)" : "var(--shadow-lg)"; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = p.popular ? "var(--shadow-lg)" : "var(--shadow-sm)"; }}
+          >
+            {p.popular && <div style={{ position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)", background: PB, color: N1, fontSize: 11, fontWeight: 800, padding: "4px 16px", borderRadius: 20, letterSpacing: ".05em", whiteSpace: "nowrap" }}>BEST VALUE</div>}
+
+            <div style={{ fontSize: 12, fontWeight: 700, color: p.popular ? "rgba(255,255,255,.65)" : "var(--text-muted)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 10 }}>{p.name}</div>
+            <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 44, fontWeight: 400, color: p.popular ? "white" : "var(--text)", lineHeight: 1, marginBottom: 4 }}>₹{p.price}</div>
+            <div style={{ fontSize: 13, color: p.popular ? "rgba(255,255,255,.6)" : "var(--text-muted)", marginBottom: 10 }}>{p.tag}</div>
+            <div style={{ fontSize: 12, color: p.popular ? "rgba(255,255,255,.78)" : AC, fontWeight: 700, marginBottom: 22 }}>{p.note}</div>
+            <div style={{ flex: 1, marginBottom: 28, display: "grid", gap: 9 }}>
+              {p.includes.map((f, j) => {
+                const isCross = typeof f === "object" && f.cross;
+                const text = typeof f === "object" ? f.text : f;
+                return (
                   <div key={j} style={{ display: "flex", gap: 9, alignItems: "flex-start", opacity: isCross ? 0.6 : 1 }}>
                     {isCross ? (
-                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={p.popular ? "rgba(255,255,255,.5)" : "var(--text-muted)"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={p.popular ? "rgba(255,255,255,.5)" : "var(--text-muted)"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                     ) : (
-                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={p.popular ? "#86efac" : G} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><polyline points="20 6 9 17 4 12"/></svg>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={p.popular ? "#86efac" : G} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><polyline points="20 6 9 17 4 12" /></svg>
                     )}
                     <span style={{ fontSize: 13, color: p.popular ? "rgba(255,255,255,.86)" : "var(--text-mid)", lineHeight: 1.6, textDecoration: isCross ? "line-through" : "none" }}>{text}</span>
                   </div>
-                )})}
-              </div>
-              <button onClick={() => setPage(p.name === "Free" ? "auth" : (user ? "payment" : "auth"))} className="btn-primary" style={{ width: "100%", marginTop: "auto", background: p.popular ? "rgba(255,255,255,.15)" : "var(--grad)", color: "white", border: p.popular ? "2px solid rgba(255,255,255,.3)" : "none", borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", backdropFilter: p.popular ? "blur(8px)" : "none" }}>
-                {user ? "Upgrade Now" : "Get Started"}
-              </button>
+                )
+              })}
             </div>
-          ))}
-        </div>
+            {(() => {
+              const currentPlan = (user.plan || "Free").toLowerCase();
+              const cardName = p.name.toLowerCase();
+              const isCurrentPlan = user && (cardName === currentPlan || (cardName === "unlimited" && currentPlan === "unlimited_monthly"));
+              return (
+                <button onClick={() => isCurrentPlan ? setPage("dashboard") : setPage(user ? "payment" : "auth")} className={isCurrentPlan ? "" : "btn-primary"} style={{ width: "100%", marginTop: "auto", background: isCurrentPlan ? (p.popular ? "rgba(255,255,255,.1)" : "var(--surface2)") : p.popular ? "rgba(255,255,255,.15)" : "var(--grad)", color: isCurrentPlan ? (p.popular ? "rgba(255,255,255,.6)" : "var(--text-muted)") : "white", border: isCurrentPlan ? (p.popular ? "1px solid rgba(255,255,255,.2)" : "1px solid var(--border)") : p.popular ? "2px solid rgba(255,255,255,.3)" : "none", borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 700, cursor: isCurrentPlan ? "default" : "pointer", fontFamily: "inherit", backdropFilter: p.popular ? "blur(8px)" : "none" }}>
+                  {user ? (isCurrentPlan ? "Current Plan" : "Upgrade Now") : "Get Started"}
+                </button>
+              );
+            })()}
+          </div>
+        ))}
       </div>
 
       {/* ── ARTICLES ── */}
-      <div id="articles-section" style={{ background: "var(--bg)", borderTop: "1px solid var(--border)" }}>
-        <div className="section-pad" style={{ padding: "80px clamp(20px,5vw,80px)" }}>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: AC, marginBottom: 14 }}>Career insights</div>
-            <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>
-              Practical guidance for a tougher job market
-            </h2>
-            <p style={{ fontSize: 15, color: "var(--text-muted)", marginTop: 14, maxWidth: 560, margin: "14px auto 0", lineHeight: 1.7 }}>
-              You don’t always need more experience, sometimes you need clearer positioning, stronger proof, and sharper relevance.
-            </p>
-          </div>
-
-          <div className="card-hover" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 24, padding: "32px 32px", marginBottom: 22, position: "relative", overflow: "hidden", boxShadow: "var(--soft-shadow)" }}>
-            
-            <div className="two-col-md article-featured" style={{ display: "grid", gridTemplateColumns: "1.2fr .8fr", gap: 26, alignItems: "start" }}>
-              <div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--accent-soft)", border: "1px solid var(--border)", borderRadius: 20, padding: "4px 12px", marginBottom: 16 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: AC }} />
-                  <span style={{ fontSize: 11, fontWeight: 700, color: AC }}>What matters most</span>
-                </div>
-                <h3 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(20px,3vw,30px)", fontWeight: 400, color: "var(--text)", letterSpacing: "-.02em", marginBottom: 14, lineHeight: 1.25 }}>
-                  Why strong candidates still get filtered out
-                </h3>
-                <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.8, marginBottom: 16 }}>
-                  In high-volume hiring, resumes are scanned before stories are heard. The first goal isn’t to explain everything, it’s to make relevance obvious in seconds.
-                </p>
-                <div style={{ display: "grid", gap: 10, marginBottom: 18 }}>
-                  {[
-                    "Match the language of the role where it's genuinely true.",
-                    "Show outcomes, not only responsibilities.",
-                    "Make the recruiter’s next decision feel easy.",
-                  ].map(item => (
-                    <div key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: MID }}>
-                      <span style={{ width: 20, height: 20, borderRadius: "50%", background: "var(--accent-soft)", color: AC, display: "inline-flex", alignItems: "center", justifyContent: "center", fontWeight: 700, flexShrink: 0 }}>✓</span>
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </div>
-                <button onClick={() => { setSelectedArticle?.(1); setPage("articles"); }} style={{ background: "none", border: "none", padding: 0, color: AC, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-                  Read the full article
-                </button>
-              </div>
-              <div style={{ display: "grid", gap: 12 }}>
-                <div style={{ background: "var(--grad)", borderRadius: 16, padding: "22px 18px", color: "white", textAlign: "center" }}>
-                  <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 42, fontWeight: 400, lineHeight: 1, marginBottom: 6 }}>75%</div>
-                  <div style={{ fontSize: 12, color: "rgba(255,255,255,.74)", lineHeight: 1.5 }}>Research suggests up to 75% of resumes are filtered before a recruiter reads them</div>
-                </div>
-                <div style={{ background: "var(--surface2)", borderRadius: 14, padding: "16px 18px", border: "1px solid var(--border)" }}>
-                  <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 30, fontWeight: 400, color: AC, lineHeight: 1, marginBottom: 4 }}>6s</div>
-                  <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>Studies show recruiters spend an average of 6–7 seconds on a first scan</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="three-col" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18, marginBottom: 24 }}>
-            {[
-              {
-                title: "Why ATS fit matters more than you think",
-                summary: "Use the same language as the job description where it is true and proven.",
-                stat: "Keywords",
-                tag: "ATS",
-                articleIndex: 0,
-              },
-              {
-                title: "Proof beats promises",
-                summary: "Numbers, outcomes, and measurable wins create faster trust than generic claims.",
-                stat: "Impact",
-                tag: "Positioning",
-                articleIndex: 2,
-              },
-              {
-                title: "Relevance creates momentum",
-                summary: "A cleaner, more targeted resume improves the odds of better outreach and better interviews.",
-                stat: "Clarity",
-                tag: "Strategy",
-                articleIndex: 5,
-              },
-            ].map((a, i) => (
-              <button key={i} onClick={() => { setSelectedArticle?.(a.articleIndex); setPage("articles"); }} className="card-hover" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "24px 22px", display: "flex", flexDirection: "column", textAlign: "left", cursor: "pointer", fontFamily: "inherit" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                  <span style={{ background: "var(--accent-soft)", color: AC, fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 20, border: "1px solid var(--border)" }}>{a.tag}</span>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: FAINT }}>{a.stat}</span>
-                </div>
-                <h3 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 18, fontWeight: 400, color: "var(--text)", marginBottom: 10, lineHeight: 1.35, letterSpacing: "-.01em" }}>{a.title}</h3>
-                <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.75, marginBottom: 14 }}>{a.summary}</p>
-                <span style={{ marginTop: "auto", fontSize: 12, fontWeight: 700, color: AC }}>Read more</span>
-              </button>
-            ))}
-          </div>
-
-          <div style={{ background: "var(--grad)", borderRadius: 20, padding: "34px 36px", textAlign: "center", position: "relative", overflow: "hidden" }}>
-            <div className="blob" style={{ width: 200, height: 200, background: LB, top: -60, right: 40 }} />
-            <div style={{ position: "relative", zIndex: 1 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".15em", textTransform: "uppercase", color: "rgba(255,255,255,.6)", marginBottom: 14 }}>The core formula</div>
-              <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(14px,2.5vw,22px)", color: "white", fontWeight: 400, lineHeight: 1.6, marginBottom: 18 }}>
-                Resume Effectiveness = <span style={{ color: PB }}>Keyword Match</span> × <span style={{ color: PB }}>Clarity</span> × <span style={{ color: PB }}>Measurable Impact</span> × <span style={{ color: PB }}>ATS Compatibility</span>
-              </div>
-              <p style={{ fontSize: 14, color: "rgba(255,255,255,.74)", marginBottom: 24 }}>If even one of these drops to zero, your chances drop with it. Rezolt is designed to strengthen all four together.</p>
-              <button onClick={() => setPage(user ? "generate" : "auth")} className="hero-btn btn-primary" style={{ background: "linear-gradient(135deg,#E4BE47,#F2D46C,#E4BE47)", backgroundSize: "200% auto", color: N1, border: "none", borderRadius: 12, padding: "14px 32px", fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: "inherit" }}>
-                {user ? "Build My Next Kit" : "Start Free"}
-              </button>
-            </div>
-          </div>
-        </div>
+  <div id="articles-section" style={{ background: "var(--bg)", borderTop: "1px solid var(--border)" }}>
+    <div className="section-pad" style={{ padding: "80px clamp(20px,5vw,80px)" }}>
+      <div style={{ textAlign: "center", marginBottom: 56 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: AC, marginBottom: 14 }}>Career insights</div>
+        <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>
+          Practical guidance for a tougher job market
+        </h2>
+        <p style={{ fontSize: 15, color: "var(--text-muted)", marginTop: 14, maxWidth: 560, margin: "14px auto 0", lineHeight: 1.7 }}>
+          You don’t always need more experience, sometimes you need clearer positioning, stronger proof, and sharper relevance.
+        </p>
       </div>
 
-      {/* ── FUN CTA ── */}
-      <div style={{ padding: "0 clamp(16px,5vw,80px) 80px", background: "var(--bg)" }} className="section-pad">
-        <div className="hero-gradient" style={{ borderRadius: 28, padding: "72px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
-          <div className="blob" style={{ width: 300, height: 300, background: AC, top: -80, right: 40 }} />
-          <div className="blob" style={{ width: 200, height: 200, background: LB, bottom: -60, left: 60 }} />
-          <div style={{ position: "relative", zIndex: 1 }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(3,29,64,0.06)", border: "1px solid rgba(3,29,64,0.10)", borderRadius: 999, padding: "6px 14px", fontSize: 12, fontWeight: 700, color: AC, marginBottom: 16 }}>
-              Ready when you are
+      <div className="card-hover" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 24, padding: "32px 32px", marginBottom: 22, position: "relative", overflow: "hidden", boxShadow: "var(--soft-shadow)" }}>
+
+        <div className="two-col-md article-featured" style={{ display: "grid", gridTemplateColumns: "1.2fr .8fr", gap: 26, alignItems: "start" }}>
+          <div>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--accent-soft)", border: "1px solid var(--border)", borderRadius: 20, padding: "4px 12px", marginBottom: 16 }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: AC }} />
+              <span style={{ fontSize: 11, fontWeight: 700, color: AC }}>What matters most</span>
             </div>
-            <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(30px,4vw,52px)", fontWeight: 400, letterSpacing: "-.02em", color: "var(--text)", marginBottom: 14 }}>
-              Your next offer starts <em style={{ color: PB }}>here.</em>
-            </h2>
-            <p style={{ fontSize: 16, color: "var(--text-muted)", marginBottom: 36 }}>
-              {user ? "You're already in. Generate your next Career kit in 60 seconds." : "Sign up now and get 3 free Career Kits instantly. No card required."}
+            <h3 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(20px,3vw,30px)", fontWeight: 400, color: "var(--text)", letterSpacing: "-.02em", marginBottom: 14, lineHeight: 1.25 }}>
+              Why strong candidates still get filtered out
+            </h3>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.8, marginBottom: 16 }}>
+              In high-volume hiring, resumes are scanned before stories are heard. The first goal isn’t to explain everything, it’s to make relevance obvious in seconds.
             </p>
-            <button onClick={() => setPage(user ? "generate" : "auth")} className="hero-btn btn-primary" style={{ background: "linear-gradient(135deg,#E4BE47,#F2D46C,#E4BE47)", backgroundSize: "200% auto", color: N1, border: "none", borderRadius: 12, padding: "16px 40px", fontSize: 16, fontWeight: 800, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 6px 22px rgba(228,190,71,.32)" }}>
-              {user ? "Generate a Kit" : "Get Started Free"}
+            <div style={{ display: "grid", gap: 10, marginBottom: 18 }}>
+              {[
+                "Match the language of the role where it's genuinely true.",
+                "Show outcomes, not only responsibilities.",
+                "Make the recruiter’s next decision feel easy.",
+              ].map(item => (
+                <div key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: MID }}>
+                  <span style={{ width: 20, height: 20, borderRadius: "50%", background: "var(--accent-soft)", color: AC, display: "inline-flex", alignItems: "center", justifyContent: "center", fontWeight: 700, flexShrink: 0 }}>✓</span>
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => { setSelectedArticle?.(1); setPage("articles"); }} style={{ background: "none", border: "none", padding: 0, color: AC, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+              Read the full article
             </button>
           </div>
+          <div style={{ display: "grid", gap: 12 }}>
+            <div style={{ background: "var(--grad)", borderRadius: 16, padding: "22px 18px", color: "white", textAlign: "center" }}>
+              <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 42, fontWeight: 400, lineHeight: 1, marginBottom: 6 }}>75%</div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,.74)", lineHeight: 1.5 }}>Research suggests up to 75% of resumes are filtered before a recruiter reads them</div>
+            </div>
+            <div style={{ background: "var(--surface2)", borderRadius: 14, padding: "16px 18px", border: "1px solid var(--border)" }}>
+              <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 30, fontWeight: 400, color: AC, lineHeight: 1, marginBottom: 4 }}>6s</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>Studies show recruiters spend an average of 6–7 seconds on a first scan</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ── FOOTER ── */}
-      <div style={{ borderTop: "1px solid var(--border)", background: "var(--surface)", padding: "28px clamp(16px,5vw,80px)" }} className="section-pad">
-        <div className="footer-grid" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <BrandLogo height={84} />
+      <div className="three-col" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18, marginBottom: 24 }}>
+        {[
+          {
+            title: "Why ATS fit matters more than you think",
+            summary: "Use the same language as the job description where it is true and proven.",
+            stat: "Keywords",
+            tag: "ATS",
+            articleIndex: 0,
+          },
+          {
+            title: "Proof beats promises",
+            summary: "Numbers, outcomes, and measurable wins create faster trust than generic claims.",
+            stat: "Impact",
+            tag: "Positioning",
+            articleIndex: 2,
+          },
+          {
+            title: "Relevance creates momentum",
+            summary: "A cleaner, more targeted resume improves the odds of better outreach and better interviews.",
+            stat: "Clarity",
+            tag: "Strategy",
+            articleIndex: 5,
+          },
+        ].map((a, i) => (
+          <button key={i} onClick={() => { setSelectedArticle?.(a.articleIndex); setPage("articles"); }} className="card-hover" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "24px 22px", display: "flex", flexDirection: "column", textAlign: "left", cursor: "pointer", fontFamily: "inherit" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <span style={{ background: "var(--accent-soft)", color: AC, fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 20, border: "1px solid var(--border)" }}>{a.tag}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: FAINT }}>{a.stat}</span>
+            </div>
+            <h3 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 18, fontWeight: 400, color: "var(--text)", marginBottom: 10, lineHeight: 1.35, letterSpacing: "-.01em" }}>{a.title}</h3>
+            <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.75, marginBottom: 14 }}>{a.summary}</p>
+            <span style={{ marginTop: "auto", fontSize: 12, fontWeight: 700, color: AC }}>Read more</span>
+          </button>
+        ))}
+      </div>
+
+      <div style={{ background: "var(--grad)", borderRadius: 20, padding: "34px 36px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+        <div className="blob" style={{ width: 200, height: 200, background: LB, top: -60, right: 40 }} />
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".15em", textTransform: "uppercase", color: "rgba(255,255,255,.6)", marginBottom: 14 }}>The core formula</div>
+          <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(14px,2.5vw,22px)", color: "white", fontWeight: 400, lineHeight: 1.6, marginBottom: 18 }}>
+            Resume Effectiveness = <span style={{ color: PB }}>Keyword Match</span> × <span style={{ color: PB }}>Clarity</span> × <span style={{ color: PB }}>Measurable Impact</span> × <span style={{ color: PB }}>ATS Compatibility</span>
           </div>
-          <div style={{ fontSize: 13, color: "var(--text-muted)" }}>© 2026 Rezolt. Career Kit for Indian Job Seekers.</div>
-          <div style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
-            {[
-              { label: "Privacy Policy", action: () => setPage("privacy") },
-              { label: "Terms", action: () => setPage("terms") },
-              { label: "FAQ", action: () => setPage("faq") },
-              { label: "Contact Us", action: () => setPage("contact") },
-            ].map(l => (
-              <button key={l.label} onClick={l.action} style={{ background: "none", border: "none", padding: 0, fontSize: 13, color: "var(--text-muted)", cursor: "pointer", transition: "color .15s ease", fontFamily: "inherit" }}
-                onMouseEnter={e => e.target.style.color = AC} onMouseLeave={e => e.target.style.color = "var(--text-muted)"}>{l.label}</button>
-            ))}
-            <a href="https://www.instagram.com/rezolt.in/" target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", transition: "color .15s ease", display: "inline-flex", alignItems: "center", gap: 6 }}
-              onMouseEnter={e => e.currentTarget.style.color = AC} onMouseLeave={e => e.currentTarget.style.color = "var(--text-muted)"}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" ry="5"/><path d="M16.5 7.5h.01"/><circle cx="12" cy="12" r="4"/></svg>
-              <span>Instagram</span>
-            </a>
-            <a href="https://www.linkedin.com/company/rezolt/" target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", transition: "color .15s ease", display: "inline-flex", alignItems: "center", gap: 6 }}
-              onMouseEnter={e => e.currentTarget.style.color = AC} onMouseLeave={e => e.currentTarget.style.color = "var(--text-muted)"}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.94 8.5a1.56 1.56 0 1 1 0-3.12 1.56 1.56 0 0 1 0 3.12ZM5.5 9.75h2.88V18H5.5V9.75Zm4.68 0h2.76v1.13h.04c.38-.73 1.32-1.5 2.72-1.5 2.92 0 3.46 1.92 3.46 4.42V18h-2.88v-3.72c0-.89-.02-2.03-1.24-2.03-1.24 0-1.43.97-1.43 1.97V18h-2.88V9.75Z"/></svg>
-              <span>LinkedIn</span>
-            </a>
-            <a href="mailto:hello@rezolt.in" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", transition: "color .15s ease" }}
-              onMouseEnter={e => e.target.style.color = AC} onMouseLeave={e => e.target.style.color = "var(--text-muted)"}>
-              hello@rezolt.in
-            </a>
-          </div>
+          <p style={{ fontSize: 14, color: "rgba(255,255,255,.74)", marginBottom: 24 }}>If even one of these drops to zero, your chances drop with it. Rezolt is designed to strengthen all four together.</p>
+          <button onClick={() => setPage(user ? "generate" : "auth")} className="hero-btn btn-primary" style={{ background: "linear-gradient(135deg,#E4BE47,#F2D46C,#E4BE47)", backgroundSize: "200% auto", color: N1, border: "none", borderRadius: 12, padding: "14px 32px", fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: "inherit" }}>
+            {user ? "Build My Next Kit" : "Start Free"}
+          </button>
         </div>
       </div>
     </div>
-  );
-}
+  </div>
+
+  {/* ── FUN CTA ── */}
+  <div style={{ padding: "0 clamp(16px,5vw,80px) 80px", background: "var(--bg)" }} className="section-pad">
+    <div className="hero-gradient" style={{ borderRadius: 28, padding: "72px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+      <div className="blob" style={{ width: 300, height: 300, background: AC, top: -80, right: 40 }} />
+      <div className="blob" style={{ width: 200, height: 200, background: LB, bottom: -60, left: 60 }} />
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(3,29,64,0.06)", border: "1px solid rgba(3,29,64,0.10)", borderRadius: 999, padding: "6px 14px", fontSize: 12, fontWeight: 700, color: AC, marginBottom: 16 }}>
+          Ready when you are
+        </div>
+        <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(30px,4vw,52px)", fontWeight: 400, letterSpacing: "-.02em", color: "var(--text)", marginBottom: 14 }}>
+          Your next offer starts <em style={{ color: PB }}>here.</em>
+        </h2>
+        <p style={{ fontSize: 16, color: "var(--text-muted)", marginBottom: 36 }}>
+          {user ? "You're already in. Generate your next Career kit in 60 seconds." : "Sign up now and get 3 free Career Kits instantly. No card required."}
+        </p>
+        <button onClick={() => setPage(user ? "generate" : "auth")} className="hero-btn btn-primary" style={{ background: "linear-gradient(135deg,#E4BE47,#F2D46C,#E4BE47)", backgroundSize: "200% auto", color: N1, border: "none", borderRadius: 12, padding: "16px 40px", fontSize: 16, fontWeight: 800, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 6px 22px rgba(228,190,71,.32)" }}>
+          {user ? "Generate a Kit" : "Get Started Free"}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {/* ── FOOTER ── */}
+  <div style={{ borderTop: "1px solid var(--border)", background: "var(--surface)", padding: "28px clamp(16px,5vw,80px)" }} className="section-pad">
+    <div className="footer-grid" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <BrandLogo height={84} />
+      </div>
+      <div style={{ fontSize: 13, color: "var(--text-muted)" }}>© 2026 Rezolt. Career Kit for Indian Job Seekers.</div>
+      <div style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
+        {[
+          { label: "Privacy Policy", action: () => setPage("privacy") },
+          { label: "Terms", action: () => setPage("terms") },
+          { label: "FAQ", action: () => setPage("faq") },
+          { label: "Contact Us", action: () => setPage("contact") },
+        ].map(l => (
+          <button key={l.label} onClick={l.action} style={{ background: "none", border: "none", padding: 0, fontSize: 13, color: "var(--text-muted)", cursor: "pointer", transition: "color .15s ease", fontFamily: "inherit" }}
+            onMouseEnter={e => e.target.style.color = AC} onMouseLeave={e => e.target.style.color = "var(--text-muted)"}>{l.label}</button>
+        ))}
+        <a href="https://www.instagram.com/rezolt.in/" target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", transition: "color .15s ease", display: "inline-flex", alignItems: "center", gap: 6 }}
+          onMouseEnter={e => e.currentTarget.style.color = AC} onMouseLeave={e => e.currentTarget.style.color = "var(--text-muted)"}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" /><path d="M16.5 7.5h.01" /><circle cx="12" cy="12" r="4" /></svg>
+          <span>Instagram</span>
+        </a>
+        <a href="https://www.linkedin.com/company/rezolt/" target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", transition: "color .15s ease", display: "inline-flex", alignItems: "center", gap: 6 }}
+          onMouseEnter={e => e.currentTarget.style.color = AC} onMouseLeave={e => e.currentTarget.style.color = "var(--text-muted)"}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.94 8.5a1.56 1.56 0 1 1 0-3.12 1.56 1.56 0 0 1 0 3.12ZM5.5 9.75h2.88V18H5.5V9.75Zm4.68 0h2.76v1.13h.04c.38-.73 1.32-1.5 2.72-1.5 2.92 0 3.46 1.92 3.46 4.42V18h-2.88v-3.72c0-.89-.02-2.03-1.24-2.03-1.24 0-1.43.97-1.43 1.97V18h-2.88V9.75Z" /></svg>
+          <span>LinkedIn</span>
+        </a>
+        <a href="mailto:hello@rezolt.in" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", transition: "color .15s ease" }}
+          onMouseEnter={e => e.target.style.color = AC} onMouseLeave={e => e.target.style.color = "var(--text-muted)"}>
+          hello@rezolt.in
+        </a>
+      </div>
+        </div>
+      </div>
+    </div>
+    );
+  }
 
 
-function ArticlesPage({ setPage, user, selectedArticle = 0, setSelectedArticle = () => {} }) {
+
+function ArticlesPage({ setPage, user, selectedArticle = 0, setSelectedArticle = () => { } }) {
   const [activeArticle, setActiveArticle] = useState(selectedArticle || 0);
 
   useEffect(() => {
@@ -3290,7 +3313,7 @@ function AuthPage({ onAuth, setPage }) {
 
           {mode === "signup" && !verifyMsg && (
             <div style={{ background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: 10, padding: "11px 14px", fontSize: 13, color: "#15803D", marginBottom: 18, display: "flex", gap: 8, alignItems: "center" }}>
-              <span>🎁</span> Sign up now and get 1 free job kit instantly
+              <span>🎁</span> Sign up free and get 1 resume kit instantly
             </div>
           )}
 
@@ -3340,7 +3363,7 @@ function Dashboard({ user, history, setPage, onBuyCredits }) {
   const showResumeBranding = (user?.plan ?? "starter") === "starter";
 
   const copy = (id) => {
-    navigator.clipboard.writeText(viewingKit.outputs?.[id] || "").catch(() => {});
+    navigator.clipboard.writeText(viewingKit.outputs?.[id] || "").catch(() => { });
     setCopied(id); setTimeout(() => setCopied(""), 2000);
   };
 
@@ -3462,7 +3485,7 @@ function Dashboard({ user, history, setPage, onBuyCredits }) {
 
       <div className="dash-stats" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18, marginBottom: 36 }}>
         {[
-          { label: "Credits Left", value: user.plan === "unlimited" ? "∞" : user.credits, color: O, sub: user.plan === "unlimited" ? "unlimited plan" : "Career Kits available" },
+          { label: "Credits Left", value: user.plan === "unlimited" ? "∞" : user.credits, color: O, sub: user.plan === "unlimited" ? "unlimited plan" : user.plan === "Free" ? "free resume available" : "Career Kits available" },
           { label: "Kits Generated", value: history.length, color: DARK, sub: "total" },
           { label: "Status", value: user.credits > 0 || user.plan === "unlimited" ? "Active" : "No Credits", color: user.credits > 0 || user.plan === "unlimited" ? G : "#EF4444", sub: user.credits > 0 || user.plan === "unlimited" ? "ready to apply" : "buy credits to continue" },
         ].map(s => (
@@ -3677,7 +3700,7 @@ function NegotiateTab() {
 
 // ─── KIT GENERATOR ────────────────────────────────────────────────────────────
 
-function KitGenerator({ user, setUser, onSaveKit, onUseCredit, setPage, selectedTemplate, setSelectedTemplate }) {
+function KitGenerator({ user, setUser, onSaveKit, onUseCredit, setPage, selectedTemplate, setSelectedTemplate, sessionToken }) {
   const [resume, setResume] = useState("");
   const [jd, setJd] = useState("");
   const [outputs, setOutputs] = useState({});
@@ -3695,6 +3718,7 @@ function KitGenerator({ user, setUser, onSaveKit, onUseCredit, setPage, selected
   const [showSample, setShowSample] = useState(false);
   const [sampleTab, setSampleTab] = useState("resume");
   const [kitFeedback, setKitFeedback] = useState(null);
+  const [subStep, setSubStep] = useState("");
 
   const sampleJdText = `Role: HRBP Manager
 Company: Leading pharma analytics firm
@@ -3738,6 +3762,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
   const resumeQualityColor = !resumeTrimmed ? FAINT : resumeScore >= 4 ? "#15803D" : resumeScore >= 2 ? O : ER;
 
   const accessibleTabs = TABS.filter(t => canAccess(user.plan, t.minPlan));
+  const generatableTabs = accessibleTabs.filter(t => PROMPTS[t.id]);
   const loadingTone = {
     resume: "Curating your experience...",
     cover: "Refining your tone...",
@@ -3759,11 +3784,15 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
   }, [generating]);
 
   const generate = async () => {
+    if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
+      alert("Note: AI generation requires the live server. Please test this on www.rezolt.in");
+    }
     if (!isReady || !hasCredits || generating) return;
     setLoaderStage(0);
     setGenerating(true);
+    setSubStep("1/3: Authenticating...");
     try {
-      try { await supabase.auth.refreshSession(); } catch (e) { console.warn("Session refresh failed:", e); }
+      try { await Promise.race([supabase.auth.refreshSession(), new Promise((_, r) => setTimeout(r, 1500))]); } catch (e) { console.warn("Session refresh failed:", e); }
 
       const safeResume = prepareInputForAi(resume, MAX_RESUME_CHARS, "Resume");
       const safeJd = prepareInputForAi(jd, MAX_JD_CHARS, "Job description");
@@ -3800,18 +3829,23 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
       setStep("output");
       setOutputs({});
       setActiveTab("resume");
-      setLoading(Object.fromEntries(accessibleTabs.map(t => [t.id, true])));
+      setLoading(Object.fromEntries(generatableTabs.map(t => [t.id, true])));
 
+      setSubStep("2/3: Connecting to AI...");
       const results = {};
-      await Promise.all(accessibleTabs.map(async (tab) => {
+      await Promise.all(generatableTabs.map(async (tab) => {
         try {
           const res = await fetchWithAuth("/api/claude-generate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ prompt: PROMPTS[tab.id](safeResume.text, safeJd.text, selectedTemplate) }),
-          });
+          }, sessionToken);
           const data = await res.json().catch(() => ({}));
-          if (!res.ok) throw new Error(data.error || "Generation failed");
+          if (!res.ok) {
+            const e = new Error(data.error || "Generation failed");
+            e.diagnostic = data.diagnostic;
+            throw e;
+          }
           results[tab.id] = data.text || "Something went wrong. Please try again.";
         } catch (err) {
           const msg = err?.message || "";
@@ -3826,6 +3860,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
         setLoading(prev => ({ ...prev, [tab.id]: false }));
       }));
 
+      setSubStep("3/3: Saving results...");
       const successfulCount = Object.values(results).filter(isUsableGeneration).length;
       if (successfulCount > 0) {
         if (user.plan !== "unlimited") {
@@ -3843,7 +3878,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
   };
 
   const copy = (id) => {
-    navigator.clipboard.writeText(outputs[id] || "").catch(() => {});
+    navigator.clipboard.writeText(outputs[id] || "").catch(() => { });
     setCopied(id); setTimeout(() => setCopied(""), 2000);
   };
 
@@ -3927,16 +3962,20 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
     if (loading[tabId] || generating) return;
     setLoading(prev => ({ ...prev, [tabId]: true }));
     try {
-      try { await supabase.auth.refreshSession(); } catch (e) { console.warn(e); }
+      try { await Promise.race([supabase.auth.refreshSession(), new Promise((_, r) => setTimeout(r, 1500))]); } catch (e) { console.warn(e); }
       const safeResume = prepareInputForAi(resume, MAX_RESUME_CHARS, "Resume");
       const safeJd = prepareInputForAi(jd, MAX_JD_CHARS, "Job description");
       const res = await fetchWithAuth("/api/claude-generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: PROMPTS[tabId](safeResume.text, safeJd.text, selectedTemplate) }),
-      });
+      }, sessionToken);
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Generation failed");
+      if (!res.ok) {
+        const e = new Error(data.error || "Generation failed");
+        e.diagnostic = data.diagnostic;
+        throw e;
+      }
       setOutputs(prev => ({ ...prev, [tabId]: data.text || "Something went wrong. Please try again." }));
     } catch (err) {
       const msg = err?.message || "";
@@ -4135,13 +4174,13 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                 <button onClick={() => setShowSample(true)} style={{ background: "none", border: "none", color: AC, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", padding: 0 }}>See a sample output</button>
                 <button className="gen-btn" onClick={generate} disabled={!isReady || !hasCredits || generating}
                   style={{ background: isReady && hasCredits && !generating ? O : "#E2E8F0", color: isReady && hasCredits && !generating ? WHITE : FAINT, border: "none", borderRadius: 12, padding: "13px 30px", fontSize: 15, fontWeight: 700, cursor: isReady && hasCredits && !generating ? "pointer" : "not-allowed", fontFamily: "inherit", boxShadow: isReady && hasCredits && !generating ? "0 8px 22px rgba(3,29,64,0.18)" : "none", transition: "all 0.2s", minWidth: 180 }}>
-                  {generating ? "Curating your experience..." : "Let’s build your kit"}
+                  {generating ? (subStep || "Curating your experience...") : "Let’s build your kit"}
                 </button>
               </div>
             </div>
           </div>
         </>
-    )}
+      )}
 
       {step === "output" && (
         <>
@@ -4187,7 +4226,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                 <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: outputs[t.id] ? MID : FAINT }}>
                   {loading[t.id] ? <div style={{ width: 8, height: 8, borderRadius: "50%", border: `2px solid ${O}`, borderTopColor: "transparent", animation: "spin 0.7s linear infinite" }} />
                     : outputs[t.id] ? <div style={{ width: 8, height: 8, borderRadius: "50%", background: G }} />
-                    : <div style={{ width: 8, height: 8, borderRadius: "50%", background: BORDER }} />}
+                      : <div style={{ width: 8, height: 8, borderRadius: "50%", background: BORDER }} />}
                   <i className={t.iconClass} style={{ fontSize: 12 }} /> {t.label}
                 </div>
               ))}
@@ -4214,7 +4253,8 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
               const planNeeded = t.minPlan === "Pro" ? "Pro" : "Unlimited";
               return (
                 <button key={t.id} className="tab-pill" onClick={() => setActiveTab(t.id)}
-                  style={{ display: "flex", alignItems: "center", gap: 7, padding: "9px 16px", borderRadius: 10,
+                  style={{
+                    display: "flex", alignItems: "center", gap: 7, padding: "9px 16px", borderRadius: 10,
                     border: `1.5px solid ${locked ? BORDER : active ? O : BORDER}`,
                     background: locked ? BG : active ? "var(--accent-soft)" : WHITE,
                     color: locked ? FAINT : active ? O : MUTED,
@@ -4246,7 +4286,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                 {/* Template switcher — only on resume tab */}
                 {activeTab === "resume" && outputs[activeTab] && (
                   <div className="template-switcher" style={{ display: "flex", gap: 4, background: "var(--surface2)", borderRadius: 8, padding: 3, border: "1px solid var(--border)", flexWrap: "wrap" }}>
-                    {["creative","modern","bold","classic","elegant","compact","minimal","tech","warm"].map(t => (
+                    {["creative", "modern", "bold", "classic", "elegant", "compact", "minimal", "tech", "warm"].map(t => (
                       <button key={t} onClick={() => setSelectedTemplate(t)} style={{
                         padding: "3px 9px", borderRadius: 6, fontSize: 10, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", border: "none", transition: "all .15s",
                         background: selectedTemplate === t ? N1 : "transparent",
@@ -4350,7 +4390,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
 
             {/* Tab switcher */}
             <div style={{ display: "flex", gap: 8, marginBottom: 18, flexWrap: "wrap" }}>
-              {[["resume","Resume"],["cover","Cover Letter"],["referral","Referral DM"]].map(([id, label]) => (
+              {[["resume", "Resume"], ["cover", "Cover Letter"], ["referral", "Referral DM"]].map(([id, label]) => (
                 <button key={id} onClick={() => setSampleTab(id)} style={{ padding: "8px 18px", borderRadius: 30, fontSize: 13, fontWeight: sampleTab === id ? 700 : 600, cursor: "pointer", fontFamily: "inherit", border: "none", background: sampleTab === id ? N1 : "var(--surface2)", color: sampleTab === id ? "white" : MUTED }}>
                   {label}
                 </button>
@@ -4374,7 +4414,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                     <div style={{ fontSize: 9, color: "#C9D6E4", marginBottom: 8 }}>Lead TA Specialist</div>
                     <div style={{ fontSize: 8, color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4 }}>Skills</div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-                      {["Power BI","Naukri","HRBP","SQL"].map(s => <span key={s} style={{ background: "rgba(3,29,64,.28)", color: "#C9D6E4", fontSize: 8, padding: "2px 5px", borderRadius: 3 }}>{s}</span>)}
+                      {["Power BI", "Naukri", "HRBP", "SQL"].map(s => <span key={s} style={{ background: "rgba(3,29,64,.28)", color: "#C9D6E4", fontSize: 8, padding: "2px 5px", borderRadius: 3 }}>{s}</span>)}
                     </div>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -4382,7 +4422,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                     <p style={{ fontSize: 10, color: "var(--text-mid)", lineHeight: 1.75, marginBottom: 12 }}>Lead Talent Acquisition Specialist with 4.5 years driving end-to-end recruitment for pharma analytics roles. Targeting the HRBP Manager position — bringing Power BI dashboards, stakeholder management, and MOU partnership execution.</p>
                     <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#02457A", marginBottom: 6 }}>Experience</div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: N1, marginBottom: 2 }}>Lead TA Specialist · Current Company, Bangalore</div>
-                    <div style={{ fontSize: 9, color: "var(--text-mid)", lineHeight: 1.65 }}>• Reduced time-to-hire by 28% across 40+ analytics and engineering roles<br/>• Built Power BI WFH dashboard tracking 150+ headcount across 4 quarters<br/>• Executed MOUs with Dayananda Sagar College and MIT Pune — 12 hires in FY2024</div>
+                    <div style={{ fontSize: 9, color: "var(--text-mid)", lineHeight: 1.65 }}>• Reduced time-to-hire by 28% across 40+ analytics and engineering roles<br />• Built Power BI WFH dashboard tracking 150+ headcount across 4 quarters<br />• Executed MOUs with Dayananda Sagar College and MIT Pune — 12 hires in FY2024</div>
                   </div>
                 </div>
               </div>
@@ -4404,7 +4444,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                   <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85, marginBottom: 12 }}>Dear Hiring Manager,</p>
                   <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85, marginBottom: 12 }}>With 4.5 years building talent pipelines for pharma analytics functions, I bring exactly what the HRBP Manager role requires — domain fluency you cannot onboard, and execution speed your team can rely on from day one.</p>
                   <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85, marginBottom: 12 }}>At my current organisation, I reduced time-to-hire by 28% across 40+ roles and built a Power BI dashboard tracking 150+ headcount decisions — giving me a dual lens on talent strategy and HR data storytelling.</p>
-                  <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85 }}>Warm regards,<br/><strong style={{ color: "var(--text)" }}>Priya Sharma</strong></p>
+                  <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85 }}>Warm regards,<br /><strong style={{ color: "var(--text)" }}>Priya Sharma</strong></p>
                 </div>
               </div>
             )}
@@ -4427,8 +4467,8 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                   <div>
                     <div style={{ display: "inline-block", background: "var(--accent-soft)", color: AC, fontSize: 9, fontWeight: 700, padding: "3px 10px", borderRadius: 4, marginBottom: 10, letterSpacing: ".06em" }}>VERSION 2 · DIRECT MESSAGE</div>
                     <div style={{ background: "var(--bg)", borderLeft: `3px solid ${LB}`, borderRadius: "0 10px 10px 0", padding: "12px 14px", fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85 }}>
-                      Hi Anjali, hope you&apos;re doing well!<br/><br/>
-                      I came across the HRBP Manager opening at [Company] and I&apos;m genuinely excited — it aligns closely with what I&apos;ve been building over 4.5 years in pharma TA and HR analytics.<br/><br/>
+                      Hi Anjali, hope you&apos;re doing well!<br /><br />
+                      I came across the HRBP Manager opening at [Company] and I&apos;m genuinely excited — it aligns closely with what I&apos;ve been building over 4.5 years in pharma TA and HR analytics.<br /><br />
                       Would you be open to referring me or sharing tips on the process? Happy to send my resume directly!
                     </div>
                   </div>
@@ -4834,15 +4874,29 @@ function ContactPage({ setPage, user }) {
 function AdminPage({ user, setPage }) {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [planFilter, setPlanFilter] = useState("all");
 
   useEffect(() => {
-    if (user?.email !== ADMIN_EMAIL) { setPage("dashboard"); return; }
-    fetchAdminStats().then(s => { setStats(s); setLoading(false); });
+    if (!user || user.email?.trim().toLowerCase() !== ADMIN_EMAIL.trim().toLowerCase()) {
+      console.log("Admin blocked. Logged in as:", user?.email, "| Expected:", ADMIN_EMAIL);
+      setPage("dashboard");
+      return;
+    }
+    fetchAdminStats().then(s => {
+      console.log("Admin stats loaded:", s);
+      setStats(s);
+      setLoading(false);
+    }).catch(e => {
+      console.error("Admin stats error:", e);
+      setError(e?.message || "Failed to load admin data. This usually happens if you're not the primary owner or Supabase RLS policies are too restrictive.");
+      setStats({ totalUsers: 0, totalKits: 0, profiles: [] });
+      setLoading(false);
+    });
   }, []);
 
-  if (user?.email !== ADMIN_EMAIL) return null;
+  if (!user || user.email?.trim().toLowerCase() !== ADMIN_EMAIL.trim().toLowerCase()) return null;
 
   const PLAN_COLORS = { starter: FAINT, Pro: O, unlimited: "#7C3AED" };
   const PLAN_BG = { starter: "#F1F5F9", Pro: "#FFF7ED", unlimited: "#F5F3FF" };
@@ -4875,15 +4929,21 @@ function AdminPage({ user, setPage }) {
         <div style={{ display: "flex", justifyContent: "center", padding: "80px 0" }}>
           <div style={{ width: 32, height: 32, borderRadius: "50%", border: `3px solid ${BORDER}`, borderTopColor: O, animation: "spin 0.8s linear infinite" }} />
         </div>
+      ) : error ? (
+        <div style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "24px", color: "#B91C1C", textAlign: "center" }}>
+          <div style={{ fontSize: 24, marginBottom: 12 }}>⚠</div>
+          <div style={{ fontWeight: 700, marginBottom: 4 }}>Admin Loading Failed</div>
+          <div style={{ fontSize: 13, opacity: 0.8 }}>{error}</div>
+        </div>
       ) : (
         <>
           {/* Stats cards */}
           <div className="dash-stats" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 36 }}>
             {[
-              { label: "Total Users",     value: stats.totalUsers,  color: DARK, sub: "signed up" },
-              { label: "Kits Generated",  value: stats.totalKits,   color: O,    sub: "all time" },
-              { label: "Paying Users",    value: filtered.filter(p => p.plan !== "starter").length, color: G, sub: "Pro + unlimited" },
-              { label: "Est. Revenue",    value: `₹${revenue.toLocaleString("en-IN")}`, color: "#7C3AED", sub: "current month" },
+              { label: "Total Users", value: stats.totalUsers, color: DARK, sub: "signed up" },
+              { label: "Kits Generated", value: stats.totalKits, color: O, sub: "all time" },
+              { label: "Paying Users", value: filtered.filter(p => p.plan !== "starter").length, color: G, sub: "Pro + unlimited" },
+              { label: "Est. Revenue", value: `₹${revenue.toLocaleString("en-IN")}`, color: "#7C3AED", sub: "current month" },
             ].map(s => (
               <div key={s.label} style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 12, padding: "20px 22px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: FAINT, marginBottom: 10 }}>{s.label}</div>
@@ -4971,7 +5031,7 @@ function PaymentPage({ user, setUser, setPage }) {
     setCancelling(true);
     try {
       await fetch(`mailto:hello@rezolt.in`);
-    } catch {}
+    } catch { }
     const subject = encodeURIComponent("Cancel Unlimited Subscription — " + user.email);
     const body = encodeURIComponent(
       `Hi Rezolt team,\n\nPlease cancel my Unlimited subscription effective immediately.\n\nAccount email: ${user.email}\nUser ID: ${user.id}\n\nThank you.`
@@ -5159,12 +5219,22 @@ function PaymentPage({ user, setUser, setPage }) {
 
 
 async function fetchAdminStats() {
-  const [{ count: totalUsers }, { count: totalKits }, { data: profiles }] = await Promise.all([
-    supabase.from("profiles").select("*", { count: "exact", head: true }),
-    supabase.from("kits").select("*", { count: "exact", head: true }),
-    supabase.from("profiles").select("id, name, email, plan, credits, created_at").order("created_at", { ascending: false }),
-  ]);
-  return { totalUsers: totalUsers || 0, totalKits: totalKits || 0, profiles: profiles || [] };
+  try {
+    const [usersRes, kitsRes, profilesRes] = await Promise.all([
+      supabase.from("profiles").select("*", { count: "exact", head: true }),
+      supabase.from("kits").select("*", { count: "exact", head: true }),
+      supabase.from("profiles").select("id, name, email, plan, credits, created_at").order("created_at", { ascending: false }),
+    ]);
+    if (profilesRes.error) console.error("Admin profiles error:", profilesRes.error);
+    return {
+      totalUsers: usersRes.count || 0,
+      totalKits: kitsRes.count || 0,
+      profiles: profilesRes.data || [],
+    };
+  } catch (e) {
+    console.error("fetchAdminStats failed:", e);
+    return { totalUsers: 0, totalKits: 0, profiles: [] };
+  }
 }
 
 
@@ -5196,7 +5266,8 @@ async function saveKit(userId, kit) {
 
 async function decrementCredits(userId, currentCredits) {
   const next = Math.max(0, currentCredits - 1);
-  await supabase.from("profiles").update({ credits: next }).eq("id", userId);
+  const { error } = await supabase.from("profiles").update({ credits: next }).eq("id", userId);
+  if (error) console.error("Credit decrement failed:", error);
   return next;
 }
 
@@ -5237,22 +5308,25 @@ function PrivacyPage({ setPage }) {
 function TermsPage({ setPage }) {
   return (
     <div className="fade-in" style={{ background: "var(--bg)", minHeight: "calc(100vh - 85px)" }}>
-      <div style={{ maxWidth: 760, margin: "0 auto", padding: "56px clamp(20px,5vw,40px) 80px" }}>
-        <button onClick={() => setPage("landing")} style={{ background: "none", border: "none", color: MUTED, fontSize: 13, cursor: "pointer", padding: 0, marginBottom: 24, fontFamily: "inherit" }}>Back</button>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: AC, marginBottom: 10 }}>Legal</div>
+      <div style={{ maxWidth: 760, margin: "0 auto", padding: "56px clamp(20px,5vw,40px) 80px", textAlign: "left" }}>
+        <button onClick={() => setPage("landing")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 13, cursor: "pointer", padding: 0, marginBottom: 24, fontFamily: "inherit" }}>Back</button>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 10 }}>Legal</div>
         <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,42px)", fontWeight: 400, color: "var(--text)", marginBottom: 8 }}>Terms of Service</h1>
-        <p style={{ fontSize: 13, color: MUTED, marginBottom: 36 }}>Last updated: April 2026 · By using Rezolt, you agree to these terms.</p>
+        <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 36 }}>Last updated: April 2026 — By using Rezolt, you agree to these terms.</p>
 
         {[
-          { heading: "1. The service", body: "Rezolt is an AI-assisted career kit generation platform. You provide your resume and a job description; our platform uses Anthropic's Claude API to produce tailored career documents including a resume rewrite, cover letter, referral messages, interview preparation, reach-out plans, and salary negotiation notes." },
-          { heading: "2. Accurate information only", body: "You agree that the resume and information you submit to Rezolt represents your genuine professional experience. You must not use Rezolt to fabricate, exaggerate, or misrepresent qualifications, roles, achievements, or credentials. Rezolt is a tool to better communicate real experience — not to manufacture false ones. Misuse for fraudulent applications is a violation of these terms and may constitute fraud under applicable law." },
-          { heading: "3. Credits and payments", body: "Credits are non-refundable once a kit generation has been attempted. The Starter plan includes 1 free kit. Paid credits and plans are non-transferable. Rezolt reserves the right to modify pricing with reasonable notice." },
-          { heading: "4. No refund policy", body: "Due to the nature of AI-generated outputs, we do not offer refunds once generation has been initiated. If you experience a technical failure that genuinely prevents output delivery, contact hello@rezolt.in and we will review on a case-by-case basis." },
-          { heading: "5. Service availability", body: "Rezolt relies on third-party APIs (Anthropic, Supabase, Razorpay) and hosting infrastructure (Vercel). We do not guarantee uninterrupted availability. Scheduled or unscheduled downtime, including third-party outages, does not entitle users to refunds or compensation." },
-          { heading: "6. Intellectual property", body: "You retain ownership of your resume content and generated outputs. Rezolt retains ownership of the platform, prompts, templates, and interface. Generated content may not be used to train competing AI models." },
-          { heading: "7. Acceptable use", body: "You may not use Rezolt to spam recruiters, generate bulk applications without genuine intent, or circumvent any employer's application systems. Accounts found abusing the platform (including use of throwaway emails to cycle free kits) will be suspended." },
-          { heading: "8. Governing law", body: "These terms are governed by the laws of India. Any disputes will be subject to the jurisdiction of courts in India." },
-          { heading: "9. Contact", body: "For any queries related to these terms, write to hello@rezolt.in." },
+          { heading: "1. Acceptance of terms", body: "By accessing or using Rezolt, you agree to be bound by these Terms of Service. If you do not agree to all terms and conditions, you may not access the platform or use our tools." },
+          { heading: "2. The service", body: "Rezolt is an AI-assisted career kit generation platform. You provide your resume and a job description; our platform uses Anthropic's Claude API to produce tailored career documents including a resume rewrite, cover letter, referral messages, interview preparation, reach-out plans, and salary negotiation notes." },
+          { heading: "3. Account registration", body: "You must provide accurate, current, and complete information during registration. You are responsible for all activities that occur under your account. Do not share your credentials." },
+          { heading: "4. Accurate information only", body: "You agree that the resume and information you submit to Rezolt represents your genuine professional experience. You must not use Rezolt to fabricate, exaggerate, or misrepresent qualifications, roles, achievements, or credentials. Misuse for fraudulent applications is a violation of these terms." },
+          { heading: "5. Credits and payments", body: "Credits are non-refundable once a kit generation has been attempted. The Starter plan includes 1 free kit. Paid credits and plans are non-transferable. Rezolt reserves the right to modify pricing with reasonable notice." },
+          { heading: "6. No refund policy", body: "Due to the nature of AI-generated outputs, we do not offer refunds once generation has been initiated. If you experience a technical failure that genuinely prevents output delivery, contact hello@rezolt.in and we will review on a case-by-case basis." },
+          { heading: "7. Service availability", body: "Rezolt relies on third-party APIs (Anthropic, Supabase, Razorpay) and hosting infrastructure (Vercel). We do not guarantee uninterrupted availability. Scheduled or unscheduled downtime does not entitle users to refunds or compensation." },
+          { heading: "8. Intellectual property", body: "You retain ownership of your resume content and generated outputs. Rezolt retains ownership of the platform, prompts, templates, and interface. Generated content may not be used to train competing AI models." },
+          { heading: "9. Acceptable use", body: "You may not use Rezolt to spam recruiters, generate bulk applications without genuine intent, or circumvent any employer's application systems. Accounts found abusing the platform will be suspended." },
+          { heading: "10. Liability limitations", body: "In no event shall Rezolt or its operators be liable for indirect, incidental, special, or consequential damages (including loss of employment opportunities) arising out of the use or inability to use the platform." },
+          { heading: "11. Governing law", body: "These terms are governed by the laws of India. Any disputes will be subject to the exclusive jurisdiction of courts in India." },
+          { heading: "12. Contact", body: "For any queries related to these terms, write to us directly at hello@rezolt.in." },
         ].map(({ heading, body }) => (
           <div key={heading} style={{ marginBottom: 28, borderBottom: "1px solid var(--border)", paddingBottom: 28 }}>
             <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>{heading}</h2>
@@ -5271,7 +5345,7 @@ export default function App() {
   const [booting, setBooting] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState("creative");
   const [selectedArticle, setSelectedArticle] = useState(0);
-
+  const [sessionToken, setSessionToken] = useState(null);
   // Restore session on load
   useEffect(() => {
     let cancelled = false;
@@ -5289,7 +5363,7 @@ export default function App() {
 
         // Ensure login feels instant, then hydrate richer data in background.
         if (!cancelled) {
-          setUser({ id: authUser.id, name: authUser.email.split("@")[0], email: authUser.email, credits: 3, plan: "starter" });
+          setUser({ id: authUser.id, name: authUser.email.split("@")[0], email: authUser.email, credits: 1, plan: "Free" });
           if (nextPage) setPage(nextPage);
         }
 
@@ -5297,7 +5371,7 @@ export default function App() {
         const profile = await fetchProfile(authUser.id);
         const kits = await fetchKits(authUser.id);
         if (cancelled) return;
-        setUser({ id: authUser.id, name: profile?.name || authUser.email.split("@")[0], email: authUser.email, credits: profile?.credits ?? 3, plan: profile?.plan ?? "starter" });
+        setUser({ id: authUser.id, name: profile?.name || authUser.email.split("@")[0], email: authUser.email, credits: profile?.credits ?? 1, plan: profile?.plan ?? "Free" });
         setHistory(kits.map(k => ({ role: k.role, outputs: k.outputs, date: new Date(k.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) })));
       } catch (e) {
         console.error("Session sync failed:", e);
@@ -5308,19 +5382,20 @@ export default function App() {
     const recoveryFlow = typeof window !== "undefined" && /type=recovery/i.test(`${window.location.hash}${window.location.search}`);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.access_token) setSessionToken(session.access_token);
       // Clear boot lock the moment Supabase answers natively
       if (!cancelled) {
         clearTimeout(bootTimeoutId);
         setBooting(false);
       }
 
-      if (event === "SIGNED_OUT") { 
-        setUser(null); 
-        setHistory([]); 
-        setPage("landing"); 
-        return; 
+      if (event === "SIGNED_OUT") {
+        setUser(null);
+        setHistory([]);
+        setPage("landing");
+        return;
       }
-      
+
       if (!session?.user) {
         if (event === "INITIAL_SESSION") setPage(prev => prev === "loading" ? "landing" : prev);
         return;
@@ -5330,16 +5405,17 @@ export default function App() {
         await syncSessionUser(session.user, "reset-password");
         return;
       }
-      
+
       if (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
-        // Only force routing on the first payload if they were cold-booting, otherwise maintain their active tab
-        await syncSessionUser(session.user, event === "INITIAL_SESSION" ? (recoveryFlow ? "reset-password" : "dashboard") : undefined);
+        await syncSessionUser(session.user, (event === "INITIAL_SESSION" || event === "SIGNED_IN") ? (recoveryFlow ? "reset-password" : "dashboard") : undefined);
       }
     });
 
     // Fallback: If no cache exists, INITIAL_SESSION may silently not broadcast fast enough. 
     // This perfectly bypasses the old lock conflict because it fails silently backwards to 'landing'.
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.access_token) setSessionToken(session.access_token);
+      if (session?.access_token) setSessionToken(session.access_token);
       if (!cancelled && !session?.user) setPage(p => p === "loading" ? "landing" : p);
     }).catch(() => {
       if (!cancelled) setPage(p => p === "loading" ? "landing" : p);
@@ -5373,8 +5449,26 @@ export default function App() {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null); setHistory([]); setPage("landing");
+    try {
+      // Forcefully clear local state first so UI feels instant
+      setUser(null);
+      setHistory([]);
+      setPage("landing");
+      setSessionToken(null);
+
+      // Attempt to tell Supabase, but don't hang if the lock is stuck
+      await Promise.race([
+        supabase.auth.signOut(),
+        new Promise(r => setTimeout(r, 1000))
+      ]);
+
+      // Manual cleanup of storage keys just in case
+      Object.keys(localStorage).forEach(key => {
+        if (key.includes("supabase") || key.includes("sb-")) localStorage.removeItem(key);
+      });
+    } catch (e) {
+      console.warn("Sign out encountered an error, but local state was cleared.");
+    }
   };
 
   const handleSaveKit = async (kit) => {
@@ -5386,6 +5480,9 @@ export default function App() {
     if (!user?.id || user.plan === "unlimited") return;
     const next = await decrementCredits(user.id, user.credits);
     setUser(prev => ({ ...prev, credits: next }));
+    // Re-fetch from DB to confirm actual value
+    const profile = await fetchProfile(user.id);
+    if (profile) setUser(prev => ({ ...prev, credits: profile.credits }));
   };
 
   const handleBuyCredits = async () => {
@@ -5399,7 +5496,7 @@ export default function App() {
           <BrandLogo height={132} />
         </div>
         <div style={{ display: "flex", gap: 6 }}>
-          {[0,1,2].map(i => <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: LB, animation: `dotPulse 1.2s ease ${i * 0.18}s infinite` }} />)}
+          {[0, 1, 2].map(i => <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: LB, animation: `dotPulse 1.2s ease ${i * 0.18}s infinite` }} />)}
         </div>
       </div>
     </div>
@@ -5409,19 +5506,19 @@ export default function App() {
     <>
       <style>{GLOBAL_CSS}</style>
       <TopBar page={page} setPage={setPage} user={user} onSignOut={handleSignOut} />
-      {page === "landing"  && <LandingPage setPage={setPage} user={user} selectedTemplate={selectedTemplate} setSelectedTemplate={setSelectedTemplate} setSelectedArticle={setSelectedArticle} />}
+      {page === "landing" && <LandingPage setPage={setPage} user={user} selectedTemplate={selectedTemplate} setSelectedTemplate={setSelectedTemplate} setSelectedArticle={setSelectedArticle} />}
       {page === "articles" && <ArticlesPage setPage={setPage} user={user} selectedArticle={selectedArticle} setSelectedArticle={setSelectedArticle} />}
-      {page === "faq"      && <FAQPage setPage={setPage} user={user} />}
-      {page === "contact"  && <ContactPage setPage={setPage} user={user} />}
-      {page === "privacy"  && <PrivacyPage setPage={setPage} />}
-      {page === "terms"    && <TermsPage setPage={setPage} />}
-      {page === "auth"     && <AuthPage onAuth={handleAuth} setPage={setPage} />}
-      {page === "forgot"   && <ForgotPasswordPage setPage={setPage} />}
+      {page === "faq" && <FAQPage setPage={setPage} user={user} />}
+      {page === "contact" && <ContactPage setPage={setPage} user={user} />}
+      {page === "privacy" && <PrivacyPage setPage={setPage} />}
+      {page === "terms" && <TermsPage setPage={setPage} />}
+      {page === "auth" && <AuthPage onAuth={handleAuth} setPage={setPage} />}
+      {page === "forgot" && <ForgotPasswordPage setPage={setPage} />}
       {page === "reset-password" && <ResetPasswordPage setPage={setPage} />}
-      {page === "admin"    && user && <AdminPage user={user} setPage={setPage} />}
-      {page === "payment"  && user && <PaymentPage user={user} setUser={setUser} setPage={setPage} />}
+      {page === "admin" && user && <AdminPage user={user} setPage={setPage} />}
+      {page === "payment" && (user ? <PaymentPage user={user} setUser={setUser} setPage={setPage} /> : <AuthPage onAuth={handleAuth} setPage={setPage} />)}
       {page === "dashboard" && user && <Dashboard user={user} history={history} setPage={setPage} onBuyCredits={handleBuyCredits} />}
-      {page === "generate" && user && <KitGenerator user={user} setUser={setUser} onSaveKit={handleSaveKit} onUseCredit={handleUseCredit} setPage={setPage} selectedTemplate={selectedTemplate} setSelectedTemplate={setSelectedTemplate} />}
+      {page === "generate" && user && <KitGenerator sessionToken={sessionToken} user={user} setUser={setUser} onSaveKit={handleSaveKit} onUseCredit={handleUseCredit} setPage={setPage} selectedTemplate={selectedTemplate} setSelectedTemplate={setSelectedTemplate} />}
       {(page === "dashboard" || page === "generate" || page === "admin" || page === "payment") && !user && <AuthPage onAuth={handleAuth} setPage={setPage} />}
 
       {/* Mobile bottom nav — logged in users only */}

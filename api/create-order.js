@@ -7,12 +7,13 @@ const allowedOrigins = new Set([
   "https://www.rezolt.in",
   "https://rezolt.in",
   "http://localhost:5173",
+  "http://localhost:5179",
   "http://127.0.0.1:5173",
 ]);
 
 const PLAN_CATALOG = {
   starter_kit: { amountInr: 99, label: "Starter" },
-  hustler_kit: { amountInr: 299, label: "Hustler" },
+  Pro_kit: { amountInr: 299, label: "Pro" },
   unlimited_monthly: { amountInr: 599, label: "Unlimited" },
 };
 

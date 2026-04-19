@@ -1,0 +1,31 @@
+﻿
+function TermsPage({ setPage }) {
+  return (
+    <div className="fade-in" style={{ background: "var(--bg)", minHeight: "calc(100vh - 85px)" }}>
+      <div style={{ maxWidth: 760, margin: "0 auto", padding: "56px clamp(20px,5vw,40px) 80px" }}>
+        <button onClick={() => setPage("landing")} style={{ background: "none", border: "none", color: MUTED, fontSize: 13, cursor: "pointer", padding: 0, marginBottom: 24, fontFamily: "inherit" }}>Back</button>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: AC, marginBottom: 10 }}>Legal</div>
+        <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,42px)", fontWeight: 400, color: "var(--text)", marginBottom: 8 }}>Terms of Service</h1>
+        <p style={{ fontSize: 13, color: MUTED, marginBottom: 36 }}>Last updated: April 2026 Â· By using Rezolt, you agree to these terms.</p>
+
+        {[
+          { heading: "1. The service", body: "Rezolt is an AI-assisted career kit generation platform. You provide your resume and a job description; our platform uses Anthropic's Claude API to produce tailored career documents including a resume rewrite, cover letter, referral messages, interview preparation, reach-out plans, and salary negotiation notes." },
+          { heading: "2. Accurate information only", body: "You agree that the resume and information you submit to Rezolt represents your genuine professional experience. You must not use Rezolt to fabricate, exaggerate, or misrepresent qualifications, roles, achievements, or credentials. Rezolt is a tool to better communicate real experience â€” not to manufacture false ones. Misuse for fraudulent applications is a violation of these terms and may constitute fraud under applicable law." },
+          { heading: "3. Credits and payments", body: "Credits are non-refundable once a kit generation has been attempted. The Starter plan includes 1 free kit. Paid credits and plans are non-transferable. Rezolt reserves the right to modify pricing with reasonable notice." },
+          { heading: "4. No refund policy", body: "Due to the nature of AI-generated outputs, we do not offer refunds once generation has been initiated. If you experience a technical failure that genuinely prevents output delivery, contact hello@rezolt.in and we will review on a case-by-case basis." },
+          { heading: "5. Service availability", body: "Rezolt relies on third-party APIs (Anthropic, Supabase, Razorpay) and hosting infrastructure (Vercel). We do not guarantee uninterrupted availability. Scheduled or unscheduled downtime, including third-party outages, does not entitle users to refunds or compensation." },
+          { heading: "6. Intellectual property", body: "You retain ownership of your resume content and generated outputs. Rezolt retains ownership of the platform, prompts, templates, and interface. Generated content may not be used to train competing AI models." },
+          { heading: "7. Acceptable use", body: "You may not use Rezolt to spam recruiters, generate bulk applications without genuine intent, or circumvent any employer's application systems. Accounts found abusing the platform (including use of throwaway emails to cycle free kits) will be suspended." },
+          { heading: "8. Governing law", body: "These terms are governed by the laws of India. Any disputes will be subject to the jurisdiction of courts in India." },
+          { heading: "9. Contact", body: "For any queries related to these terms, write to hello@rezolt.in." },
+        ].map(({ heading, body }) => (
+          <div key={heading} style={{ marginBottom: 28, borderBottom: "1px solid var(--border)", paddingBottom: 28 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", marginBottom: 10 }}>{heading}</h2>
+            <p style={{ fontSize: 14, color: "var(--text-mid)", lineHeight: 1.8 }}>{body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+

@@ -7,7 +7,7 @@ const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const PLAN_PRICING_PAISE = {
   starter_kit: 9900,
-  hustler_kit: 29900,
+  Pro_kit: 29900,
   unlimited_monthly: 59900,
 };
 
@@ -22,7 +22,7 @@ async function getRawBody(req) {
 
 async function updateProfileWithRetry(userId, plan, maxAttempts = 4) {
   const supabase = createClient(supabaseUrl, serviceRoleKey);
-  const creditMap = { starter_kit: 1, hustler_kit: 5 };
+  const creditMap = { starter_kit: 1, Pro_kit: 5 };
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
@@ -38,8 +38,8 @@ async function updateProfileWithRetry(userId, plan, maxAttempts = 4) {
       const newCredits = plan === "unlimited_monthly" ? 9999 : currentCredits + (creditMap[plan] ?? 0);
       const newPlan = plan === "unlimited_monthly"
         ? "unlimited"
-        : plan === "hustler_kit"
-          ? (profile?.plan === "unlimited" ? "unlimited" : "hustler")
+        : plan === "Pro_kit"
+          ? (profile?.plan === "unlimited" ? "unlimited" : "Pro")
           : (profile?.plan ?? "starter");
 
       const { error: updateErr } = await supabase
