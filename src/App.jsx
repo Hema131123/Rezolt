@@ -1936,7 +1936,11 @@ function TopBar({ page, setPage, user, onSignOut }) {
     ? ""
     : user?.plan === "unlimited"
       ? "Unlimited kits"
-      : `${creditCount} ${user?.plan === "Free" ? "free resume" : "kit"}${creditCount === 1 ? "" : "s"} left`;
+      : creditCount === 0
+        ? "No credits left"
+        : user?.plan === "Free"
+          ? `${creditCount} free resume left`
+          : `${creditCount} kit${creditCount === 1 ? "" : "s"} left`;
   const creditTone = !user ? AC : user?.plan === "unlimited" || creditCount > 0 ? AC : ER;
 
   return (
@@ -2497,186 +2501,186 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
 
       {/* ── SAMPLE OUTPUT ── */}
       <div style={{ background: "var(--grad-subtle)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
-    <div className="section-pad" style={{ padding: "80px clamp(20px,5vw,80px)" }}>
-      <div style={{ textAlign: "center", marginBottom: 44 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: AC, marginBottom: 14 }}>See it in action</div>
-        <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>See what a stronger application can look like</h2>
-        <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 460, margin: "10px auto 0", lineHeight: 1.7 }}>Real sample outputs based on a genuine resume and role brief — designed to feel clearer, sharper, and more recruiter-ready.</p>
-      </div>
+        <div className="section-pad" style={{ padding: "80px clamp(20px,5vw,80px)" }}>
+          <div style={{ textAlign: "center", marginBottom: 44 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: AC, marginBottom: 14 }}>See it in action</div>
+            <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>See what a stronger application can look like</h2>
+            <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 460, margin: "10px auto 0", lineHeight: 1.7 }}>Real sample outputs based on a genuine resume and role brief — designed to feel clearer, sharper, and more recruiter-ready.</p>
+          </div>
 
-      {/* Sample tabs */}
-      <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 14, flexWrap: "wrap" }}>
-        {[["resume", "Resume"], ["cover", "Cover Letter"], ["referral", "Referral DM"]].map(([id, label]) => (
-          <button key={id} className="tab-pill pill-btn" onClick={() => setSampleTab(id)} style={{
-            padding: "9px 20px", borderRadius: 30, fontSize: 13, fontWeight: sampleTab === id ? 700 : 600, cursor: "pointer", fontFamily: "inherit", border: "none", transition: "all .18s ease",
-            background: sampleTab === id ? N1 : "var(--surface)",
-            color: sampleTab === id ? "white" : "var(--text-muted)",
-            boxShadow: sampleTab === id ? "var(--shadow-md)" : "none",
-          }}>{label}</button>
-        ))}
-      </div>
+          {/* Sample tabs */}
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 14, flexWrap: "wrap" }}>
+            {[["resume", "Resume"], ["cover", "Cover Letter"], ["referral", "Referral DM"]].map(([id, label]) => (
+              <button key={id} className="tab-pill pill-btn" onClick={() => setSampleTab(id)} style={{
+                padding: "9px 20px", borderRadius: 30, fontSize: 13, fontWeight: sampleTab === id ? 700 : 600, cursor: "pointer", fontFamily: "inherit", border: "none", transition: "all .18s ease",
+                background: sampleTab === id ? N1 : "var(--surface)",
+                color: sampleTab === id ? "white" : "var(--text-muted)",
+                boxShadow: sampleTab === id ? "var(--shadow-md)" : "none",
+              }}>{label}</button>
+            ))}
+          </div>
 
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
-        <button onClick={() => setSampleModalOpen(true)} style={{ background: WHITE, color: O, border: `1px solid ${BORDER}`, borderRadius: 999, padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)" }}>
-          View sample kit in detail
-        </button>
-      </div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
+            <button onClick={() => setSampleModalOpen(true)} style={{ background: WHITE, color: O, border: `1px solid ${BORDER}`, borderRadius: 999, padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)" }}>
+              View sample kit in detail
+            </button>
+          </div>
 
-      <div style={{ maxWidth: 700, margin: "0 auto" }}>
-        {/* Resume Sample */}
-        {sampleTab === "resume" && (
-          <div style={{ background: "var(--surface)", borderRadius: 20, overflow: "hidden", boxShadow: "var(--shadow-lg)", border: "1px solid var(--border)", animation: "fadeUp .3s ease" }}>
-            <div style={{ background: "linear-gradient(135deg,#001B48,#02457A)", padding: "14px 22px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#22C55E" }} />
-                <span style={{ color: "rgba(255,255,255,.65)", fontSize: 12 }}>resume_rewrite.pdf</span>
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <span style={{ background: "rgba(34,197,94,.2)", color: "#86efac", fontSize: 10, fontWeight: 700, padding: "2px 10px", borderRadius: 10 }}>ATS 94/100</span>
-                <span style={{ background: "rgba(255,255,255,.1)", color: "#C9D6E4", fontSize: 10, fontWeight: 600, padding: "2px 10px", borderRadius: 10 }}>Tailored</span>
-              </div>
-            </div>
-            <div style={{ padding: "24px 28px" }}>
-              <div style={{ display: "flex", gap: 20 }}>
-                <div style={{ width: 155, flexShrink: 0, background: "linear-gradient(180deg,#001B48,#02457A)", borderRadius: 10, padding: "16px 12px", color: "white" }}>
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#02457A", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, marginBottom: 10 }}>P</div>
-                  <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 2 }}>Priya Sharma</div>
-                  <div style={{ fontSize: 9, color: "#C9D6E4", marginBottom: 10 }}>Lead TA Specialist</div>
-                  <div style={{ fontSize: 8, color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4 }}>Contact</div>
-                  <div style={{ fontSize: 9, color: "rgba(255,255,255,.65)", marginBottom: 2 }}>priya@email.com</div>
-                  <div style={{ fontSize: 9, color: "rgba(255,255,255,.65)", marginBottom: 10 }}>Bangalore, KA</div>
-                  <div style={{ fontSize: 8, color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4 }}>Skills</div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-                    {["Power BI", "Naukri", "HRBP", "SQL"].map(s => <span key={s} style={{ background: "rgba(3,29,64,.28)", color: "#C9D6E4", fontSize: 8, padding: "2px 5px", borderRadius: 3 }}>{s}</span>)}
+          <div style={{ maxWidth: 700, margin: "0 auto" }}>
+            {/* Resume Sample */}
+            {sampleTab === "resume" && (
+              <div style={{ background: "var(--surface)", borderRadius: 20, overflow: "hidden", boxShadow: "var(--shadow-lg)", border: "1px solid var(--border)", animation: "fadeUp .3s ease" }}>
+                <div style={{ background: "linear-gradient(135deg,#001B48,#02457A)", padding: "14px 22px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#22C55E" }} />
+                    <span style={{ color: "rgba(255,255,255,.65)", fontSize: 12 }}>resume_rewrite.pdf</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <span style={{ background: "rgba(34,197,94,.2)", color: "#86efac", fontSize: 10, fontWeight: 700, padding: "2px 10px", borderRadius: 10 }}>ATS 94/100</span>
+                    <span style={{ background: "rgba(255,255,255,.1)", color: "#C9D6E4", fontSize: 10, fontWeight: 600, padding: "2px 10px", borderRadius: 10 }}>Tailored</span>
                   </div>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#02457A", marginBottom: 5 }}>Professional Summary</div>
-                  <p style={{ fontSize: 10, color: "var(--text-mid)", lineHeight: 1.75, marginBottom: 14 }}>Lead Talent Acquisition Specialist with 4.5 years driving end-to-end recruitment for pharma analytics and commercial intelligence roles. Targeting the HRBP Manager position at the target company, bringing expertise in Power BI dashboards, stakeholder management, and MOU partnership execution.</p>
-                  <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#02457A", marginBottom: 7 }}>Experience</div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: N1 }}>Lead TA Specialist</span>
-                    <span style={{ fontSize: 9, color: "#C9D6E4" }}>2020 – Present</span>
-                  </div>
-                  <div style={{ fontSize: 10, color: "#02457A", marginBottom: 4 }}>Current Company · Bangalore</div>
-                  <div style={{ fontSize: 9, color: "var(--text-mid)", lineHeight: 1.65 }}>• Reduced time-to-hire by 28% across 40+ analytics and engineering roles<br />• Built Power BI WFH dashboard tracking 150+ headcount across 4 quarters<br />• Executed MOUs with Dayananda Sagar College and MIT Pune — 12 hires in FY2024</div>
-                </div>
-              </div>
-              <div style={{ marginTop: 16, padding: "10px 14px", background: "var(--bg)", borderRadius: 8, display: "flex", alignItems: "center", gap: 8 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={AC} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12,6 12,12 16,14" /></svg>
-                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Generated in <strong style={{ color: N1 }}>58 seconds</strong> · Tailored to the exact job description</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Cover Letter Sample */}
-        {sampleTab === "cover" && (
-          <div style={{ background: "var(--surface)", borderRadius: 20, overflow: "hidden", boxShadow: "var(--shadow-lg)", border: "1px solid var(--border)", animation: "fadeUp .3s ease" }}>
-            <div style={{ background: "linear-gradient(135deg,#02457A,#02457A)", padding: "14px 22px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#22C55E" }} />
-                <span style={{ color: "rgba(255,255,255,.65)", fontSize: 12 }}>cover_letter.pdf</span>
-              </div>
-              <span style={{ background: "rgba(255,255,255,.1)", color: "#D6E8EE", fontSize: 10, fontWeight: 600, padding: "2px 10px", borderRadius: 10 }}>Tailored</span>
-            </div>
-            <div style={{ padding: "32px 36px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 22 }}>
-                <div><div style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>Priya Sharma</div><div style={{ fontSize: 11, color: "var(--text-muted)" }}>priya@email.com · Bangalore, KA</div></div>
-                <div style={{ fontSize: 11, color: "var(--text-faint)" }}>5 April 2026</div>
-              </div>
-              <div style={{ width: 36, height: 3, background: "var(--grad)", borderRadius: 2, marginBottom: 18 }} />
-              <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85, marginBottom: 14 }}>Dear Hiring Manager,</p>
-              <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85, marginBottom: 14 }}>With 4.5 years building talent pipelines for pharma analytics functions, I bring exactly what the HRBP Manager role requires — domain fluency you cannot onboard, and execution speed your team can rely on from day one.</p>
-              <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85, marginBottom: 14 }}>At my current organisation, I reduced time-to-hire by 28% across 40+ analytics and engineering roles by restructuring sourcing channels. I also built a Power BI WFH dashboard covering 150+ headcount — giving me a dual lens on both talent strategy and HR data storytelling.</p>
-              <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85, marginBottom: 20 }}>I would welcome a conversation about how my background aligns with your team&apos;s priorities. Available for an interview at your convenience.</p>
-              <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85 }}>Warm regards,<br /><strong style={{ color: "var(--text)" }}>Priya Sharma</strong></p>
-            </div>
-          </div>
-        )}
-
-        {/* Referral DM Sample */}
-        {sampleTab === "referral" && (
-          <div style={{ background: "var(--surface)", borderRadius: 20, overflow: "hidden", boxShadow: "var(--shadow-lg)", border: "1px solid var(--border)", animation: "fadeUp .3s ease" }}>
-            <div style={{ background: "linear-gradient(135deg,#031D40,#08284F)", padding: "14px 22px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#22C55E" }} />
-                <span style={{ color: "rgba(0,27,72,.7)", fontSize: 12 }}>referral_messages.txt</span>
-              </div>
-              <span style={{ background: "rgba(0,27,72,.12)", color: N1, fontSize: 10, fontWeight: 700, padding: "2px 10px", borderRadius: 10 }}>Outreach-ready</span>
-            </div>
-            <div className="output-pad" style={{ padding: "28px 32px" }}>
-              <div style={{ marginBottom: 22 }}>
-                <div style={{ display: "inline-block", background: "var(--accent-soft)", color: AC, fontSize: 9, fontWeight: 700, padding: "3px 10px", borderRadius: 4, marginBottom: 12, letterSpacing: ".06em" }}>VERSION 1 · CONNECTION REQUEST</div>
-                <div style={{ background: "var(--bg)", borderLeft: `3px solid ${AC}`, borderRadius: "0 10px 10px 0", padding: "14px 16px", fontSize: 13, color: "var(--text-mid)", lineHeight: 1.75 }}>
-                  Hi Anjali, I noticed you&apos;re at [Company] — I&apos;m applying for the HRBP Manager role and have 4.5 years in pharma TA. Would love to connect!
-                </div>
-              </div>
-              <div style={{ height: 1, background: "var(--border)", marginBottom: 22 }} />
-              <div>
-                <div style={{ display: "inline-block", background: "var(--accent-soft)", color: AC, fontSize: 9, fontWeight: 700, padding: "3px 10px", borderRadius: 4, marginBottom: 12, letterSpacing: ".06em" }}>VERSION 2 · DIRECT MESSAGE</div>
-                <div style={{ background: "var(--bg)", borderLeft: `3px solid ${LB}`, borderRadius: "0 10px 10px 0", padding: "14px 16px", fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85 }}>
-                  Hi Anjali, hope you&apos;re doing well!<br /><br />
-                  I came across the HRBP Manager opening at [Company] and I&apos;m genuinely excited — it aligns closely with what I&apos;ve been building over 4.5 years in pharma TA and HR analytics.<br /><br />
-                  Would you be open to referring me or sharing tips on the process? Happy to send my resume directly. Really appreciate it!
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div style={{ textAlign: "center", marginTop: 24 }}>
-        <button className="btn-primary" onClick={() => setPage(user ? "generate" : "auth")} style={{ background: "var(--grad)", color: "white", border: "none", borderRadius: 12, padding: "13px 30px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--shadow-accent)" }}>
-          {user ? "Generate yours now" : "Get yours free, no card needed"}
-        </button>
-      </div>
-
-      {sampleModalOpen && (
-        <>
-          <div onClick={() => setSampleModalOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(3,29,64,0.45)", zIndex: 300 }} />
-          <div className="modal-enter" style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "min(760px, calc(100vw - 24px))", maxHeight: "85vh", overflowY: "auto", background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 24, padding: 22, boxShadow: "var(--shadow-lg)", zIndex: 301 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 18 }}>
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: AC, marginBottom: 8 }}>Sample career kit</div>
-                <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, color: DARK, marginBottom: 4 }}>{sampleModalContent[sampleTab].title}</div>
-                <div style={{ fontSize: 13, color: MUTED }}>{sampleModalContent[sampleTab].subtitle}</div>
-              </div>
-              <button onClick={() => setSampleModalOpen(false)} style={{ background: "var(--surface2)", border: `1px solid ${BORDER}`, borderRadius: 10, width: 34, height: 34, cursor: "pointer", color: MUTED, fontSize: 16 }}><i className="fi fi-sr-cross-small" /></button>
-            </div>
-            <div className="two-col-md" style={{ display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 14 }}>
-              <div style={{ background: "var(--surface2)", border: `1px solid ${BORDER}`, borderRadius: 18, padding: "16px 18px" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: AC, marginBottom: 10 }}>What it sounds like</div>
-                {sampleModalContent[sampleTab].excerpt.map((line, index) => (
-                  <p key={index} style={{ fontSize: 13, color: MID, lineHeight: 1.8, marginBottom: index === sampleModalContent[sampleTab].excerpt.length - 1 ? 0 : 12 }}>{line}</p>
-                ))}
-              </div>
-              <div style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 18, padding: "16px 18px" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: AC, marginBottom: 10 }}>Why it works</div>
-                <div style={{ display: "grid", gap: 8 }}>
-                  {sampleModalContent[sampleTab].bullets.map((item) => (
-                    <div key={item} style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 13, color: MID, lineHeight: 1.7 }}>
-                      <span style={{ color: AC, fontWeight: 700 }}>✓</span>
-                      <span>{item}</span>
+                <div style={{ padding: "24px 28px" }}>
+                  <div style={{ display: "flex", gap: 20 }}>
+                    <div style={{ width: 155, flexShrink: 0, background: "linear-gradient(180deg,#001B48,#02457A)", borderRadius: 10, padding: "16px 12px", color: "white" }}>
+                      <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#02457A", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, marginBottom: 10 }}>P</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 2 }}>Priya Sharma</div>
+                      <div style={{ fontSize: 9, color: "#C9D6E4", marginBottom: 10 }}>Lead TA Specialist</div>
+                      <div style={{ fontSize: 8, color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4 }}>Contact</div>
+                      <div style={{ fontSize: 9, color: "rgba(255,255,255,.65)", marginBottom: 2 }}>priya@email.com</div>
+                      <div style={{ fontSize: 9, color: "rgba(255,255,255,.65)", marginBottom: 10 }}>Bangalore, KA</div>
+                      <div style={{ fontSize: 8, color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4 }}>Skills</div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                        {["Power BI", "Naukri", "HRBP", "SQL"].map(s => <span key={s} style={{ background: "rgba(3,29,64,.28)", color: "#C9D6E4", fontSize: 8, padding: "2px 5px", borderRadius: 3 }}>{s}</span>)}
+                      </div>
                     </div>
-                  ))}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#02457A", marginBottom: 5 }}>Professional Summary</div>
+                      <p style={{ fontSize: 10, color: "var(--text-mid)", lineHeight: 1.75, marginBottom: 14 }}>Lead Talent Acquisition Specialist with 4.5 years driving end-to-end recruitment for pharma analytics and commercial intelligence roles. Targeting the HRBP Manager position at the target company, bringing expertise in Power BI dashboards, stakeholder management, and MOU partnership execution.</p>
+                      <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#02457A", marginBottom: 7 }}>Experience</div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: N1 }}>Lead TA Specialist</span>
+                        <span style={{ fontSize: 9, color: "#C9D6E4" }}>2020 – Present</span>
+                      </div>
+                      <div style={{ fontSize: 10, color: "#02457A", marginBottom: 4 }}>Current Company · Bangalore</div>
+                      <div style={{ fontSize: 9, color: "var(--text-mid)", lineHeight: 1.65 }}>• Reduced time-to-hire by 28% across 40+ analytics and engineering roles<br />• Built Power BI WFH dashboard tracking 150+ headcount across 4 quarters<br />• Executed MOUs with Dayananda Sagar College and MIT Pune — 12 hires in FY2024</div>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: 16, padding: "10px 14px", background: "var(--bg)", borderRadius: 8, display: "flex", alignItems: "center", gap: 8 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={AC} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12,6 12,12 16,14" /></svg>
+                    <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Generated in <strong style={{ color: N1 }}>58 seconds</strong> · Tailored to the exact job description</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 18, flexWrap: "wrap" }}>
-              <button onClick={() => setSampleModalOpen(false)} style={{ background: WHITE, color: MUTED, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "11px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Close</button>
-              <button onClick={() => { setSampleModalOpen(false); setPage(user ? "generate" : "auth"); }} style={{ background: "var(--grad)", color: WHITE, border: "none", borderRadius: 10, padding: "11px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-                Try this with my role
-              </button>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  </div>
+            )}
 
-    {/* ── WHAT YOU GET ── */}
-    <div className="section-pad" style={{ padding: "80px clamp(20px,5vw,80px)", background: "var(--bg)" }}>
+            {/* Cover Letter Sample */}
+            {sampleTab === "cover" && (
+              <div style={{ background: "var(--surface)", borderRadius: 20, overflow: "hidden", boxShadow: "var(--shadow-lg)", border: "1px solid var(--border)", animation: "fadeUp .3s ease" }}>
+                <div style={{ background: "linear-gradient(135deg,#02457A,#02457A)", padding: "14px 22px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#22C55E" }} />
+                    <span style={{ color: "rgba(255,255,255,.65)", fontSize: 12 }}>cover_letter.pdf</span>
+                  </div>
+                  <span style={{ background: "rgba(255,255,255,.1)", color: "#D6E8EE", fontSize: 10, fontWeight: 600, padding: "2px 10px", borderRadius: 10 }}>Tailored</span>
+                </div>
+                <div style={{ padding: "32px 36px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 22 }}>
+                    <div><div style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>Priya Sharma</div><div style={{ fontSize: 11, color: "var(--text-muted)" }}>priya@email.com · Bangalore, KA</div></div>
+                    <div style={{ fontSize: 11, color: "var(--text-faint)" }}>5 April 2026</div>
+                  </div>
+                  <div style={{ width: 36, height: 3, background: "var(--grad)", borderRadius: 2, marginBottom: 18 }} />
+                  <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85, marginBottom: 14 }}>Dear Hiring Manager,</p>
+                  <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85, marginBottom: 14 }}>With 4.5 years building talent pipelines for pharma analytics functions, I bring exactly what the HRBP Manager role requires — domain fluency you cannot onboard, and execution speed your team can rely on from day one.</p>
+                  <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85, marginBottom: 14 }}>At my current organisation, I reduced time-to-hire by 28% across 40+ analytics and engineering roles by restructuring sourcing channels. I also built a Power BI WFH dashboard covering 150+ headcount — giving me a dual lens on both talent strategy and HR data storytelling.</p>
+                  <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85, marginBottom: 20 }}>I would welcome a conversation about how my background aligns with your team&apos;s priorities. Available for an interview at your convenience.</p>
+                  <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85 }}>Warm regards,<br /><strong style={{ color: "var(--text)" }}>Priya Sharma</strong></p>
+                </div>
+              </div>
+            )}
+
+            {/* Referral DM Sample */}
+            {sampleTab === "referral" && (
+              <div style={{ background: "var(--surface)", borderRadius: 20, overflow: "hidden", boxShadow: "var(--shadow-lg)", border: "1px solid var(--border)", animation: "fadeUp .3s ease" }}>
+                <div style={{ background: "linear-gradient(135deg,#031D40,#08284F)", padding: "14px 22px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#22C55E" }} />
+                    <span style={{ color: "rgba(0,27,72,.7)", fontSize: 12 }}>referral_messages.txt</span>
+                  </div>
+                  <span style={{ background: "rgba(0,27,72,.12)", color: N1, fontSize: 10, fontWeight: 700, padding: "2px 10px", borderRadius: 10 }}>Outreach-ready</span>
+                </div>
+                <div className="output-pad" style={{ padding: "28px 32px" }}>
+                  <div style={{ marginBottom: 22 }}>
+                    <div style={{ display: "inline-block", background: "var(--accent-soft)", color: AC, fontSize: 9, fontWeight: 700, padding: "3px 10px", borderRadius: 4, marginBottom: 12, letterSpacing: ".06em" }}>VERSION 1 · CONNECTION REQUEST</div>
+                    <div style={{ background: "var(--bg)", borderLeft: `3px solid ${AC}`, borderRadius: "0 10px 10px 0", padding: "14px 16px", fontSize: 13, color: "var(--text-mid)", lineHeight: 1.75 }}>
+                      Hi Anjali, I noticed you&apos;re at [Company] — I&apos;m applying for the HRBP Manager role and have 4.5 years in pharma TA. Would love to connect!
+                    </div>
+                  </div>
+                  <div style={{ height: 1, background: "var(--border)", marginBottom: 22 }} />
+                  <div>
+                    <div style={{ display: "inline-block", background: "var(--accent-soft)", color: AC, fontSize: 9, fontWeight: 700, padding: "3px 10px", borderRadius: 4, marginBottom: 12, letterSpacing: ".06em" }}>VERSION 2 · DIRECT MESSAGE</div>
+                    <div style={{ background: "var(--bg)", borderLeft: `3px solid ${LB}`, borderRadius: "0 10px 10px 0", padding: "14px 16px", fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85 }}>
+                      Hi Anjali, hope you&apos;re doing well!<br /><br />
+                      I came across the HRBP Manager opening at [Company] and I&apos;m genuinely excited — it aligns closely with what I&apos;ve been building over 4.5 years in pharma TA and HR analytics.<br /><br />
+                      Would you be open to referring me or sharing tips on the process? Happy to send my resume directly. Really appreciate it!
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ textAlign: "center", marginTop: 24 }}>
+            <button className="btn-primary" onClick={() => setPage(user ? "generate" : "auth")} style={{ background: "var(--grad)", color: "white", border: "none", borderRadius: 12, padding: "13px 30px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--shadow-accent)" }}>
+              {user ? "Generate yours now" : "Get yours free, no card needed"}
+            </button>
+          </div>
+
+          {sampleModalOpen && (
+            <>
+              <div onClick={() => setSampleModalOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(3,29,64,0.45)", zIndex: 300 }} />
+              <div className="modal-enter" style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "min(760px, calc(100vw - 24px))", maxHeight: "85vh", overflowY: "auto", background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 24, padding: 22, boxShadow: "var(--shadow-lg)", zIndex: 301 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 18 }}>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: AC, marginBottom: 8 }}>Sample career kit</div>
+                    <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, color: DARK, marginBottom: 4 }}>{sampleModalContent[sampleTab].title}</div>
+                    <div style={{ fontSize: 13, color: MUTED }}>{sampleModalContent[sampleTab].subtitle}</div>
+                  </div>
+                  <button onClick={() => setSampleModalOpen(false)} style={{ background: "var(--surface2)", border: `1px solid ${BORDER}`, borderRadius: 10, width: 34, height: 34, cursor: "pointer", color: MUTED, fontSize: 16 }}><i className="fi fi-sr-cross-small" /></button>
+                </div>
+                <div className="two-col-md" style={{ display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 14 }}>
+                  <div style={{ background: "var(--surface2)", border: `1px solid ${BORDER}`, borderRadius: 18, padding: "16px 18px" }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: AC, marginBottom: 10 }}>What it sounds like</div>
+                    {sampleModalContent[sampleTab].excerpt.map((line, index) => (
+                      <p key={index} style={{ fontSize: 13, color: MID, lineHeight: 1.8, marginBottom: index === sampleModalContent[sampleTab].excerpt.length - 1 ? 0 : 12 }}>{line}</p>
+                    ))}
+                  </div>
+                  <div style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 18, padding: "16px 18px" }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: AC, marginBottom: 10 }}>Why it works</div>
+                    <div style={{ display: "grid", gap: 8 }}>
+                      {sampleModalContent[sampleTab].bullets.map((item) => (
+                        <div key={item} style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 13, color: MID, lineHeight: 1.7 }}>
+                          <span style={{ color: AC, fontWeight: 700 }}>✓</span>
+                          <span>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 18, flexWrap: "wrap" }}>
+                  <button onClick={() => setSampleModalOpen(false)} style={{ background: WHITE, color: MUTED, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "11px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Close</button>
+                  <button onClick={() => { setSampleModalOpen(false); setPage(user ? "generate" : "auth"); }} style={{ background: "var(--grad)", color: WHITE, border: "none", borderRadius: 10, padding: "11px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+                    Try this with my role
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ── WHAT YOU GET ── */}
+      <div className="section-pad" style={{ padding: "80px clamp(20px,5vw,80px)", background: "var(--bg)" }}>
         <div style={{ textAlign: "center", marginBottom: 52 }}>
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: AC, marginBottom: 14 }}>What you get</div>
           <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>Everything you need to apply with confidence</h2>
@@ -2708,38 +2712,38 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
 
       {/* ── TESTIMONIALS ── */}
       <div style={{ background: "var(--grad-subtle)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
-    <div className="section-pad" style={{ padding: "72px clamp(20px,5vw,80px)" }}>
-      <div style={{ textAlign: "center", marginBottom: 44 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: AC, marginBottom: 14 }}>From our users</div>
-        <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(26px,3.5vw,40px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>What job seekers are saying</h2>
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 18, maxWidth: 1080, margin: "0 auto" }}>
-        {[
-          { name: "Najma K.", role: "Human Resource Executive", company: "Bangalore", quote: "I had hit a wall applying to 30 roles with the same resume. Rezolt rebuilt it around the JD in under a minute. Got two calls within a week.", stars: 5 },
-          { name: "Soham S.", role: "Frontend Developer", company: "Mumbai", quote: "My previous resume felt very generic. This tool didn't just summarize my work, it actually highlighted the exact React experience they asked for in the JD.", stars: 5 },
-          { name: "Shreshth J.", role: "Data Analyst", company: "Chandigarh", quote: "The referral messages are the real hidden gem. I reached out to 4 contacts and 3 responded. That never happened before.", stars: 5 },
-          { name: "Ehsan S.", role: "Product Manager", company: "Gurgaon", quote: "I usually spend 2 hours tweaking my resume for safety. Did it in 45 seconds here. The wording feels natural, not AI-generated.", stars: 5 },
-        ].map((t, i) => (
-          <div key={i} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "22px 22px 18px", boxShadow: "var(--soft-shadow)", display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ display: "flex", gap: 2 }}>
-              {Array.from({ length: t.stars }).map((_, j) => <span key={j} style={{ color: "#FBBF24", fontSize: 14 }}>★</span>)}
-            </div>
-            <p style={{ fontSize: 14, color: "var(--text-mid)", lineHeight: 1.75, fontStyle: "italic", flex: 1 }}>&ldquo;{t.quote}&rdquo;</p>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#001B48,#02457A)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "white", flexShrink: 0 }}>{t.name[0]}</div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{t.name}</div>
-                <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{t.role} · {t.company}</div>
-              </div>
-            </div>
+        <div className="section-pad" style={{ padding: "72px clamp(20px,5vw,80px)" }}>
+          <div style={{ textAlign: "center", marginBottom: 44 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: AC, marginBottom: 14 }}>From our users</div>
+            <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(26px,3.5vw,40px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>What job seekers are saying</h2>
           </div>
-        ))}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 18, maxWidth: 1080, margin: "0 auto" }}>
+            {[
+              { name: "Najma K.", role: "Human Resource Executive", company: "Bangalore", quote: "I had hit a wall applying to 30 roles with the same resume. Rezolt rebuilt it around the JD in under a minute. Got two calls within a week.", stars: 5 },
+              { name: "Soham S.", role: "Frontend Developer", company: "Mumbai", quote: "My previous resume felt very generic. This tool didn't just summarize my work, it actually highlighted the exact React experience they asked for in the JD.", stars: 5 },
+              { name: "Shreshth J.", role: "Data Analyst", company: "Chandigarh", quote: "The referral messages are the real hidden gem. I reached out to 4 contacts and 3 responded. That never happened before.", stars: 5 },
+              { name: "Ehsan S.", role: "Product Manager", company: "Gurgaon", quote: "I usually spend 2 hours tweaking my resume for safety. Did it in 45 seconds here. The wording feels natural, not AI-generated.", stars: 5 },
+            ].map((t, i) => (
+              <div key={i} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, padding: "22px 22px 18px", boxShadow: "var(--soft-shadow)", display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ display: "flex", gap: 2 }}>
+                  {Array.from({ length: t.stars }).map((_, j) => <span key={j} style={{ color: "#FBBF24", fontSize: 14 }}>★</span>)}
+                </div>
+                <p style={{ fontSize: 14, color: "var(--text-mid)", lineHeight: 1.75, fontStyle: "italic", flex: 1 }}>&ldquo;{t.quote}&rdquo;</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#001B48,#02457A)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "white", flexShrink: 0 }}>{t.name[0]}</div>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{t.name}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{t.role} · {t.company}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
-  {/* ── PRICING ── */}
-    <div id="pricing-section" className="section-pad" style={{ padding: "80px clamp(20px,5vw,80px)", background: "var(--bg)" }}>
+      {/* ── PRICING ── */}
+      <div id="pricing-section" className="section-pad" style={{ padding: "80px clamp(20px,5vw,80px)", background: "var(--bg)" }}>
         <div style={{ textAlign: "center", marginBottom: 52 }}>
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: AC, marginBottom: 14 }}>Pricing</div>
           <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>Choose a plan that fits your search</h2>
@@ -2747,274 +2751,274 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
         </div>
         <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 16, maxWidth: 1200, margin: "0 auto", alignItems: "stretch" }}>
           {[
-          {
-            name: "Free",
-            price: "0",
-            tag: "forever free",
-            popular: false,
-            note: "Try it before you commit",
-            includes: [
-              "1 career kit — one time",
-              "Resume rewrite",
-              { text: "Cover letter + referral message", cross: true },
-              { text: "ATS keyword fit support", cross: true },
-              { text: "Interview Prep + Find & Reach", cross: true },
-            ],
-          },
-          {
-            name: "Starter",
-            price: "99",
-            tag: "1 Career kit",
-            popular: false,
-            note: "Best for one strong application",
-            includes: [
-              "1 complete career kit",
-              "Resume rewrite tailored to one role",
-              "Cover letter + referral message",
-              "ATS keyword fit support",
-              "Clean PDF-ready export",
-              "Valid for 30 days",
-            ],
-          },
-          {
-            name: "Pro",
-            price: "299",
-            tag: "5 Career kits",
-            popular: true,
-            note: "Best for active job seekers",
-            includes: [
-              "5 complete career kits",
-              "All 5 outputs per kit",
-              "Interview Prep + Find & Reach",
-              "Faster generation",
-              "Outreach templates with stronger positioning",
-              "Valid for 90 days",
-            ],
-          },
-          {
-            name: "Unlimited",
-            price: "599",
-            tag: "per month",
-            popular: false,
-            note: "Best for ongoing search and negotiation",
-            includes: [
-              "Unlimited career kits",
-              "All 5 outputs + updates",
-              "Salary Negotiation tool",
-              "Notice Period scripts",
-              "First access to new Rezolt features",
-              "Cancel anytime",
-            ],
-          },
-        ].map((p, i) => (
-          <div key={i} style={{ background: p.popular ? "var(--grad)" : "var(--surface)", border: p.popular ? "none" : "1.5px solid var(--border)", borderRadius: 22, padding: "40px 24px 28px", position: "relative", boxShadow: p.popular ? "var(--shadow-lg)" : "var(--shadow-sm)", transition: "transform .25s ease, box-shadow .25s ease", display: "flex", flexDirection: "column", minHeight: "100%", height: "100%" }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.boxShadow = p.popular ? "0 20px 50px rgba(3,29,64,.32)" : "var(--shadow-lg)"; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = p.popular ? "var(--shadow-lg)" : "var(--shadow-sm)"; }}
-          >
-            {p.popular && <div style={{ position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)", background: PB, color: N1, fontSize: 11, fontWeight: 800, padding: "4px 16px", borderRadius: 20, letterSpacing: ".05em", whiteSpace: "nowrap" }}>BEST VALUE</div>}
+            {
+              name: "Free",
+              price: "0",
+              tag: "forever free",
+              popular: false,
+              note: "Try it before you commit",
+              includes: [
+                "1 career kit — one time",
+                "Resume rewrite",
+                { text: "Cover letter + referral message", cross: true },
+                { text: "ATS keyword fit support", cross: true },
+                { text: "Interview Prep + Find & Reach", cross: true },
+              ],
+            },
+            {
+              name: "Starter",
+              price: "99",
+              tag: "1 Career kit",
+              popular: false,
+              note: "Best for one strong application",
+              includes: [
+                "1 complete career kit",
+                "Resume rewrite tailored to one role",
+                "Cover letter + referral message",
+                "ATS keyword fit support",
+                "Clean PDF-ready export",
+                "Valid for 30 days",
+              ],
+            },
+            {
+              name: "Pro",
+              price: "299",
+              tag: "5 Career kits",
+              popular: true,
+              note: "Best for active job seekers",
+              includes: [
+                "5 complete career kits",
+                "All 5 outputs per kit",
+                "Interview Prep + Find & Reach",
+                "Faster generation",
+                "Outreach templates with stronger positioning",
+                "Valid for 90 days",
+              ],
+            },
+            {
+              name: "Unlimited",
+              price: "599",
+              tag: "per month",
+              popular: false,
+              note: "Best for ongoing search and negotiation",
+              includes: [
+                "Unlimited career kits",
+                "All 5 outputs + updates",
+                "Salary Negotiation tool",
+                "Notice Period scripts",
+                "First access to new Rezolt features",
+                "Cancel anytime",
+              ],
+            },
+          ].map((p, i) => (
+            <div key={i} style={{ background: p.popular ? "var(--grad)" : "var(--surface)", border: p.popular ? "none" : "1.5px solid var(--border)", borderRadius: 22, padding: "40px 24px 28px", position: "relative", boxShadow: p.popular ? "var(--shadow-lg)" : "var(--shadow-sm)", transition: "transform .25s ease, box-shadow .25s ease", display: "flex", flexDirection: "column", minHeight: "100%", height: "100%" }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.boxShadow = p.popular ? "0 20px 50px rgba(3,29,64,.32)" : "var(--shadow-lg)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = p.popular ? "var(--shadow-lg)" : "var(--shadow-sm)"; }}
+            >
+              {p.popular && <div style={{ position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)", background: PB, color: N1, fontSize: 11, fontWeight: 800, padding: "4px 16px", borderRadius: 20, letterSpacing: ".05em", whiteSpace: "nowrap" }}>BEST VALUE</div>}
 
-            <div style={{ fontSize: 12, fontWeight: 700, color: p.popular ? "rgba(255,255,255,.65)" : "var(--text-muted)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 10 }}>{p.name}</div>
-            <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 44, fontWeight: 400, color: p.popular ? "white" : "var(--text)", lineHeight: 1, marginBottom: 4 }}>₹{p.price}</div>
-            <div style={{ fontSize: 13, color: p.popular ? "rgba(255,255,255,.6)" : "var(--text-muted)", marginBottom: 10 }}>{p.tag}</div>
-            <div style={{ fontSize: 12, color: p.popular ? "rgba(255,255,255,.78)" : AC, fontWeight: 700, marginBottom: 22 }}>{p.note}</div>
-            <div style={{ flex: 1, marginBottom: 28, display: "grid", gap: 9 }}>
-              {p.includes.map((f, j) => {
-                const isCross = typeof f === "object" && f.cross;
-                const text = typeof f === "object" ? f.text : f;
-                return (
-                  <div key={j} style={{ display: "flex", gap: 9, alignItems: "flex-start", opacity: isCross ? 0.6 : 1 }}>
-                    {isCross ? (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={p.popular ? "rgba(255,255,255,.5)" : "var(--text-muted)"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                    ) : (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={p.popular ? "#86efac" : G} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><polyline points="20 6 9 17 4 12" /></svg>
-                    )}
-                    <span style={{ fontSize: 13, color: p.popular ? "rgba(255,255,255,.86)" : "var(--text-mid)", lineHeight: 1.6, textDecoration: isCross ? "line-through" : "none" }}>{text}</span>
-                  </div>
-                )
-              })}
-            </div>
-            {(() => {
-              const currentPlan = (user?.plan || "Free").toLowerCase();
-              const cardName = p.name.toLowerCase();
-              const isCurrentPlan = user && (cardName === currentPlan || (cardName === "unlimited" && currentPlan === "unlimited_monthly"));
-              return (
-                <button onClick={() => isCurrentPlan ? setPage("dashboard") : setPage(user ? "payment" : "auth")} className={isCurrentPlan ? "" : "btn-primary"} style={{ width: "100%", marginTop: "auto", background: isCurrentPlan ? (p.popular ? "rgba(255,255,255,.1)" : "var(--surface2)") : p.popular ? "rgba(255,255,255,.15)" : "var(--grad)", color: isCurrentPlan ? (p.popular ? "rgba(255,255,255,.6)" : "var(--text-muted)") : "white", border: isCurrentPlan ? (p.popular ? "1px solid rgba(255,255,255,.2)" : "1px solid var(--border)") : p.popular ? "2px solid rgba(255,255,255,.3)" : "none", borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 700, cursor: isCurrentPlan ? "default" : "pointer", fontFamily: "inherit", backdropFilter: p.popular ? "blur(8px)" : "none" }}>
-                  {user ? (isCurrentPlan ? "Current Plan" : "Upgrade Now") : "Get Started"}
-                </button>
-              );
-            })()}
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* ── ARTICLES ── */}
-<div id="articles-section" style={{ background: "var(--bg)", borderTop: "1px solid var(--border)" }}>
-  <div className="section-pad" style={{ padding: "80px clamp(20px,5vw,80px)" }}>
-    <div style={{ textAlign: "center", marginBottom: 56 }}>
-      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: AC, marginBottom: 14 }}>Career insights</div>
-      <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>
-        Practical guidance for a tougher job market
-      </h2>
-      <p style={{ fontSize: 15, color: "var(--text-muted)", marginTop: 14, maxWidth: 560, margin: "14px auto 0", lineHeight: 1.7 }}>
-        You don’t always need more experience, sometimes you need clearer positioning, stronger proof, and sharper relevance.
-      </p>
-    </div>
-
-    <div className="card-hover" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 24, padding: "32px 32px", marginBottom: 22, position: "relative", overflow: "hidden", boxShadow: "var(--soft-shadow)" }}>
-
-      <div className="two-col-md article-featured" style={{ display: "grid", gridTemplateColumns: "1.2fr .8fr", gap: 26, alignItems: "start" }}>
-        <div>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--accent-soft)", border: "1px solid var(--border)", borderRadius: 20, padding: "4px 12px", marginBottom: 16 }}>
-            <div style={{ width: 6, height: 6, borderRadius: "50%", background: AC }} />
-            <span style={{ fontSize: 11, fontWeight: 700, color: AC }}>What matters most</span>
-          </div>
-          <h3 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(20px,3vw,30px)", fontWeight: 400, color: "var(--text)", letterSpacing: "-.02em", marginBottom: 14, lineHeight: 1.25 }}>
-            Why strong candidates still get filtered out
-          </h3>
-          <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.8, marginBottom: 16 }}>
-            In high-volume hiring, resumes are scanned before stories are heard. The first goal isn’t to explain everything, it’s to make relevance obvious in seconds.
-          </p>
-          <div style={{ display: "grid", gap: 10, marginBottom: 18 }}>
-            {[
-              "Match the language of the role where it's genuinely true.",
-              "Show outcomes, not only responsibilities.",
-              "Make the recruiter’s next decision feel easy.",
-            ].map(item => (
-              <div key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: MID }}>
-                <span style={{ width: 20, height: 20, borderRadius: "50%", background: "var(--accent-soft)", color: AC, display: "inline-flex", alignItems: "center", justifyContent: "center", fontWeight: 700, flexShrink: 0 }}>✓</span>
-                <span>{item}</span>
+              <div style={{ fontSize: 12, fontWeight: 700, color: p.popular ? "rgba(255,255,255,.65)" : "var(--text-muted)", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 10 }}>{p.name}</div>
+              <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 44, fontWeight: 400, color: p.popular ? "white" : "var(--text)", lineHeight: 1, marginBottom: 4 }}>₹{p.price}</div>
+              <div style={{ fontSize: 13, color: p.popular ? "rgba(255,255,255,.6)" : "var(--text-muted)", marginBottom: 10 }}>{p.tag}</div>
+              <div style={{ fontSize: 12, color: p.popular ? "rgba(255,255,255,.78)" : AC, fontWeight: 700, marginBottom: 22 }}>{p.note}</div>
+              <div style={{ flex: 1, marginBottom: 28, display: "grid", gap: 9 }}>
+                {p.includes.map((f, j) => {
+                  const isCross = typeof f === "object" && f.cross;
+                  const text = typeof f === "object" ? f.text : f;
+                  return (
+                    <div key={j} style={{ display: "flex", gap: 9, alignItems: "flex-start", opacity: isCross ? 0.6 : 1 }}>
+                      {isCross ? (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={p.popular ? "rgba(255,255,255,.5)" : "var(--text-muted)"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                      ) : (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={p.popular ? "#86efac" : G} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><polyline points="20 6 9 17 4 12" /></svg>
+                      )}
+                      <span style={{ fontSize: 13, color: p.popular ? "rgba(255,255,255,.86)" : "var(--text-mid)", lineHeight: 1.6, textDecoration: isCross ? "line-through" : "none" }}>{text}</span>
+                    </div>
+                  )
+                })}
               </div>
+              {(() => {
+                const currentPlan = (user?.plan || "Free").toLowerCase();
+                const cardName = p.name.toLowerCase();
+                const isCurrentPlan = user && (cardName === currentPlan || (cardName === "unlimited" && currentPlan === "unlimited_monthly"));
+                return (
+                  <button onClick={() => isCurrentPlan ? setPage("dashboard") : setPage(user ? "payment" : "auth")} className={isCurrentPlan ? "" : "btn-primary"} style={{ width: "100%", marginTop: "auto", background: isCurrentPlan ? (p.popular ? "rgba(255,255,255,.1)" : "var(--surface2)") : p.popular ? "rgba(255,255,255,.15)" : "var(--grad)", color: isCurrentPlan ? (p.popular ? "rgba(255,255,255,.6)" : "var(--text-muted)") : "white", border: isCurrentPlan ? (p.popular ? "1px solid rgba(255,255,255,.2)" : "1px solid var(--border)") : p.popular ? "2px solid rgba(255,255,255,.3)" : "none", borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 700, cursor: isCurrentPlan ? "default" : "pointer", fontFamily: "inherit", backdropFilter: p.popular ? "blur(8px)" : "none" }}>
+                    {user ? (isCurrentPlan ? "Current Plan" : "Upgrade Now") : "Get Started"}
+                  </button>
+                );
+              })()}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── ARTICLES ── */}
+      <div id="articles-section" style={{ background: "var(--bg)", borderTop: "1px solid var(--border)" }}>
+        <div className="section-pad" style={{ padding: "80px clamp(20px,5vw,80px)" }}>
+          <div style={{ textAlign: "center", marginBottom: 56 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: AC, marginBottom: 14 }}>Career insights</div>
+            <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>
+              Practical guidance for a tougher job market
+            </h2>
+            <p style={{ fontSize: 15, color: "var(--text-muted)", marginTop: 14, maxWidth: 560, margin: "14px auto 0", lineHeight: 1.7 }}>
+              You don’t always need more experience, sometimes you need clearer positioning, stronger proof, and sharper relevance.
+            </p>
+          </div>
+
+          <div className="card-hover" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 24, padding: "32px 32px", marginBottom: 22, position: "relative", overflow: "hidden", boxShadow: "var(--soft-shadow)" }}>
+
+            <div className="two-col-md article-featured" style={{ display: "grid", gridTemplateColumns: "1.2fr .8fr", gap: 26, alignItems: "start" }}>
+              <div>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--accent-soft)", border: "1px solid var(--border)", borderRadius: 20, padding: "4px 12px", marginBottom: 16 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: AC }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, color: AC }}>What matters most</span>
+                </div>
+                <h3 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(20px,3vw,30px)", fontWeight: 400, color: "var(--text)", letterSpacing: "-.02em", marginBottom: 14, lineHeight: 1.25 }}>
+                  Why strong candidates still get filtered out
+                </h3>
+                <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.8, marginBottom: 16 }}>
+                  In high-volume hiring, resumes are scanned before stories are heard. The first goal isn’t to explain everything, it’s to make relevance obvious in seconds.
+                </p>
+                <div style={{ display: "grid", gap: 10, marginBottom: 18 }}>
+                  {[
+                    "Match the language of the role where it's genuinely true.",
+                    "Show outcomes, not only responsibilities.",
+                    "Make the recruiter’s next decision feel easy.",
+                  ].map(item => (
+                    <div key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: MID }}>
+                      <span style={{ width: 20, height: 20, borderRadius: "50%", background: "var(--accent-soft)", color: AC, display: "inline-flex", alignItems: "center", justifyContent: "center", fontWeight: 700, flexShrink: 0 }}>✓</span>
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+                <button onClick={() => { setSelectedArticle?.(1); setPage("articles"); }} style={{ background: "none", border: "none", padding: 0, color: AC, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+                  Read the full article
+                </button>
+              </div>
+              <div style={{ display: "grid", gap: 12 }}>
+                <div style={{ background: "var(--grad)", borderRadius: 16, padding: "22px 18px", color: "white", textAlign: "center" }}>
+                  <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 42, fontWeight: 400, lineHeight: 1, marginBottom: 6 }}>75%</div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,.74)", lineHeight: 1.5 }}>Research suggests up to 75% of resumes are filtered before a recruiter reads them</div>
+                </div>
+                <div style={{ background: "var(--surface2)", borderRadius: 14, padding: "16px 18px", border: "1px solid var(--border)" }}>
+                  <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 30, fontWeight: 400, color: AC, lineHeight: 1, marginBottom: 4 }}>6s</div>
+                  <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>Studies show recruiters spend an average of 6–7 seconds on a first scan</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="three-col" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18, marginBottom: 24 }}>
+            {[
+              {
+                title: "Why ATS fit matters more than you think",
+                summary: "Use the same language as the job description where it is true and proven.",
+                stat: "Keywords",
+                tag: "ATS",
+                articleIndex: 0,
+              },
+              {
+                title: "Proof beats promises",
+                summary: "Numbers, outcomes, and measurable wins create faster trust than generic claims.",
+                stat: "Impact",
+                tag: "Positioning",
+                articleIndex: 2,
+              },
+              {
+                title: "Relevance creates momentum",
+                summary: "A cleaner, more targeted resume improves the odds of better outreach and better interviews.",
+                stat: "Clarity",
+                tag: "Strategy",
+                articleIndex: 5,
+              },
+            ].map((a, i) => (
+              <button key={i} onClick={() => { setSelectedArticle?.(a.articleIndex); setPage("articles"); }} className="card-hover" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "24px 22px", display: "flex", flexDirection: "column", textAlign: "left", cursor: "pointer", fontFamily: "inherit" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                  <span style={{ background: "var(--accent-soft)", color: AC, fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 20, border: "1px solid var(--border)" }}>{a.tag}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: FAINT }}>{a.stat}</span>
+                </div>
+                <h3 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 18, fontWeight: 400, color: "var(--text)", marginBottom: 10, lineHeight: 1.35, letterSpacing: "-.01em" }}>{a.title}</h3>
+                <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.75, marginBottom: 14 }}>{a.summary}</p>
+                <span style={{ marginTop: "auto", fontSize: 12, fontWeight: 700, color: AC }}>Read more</span>
+              </button>
             ))}
           </div>
-          <button onClick={() => { setSelectedArticle?.(1); setPage("articles"); }} style={{ background: "none", border: "none", padding: 0, color: AC, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-            Read the full article
-          </button>
-        </div>
-        <div style={{ display: "grid", gap: 12 }}>
-          <div style={{ background: "var(--grad)", borderRadius: 16, padding: "22px 18px", color: "white", textAlign: "center" }}>
-            <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 42, fontWeight: 400, lineHeight: 1, marginBottom: 6 }}>75%</div>
-            <div style={{ fontSize: 12, color: "rgba(255,255,255,.74)", lineHeight: 1.5 }}>Research suggests up to 75% of resumes are filtered before a recruiter reads them</div>
+
+          <div style={{ background: "var(--grad)", borderRadius: 20, padding: "34px 36px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+            <div className="blob" style={{ width: 200, height: 200, background: LB, top: -60, right: 40 }} />
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".15em", textTransform: "uppercase", color: "rgba(255,255,255,.6)", marginBottom: 14 }}>The core formula</div>
+              <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(14px,2.5vw,22px)", color: "white", fontWeight: 400, lineHeight: 1.6, marginBottom: 18 }}>
+                Resume Effectiveness = <span style={{ color: PB }}>Keyword Match</span> × <span style={{ color: PB }}>Clarity</span> × <span style={{ color: PB }}>Measurable Impact</span> × <span style={{ color: PB }}>ATS Compatibility</span>
+              </div>
+              <p style={{ fontSize: 14, color: "rgba(255,255,255,.74)", marginBottom: 24 }}>If even one of these drops to zero, your chances drop with it. Rezolt is designed to strengthen all four together.</p>
+              <button onClick={() => setPage(user ? "generate" : "auth")} className="hero-btn btn-primary" style={{ background: "linear-gradient(135deg,#E4BE47,#F2D46C,#E4BE47)", backgroundSize: "200% auto", color: N1, border: "none", borderRadius: 12, padding: "14px 32px", fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: "inherit" }}>
+                {user ? "Build My Next Kit" : "Start Free"}
+              </button>
+            </div>
           </div>
-          <div style={{ background: "var(--surface2)", borderRadius: 14, padding: "16px 18px", border: "1px solid var(--border)" }}>
-            <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 30, fontWeight: 400, color: AC, lineHeight: 1, marginBottom: 4 }}>6s</div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>Studies show recruiters spend an average of 6–7 seconds on a first scan</div>
+        </div>
+      </div>
+
+      {/* ── FUN CTA ── */}
+      <div style={{ padding: "0 clamp(16px,5vw,80px) 80px", background: "var(--bg)" }} className="section-pad">
+        <div className="hero-gradient" style={{ borderRadius: 28, padding: "72px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+          <div className="blob" style={{ width: 300, height: 300, background: AC, top: -80, right: 40 }} />
+          <div className="blob" style={{ width: 200, height: 200, background: LB, bottom: -60, left: 60 }} />
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(3,29,64,0.06)", border: "1px solid rgba(3,29,64,0.10)", borderRadius: 999, padding: "6px 14px", fontSize: 12, fontWeight: 700, color: AC, marginBottom: 16 }}>
+              Ready when you are
+            </div>
+            <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(30px,4vw,52px)", fontWeight: 400, letterSpacing: "-.02em", color: "var(--text)", marginBottom: 14 }}>
+              Your next offer starts <em style={{ color: PB }}>here.</em>
+            </h2>
+            <p style={{ fontSize: 16, color: "var(--text-muted)", marginBottom: 36 }}>
+              {user ? "You're already in. Generate your next Career kit in 60 seconds." : "Sign up now and get 3 free Career Kits instantly. No card required."}
+            </p>
+            <button onClick={() => setPage(user ? "generate" : "auth")} className="hero-btn btn-primary" style={{ background: "linear-gradient(135deg,#E4BE47,#F2D46C,#E4BE47)", backgroundSize: "200% auto", color: N1, border: "none", borderRadius: 12, padding: "16px 40px", fontSize: 16, fontWeight: 800, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 6px 22px rgba(228,190,71,.32)" }}>
+              {user ? "Generate a Kit" : "Get Started Free"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── FOOTER ── */}
+      <div style={{ borderTop: "1px solid var(--border)", background: "var(--surface)", padding: "28px clamp(16px,5vw,80px)" }} className="section-pad">
+        <div className="footer-grid" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <BrandLogo height={84} />
+          </div>
+          <div style={{ fontSize: 13, color: "var(--text-muted)" }}>© 2026 Rezolt. Career Kit for Indian Job Seekers.</div>
+          <div style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
+            {[
+              { label: "Privacy Policy", action: () => setPage("privacy") },
+              { label: "Terms", action: () => setPage("terms") },
+              { label: "FAQ", action: () => setPage("faq") },
+              { label: "Contact Us", action: () => setPage("contact") },
+            ].map(l => (
+              <button key={l.label} onClick={l.action} style={{ background: "none", border: "none", padding: 0, fontSize: 13, color: "var(--text-muted)", cursor: "pointer", transition: "color .15s ease", fontFamily: "inherit" }}
+                onMouseEnter={e => e.target.style.color = AC} onMouseLeave={e => e.target.style.color = "var(--text-muted)"}>{l.label}</button>
+            ))}
+            <a href="https://www.instagram.com/rezolt.in/" target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", transition: "color .15s ease", display: "inline-flex", alignItems: "center", gap: 6 }}
+              onMouseEnter={e => e.currentTarget.style.color = AC} onMouseLeave={e => e.currentTarget.style.color = "var(--text-muted)"}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" /><path d="M16.5 7.5h.01" /><circle cx="12" cy="12" r="4" /></svg>
+              <span>Instagram</span>
+            </a>
+            <a href="https://www.linkedin.com/company/rezolt/" target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", transition: "color .15s ease", display: "inline-flex", alignItems: "center", gap: 6 }}
+              onMouseEnter={e => e.currentTarget.style.color = AC} onMouseLeave={e => e.currentTarget.style.color = "var(--text-muted)"}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.94 8.5a1.56 1.56 0 1 1 0-3.12 1.56 1.56 0 0 1 0 3.12ZM5.5 9.75h2.88V18H5.5V9.75Zm4.68 0h2.76v1.13h.04c.38-.73 1.32-1.5 2.72-1.5 2.92 0 3.46 1.92 3.46 4.42V18h-2.88v-3.72c0-.89-.02-2.03-1.24-2.03-1.24 0-1.43.97-1.43 1.97V18h-2.88V9.75Z" /></svg>
+              <span>LinkedIn</span>
+            </a>
+            <a href="mailto:hello@rezolt.in" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", transition: "color .15s ease" }}
+              onMouseEnter={e => e.target.style.color = AC} onMouseLeave={e => e.target.style.color = "var(--text-muted)"}>
+              hello@rezolt.in
+            </a>
           </div>
         </div>
       </div>
     </div>
-
-    <div className="three-col" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18, marginBottom: 24 }}>
-      {[
-        {
-          title: "Why ATS fit matters more than you think",
-          summary: "Use the same language as the job description where it is true and proven.",
-          stat: "Keywords",
-          tag: "ATS",
-          articleIndex: 0,
-        },
-        {
-          title: "Proof beats promises",
-          summary: "Numbers, outcomes, and measurable wins create faster trust than generic claims.",
-          stat: "Impact",
-          tag: "Positioning",
-          articleIndex: 2,
-        },
-        {
-          title: "Relevance creates momentum",
-          summary: "A cleaner, more targeted resume improves the odds of better outreach and better interviews.",
-          stat: "Clarity",
-          tag: "Strategy",
-          articleIndex: 5,
-        },
-      ].map((a, i) => (
-        <button key={i} onClick={() => { setSelectedArticle?.(a.articleIndex); setPage("articles"); }} className="card-hover" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: "24px 22px", display: "flex", flexDirection: "column", textAlign: "left", cursor: "pointer", fontFamily: "inherit" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <span style={{ background: "var(--accent-soft)", color: AC, fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 20, border: "1px solid var(--border)" }}>{a.tag}</span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: FAINT }}>{a.stat}</span>
-          </div>
-          <h3 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 18, fontWeight: 400, color: "var(--text)", marginBottom: 10, lineHeight: 1.35, letterSpacing: "-.01em" }}>{a.title}</h3>
-          <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.75, marginBottom: 14 }}>{a.summary}</p>
-          <span style={{ marginTop: "auto", fontSize: 12, fontWeight: 700, color: AC }}>Read more</span>
-        </button>
-      ))}
-    </div>
-
-    <div style={{ background: "var(--grad)", borderRadius: 20, padding: "34px 36px", textAlign: "center", position: "relative", overflow: "hidden" }}>
-      <div className="blob" style={{ width: 200, height: 200, background: LB, top: -60, right: 40 }} />
-      <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".15em", textTransform: "uppercase", color: "rgba(255,255,255,.6)", marginBottom: 14 }}>The core formula</div>
-        <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(14px,2.5vw,22px)", color: "white", fontWeight: 400, lineHeight: 1.6, marginBottom: 18 }}>
-          Resume Effectiveness = <span style={{ color: PB }}>Keyword Match</span> × <span style={{ color: PB }}>Clarity</span> × <span style={{ color: PB }}>Measurable Impact</span> × <span style={{ color: PB }}>ATS Compatibility</span>
-        </div>
-        <p style={{ fontSize: 14, color: "rgba(255,255,255,.74)", marginBottom: 24 }}>If even one of these drops to zero, your chances drop with it. Rezolt is designed to strengthen all four together.</p>
-        <button onClick={() => setPage(user ? "generate" : "auth")} className="hero-btn btn-primary" style={{ background: "linear-gradient(135deg,#E4BE47,#F2D46C,#E4BE47)", backgroundSize: "200% auto", color: N1, border: "none", borderRadius: 12, padding: "14px 32px", fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: "inherit" }}>
-          {user ? "Build My Next Kit" : "Start Free"}
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-{/* ── FUN CTA ── */ }
-<div style={{ padding: "0 clamp(16px,5vw,80px) 80px", background: "var(--bg)" }} className="section-pad">
-  <div className="hero-gradient" style={{ borderRadius: 28, padding: "72px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
-    <div className="blob" style={{ width: 300, height: 300, background: AC, top: -80, right: 40 }} />
-    <div className="blob" style={{ width: 200, height: 200, background: LB, bottom: -60, left: 60 }} />
-    <div style={{ position: "relative", zIndex: 1 }}>
-      <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(3,29,64,0.06)", border: "1px solid rgba(3,29,64,0.10)", borderRadius: 999, padding: "6px 14px", fontSize: 12, fontWeight: 700, color: AC, marginBottom: 16 }}>
-        Ready when you are
-      </div>
-      <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(30px,4vw,52px)", fontWeight: 400, letterSpacing: "-.02em", color: "var(--text)", marginBottom: 14 }}>
-        Your next offer starts <em style={{ color: PB }}>here.</em>
-      </h2>
-      <p style={{ fontSize: 16, color: "var(--text-muted)", marginBottom: 36 }}>
-        {user ? "You're already in. Generate your next Career kit in 60 seconds." : "Sign up now and get 3 free Career Kits instantly. No card required."}
-      </p>
-      <button onClick={() => setPage(user ? "generate" : "auth")} className="hero-btn btn-primary" style={{ background: "linear-gradient(135deg,#E4BE47,#F2D46C,#E4BE47)", backgroundSize: "200% auto", color: N1, border: "none", borderRadius: 12, padding: "16px 40px", fontSize: 16, fontWeight: 800, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 6px 22px rgba(228,190,71,.32)" }}>
-        {user ? "Generate a Kit" : "Get Started Free"}
-      </button>
-    </div>
-  </div>
-</div>
-
-{/* ── FOOTER ── */ }
-<div style={{ borderTop: "1px solid var(--border)", background: "var(--surface)", padding: "28px clamp(16px,5vw,80px)" }} className="section-pad">
-  <div className="footer-grid" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
-    <div style={{ display: "flex", alignItems: "center" }}>
-      <BrandLogo height={84} />
-    </div>
-    <div style={{ fontSize: 13, color: "var(--text-muted)" }}>© 2026 Rezolt. Career Kit for Indian Job Seekers.</div>
-    <div style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
-      {[
-        { label: "Privacy Policy", action: () => setPage("privacy") },
-        { label: "Terms", action: () => setPage("terms") },
-        { label: "FAQ", action: () => setPage("faq") },
-        { label: "Contact Us", action: () => setPage("contact") },
-      ].map(l => (
-        <button key={l.label} onClick={l.action} style={{ background: "none", border: "none", padding: 0, fontSize: 13, color: "var(--text-muted)", cursor: "pointer", transition: "color .15s ease", fontFamily: "inherit" }}
-          onMouseEnter={e => e.target.style.color = AC} onMouseLeave={e => e.target.style.color = "var(--text-muted)"}>{l.label}</button>
-      ))}
-      <a href="https://www.instagram.com/rezolt.in/" target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", transition: "color .15s ease", display: "inline-flex", alignItems: "center", gap: 6 }}
-        onMouseEnter={e => e.currentTarget.style.color = AC} onMouseLeave={e => e.currentTarget.style.color = "var(--text-muted)"}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" ry="5" /><path d="M16.5 7.5h.01" /><circle cx="12" cy="12" r="4" /></svg>
-        <span>Instagram</span>
-      </a>
-      <a href="https://www.linkedin.com/company/rezolt/" target="_blank" rel="noreferrer" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", transition: "color .15s ease", display: "inline-flex", alignItems: "center", gap: 6 }}
-        onMouseEnter={e => e.currentTarget.style.color = AC} onMouseLeave={e => e.currentTarget.style.color = "var(--text-muted)"}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.94 8.5a1.56 1.56 0 1 1 0-3.12 1.56 1.56 0 0 1 0 3.12ZM5.5 9.75h2.88V18H5.5V9.75Zm4.68 0h2.76v1.13h.04c.38-.73 1.32-1.5 2.72-1.5 2.92 0 3.46 1.92 3.46 4.42V18h-2.88v-3.72c0-.89-.02-2.03-1.24-2.03-1.24 0-1.43.97-1.43 1.97V18h-2.88V9.75Z" /></svg>
-        <span>LinkedIn</span>
-      </a>
-      <a href="mailto:hello@rezolt.in" style={{ fontSize: 13, color: "var(--text-muted)", textDecoration: "none", transition: "color .15s ease" }}
-        onMouseEnter={e => e.target.style.color = AC} onMouseLeave={e => e.target.style.color = "var(--text-muted)"}>
-        hello@rezolt.in
-      </a>
-    </div>
-  </div>
-</div>
-</div>
-    );
-  }
+  );
+}
 
 
 
@@ -4175,11 +4179,22 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                 <button onClick={() => setShowSample(true)} style={{ background: "none", border: "none", color: AC, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", padding: 0 }}>See a sample output</button>
                 <button className="gen-btn" onClick={generate} disabled={!isReady || !hasCredits || generating}
                   style={{ background: isReady && hasCredits && !generating ? O : "#E2E8F0", color: isReady && hasCredits && !generating ? WHITE : FAINT, border: "none", borderRadius: 12, padding: "13px 30px", fontSize: 15, fontWeight: 700, cursor: isReady && hasCredits && !generating ? "pointer" : "not-allowed", fontFamily: "inherit", boxShadow: isReady && hasCredits && !generating ? "0 8px 22px rgba(3,29,64,0.18)" : "none", transition: "all 0.2s", minWidth: 180 }}>
-                  {generating ? (subStep || "Curating your experience...") : "Let’s build your kit"}
+                  {generating ? (subStep || "Curating your experience...") : !hasCredits ? "No credits — upgrade to continue" : "Let's build your kit"}
                 </button>
               </div>
             </div>
           </div>
+          {!hasCredits && (
+            <div style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 16, padding: "20px 24px", marginTop: 16, textAlign: "center" }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#B91C1C", marginBottom: 6 }}>You've used your {user?.plan === "Free" ? "free resume" : "credits"}</div>
+              <div style={{ fontSize: 13, color: MUTED, marginBottom: 14, lineHeight: 1.7 }}>
+                {user?.plan === "Free" ? "Upgrade to Starter for a full career kit, or go Pro for 5 kits with interview prep and outreach." : "Purchase more credits to continue generating kits."}
+              </div>
+              <button onClick={() => setPage("payment")} className="btn-primary" style={{ background: "var(--grad)", color: "white", border: "none", borderRadius: 12, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+                View Plans & Upgrade
+              </button>
+            </div>
+          )}
         </>
       )}
 
@@ -5246,19 +5261,19 @@ function PaymentPage({ user, setUser, setPage }) {
 async function fetchAdminStats() {
   try {
     console.log("fetchAdminStats: Starting sequential load...");
-    
+
     console.log("fetchAdminStats: Fetching user count...");
     const usersRes = await supabase.from("profiles").select("*", { count: "exact", head: true });
     if (usersRes.error) console.error("Admin user count error:", usersRes.error);
-    
+
     console.log("fetchAdminStats: Fetching kit count...");
     const kitsRes = await supabase.from("kits").select("*", { count: "exact", head: true });
     if (kitsRes.error) console.error("Admin kit count error:", kitsRes.error);
-    
+
     console.log("fetchAdminStats: Fetching profiles list...");
     const profilesRes = await supabase.from("profiles").select("id, name, email, plan, credits, created_at").order("created_at", { ascending: false });
     if (profilesRes.error) console.error("Admin profiles error:", profilesRes.error);
-    
+
     console.log("fetchAdminStats: Load complete.");
     return {
       totalUsers: usersRes.count || 0,
