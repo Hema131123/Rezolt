@@ -5271,25 +5271,25 @@ async function fetchAdminStats(onStep = () => {}) {
       onStep(msg);
     };
 
-    mark("Fetching user count...");
-    const usersRes = await supabase.from("profiles").select("*", { count: "estimated", head: true });
-    if (usersRes.error) console.error("Admin user count error:", usersRes.error);
+    mark("Fetching user list...");
+    const usersRes = await supabase.from("profiles").select("id");
+    if (usersRes.error) console.error("Admin user list error:", usersRes.error);
     
-    mark("Fetching kit count...");
-    const kitsRes = await supabase.from("kits").select("*", { count: "estimated", head: true });
-    if (kitsRes.error) console.error("Admin kit count error:", kitsRes.error);
+    mark("Fetching kits list...");
+    const kitsRes = await supabase.from("kits").select("id");
+    if (kitsRes.error) console.error("Admin kits list error:", kitsRes.error);
     
-    mark("Fetching profiles list (last 100)...");
+    mark("Fetching profiles details...");
     const profilesRes = await supabase.from("profiles")
       .select("id, name, email, plan, credits, created_at")
       .order("created_at", { ascending: false })
       .limit(100);
-    if (profilesRes.error) console.error("Admin profiles error:", profilesRes.error);
+    if (profilesRes.error) console.error("Admin profiles detail error:", profilesRes.error);
     
     mark("Load complete.");
     return {
-      totalUsers: usersRes.count || 0,
-      totalKits: kitsRes.count || 0,
+      totalUsers: usersRes.data?.length || 0,
+      totalKits: kitsRes.data?.length || 0,
       profiles: profilesRes.data || [],
     };
   } catch (e) {
