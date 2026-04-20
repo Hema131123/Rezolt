@@ -4892,6 +4892,7 @@ function AdminPage({ user, setPage }) {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [lastStep, setLastStep] = useState("Initializing...");
   const [search, setSearch] = useState("");
   const [planFilter, setPlanFilter] = useState("all");
 
@@ -4905,15 +4906,17 @@ function AdminPage({ user, setPage }) {
     let mounted = true;
     const timeout = setTimeout(() => {
       if (mounted && loading) {
-        console.warn("AdminPage: Data load timed out after 10s.");
-        setError("Request timed out. The database might be responding slowly due to high volume or network issues.");
+        console.warn("AdminPage: Data load timed out after 30s.");
+        setError(`Request timed out at step: "${lastStep}". This usually means the database or network is sluggish.`);
         setLoading(false);
       }
-    }, 10000);
+    }, 30000);
 
     const load = async () => {
       try {
-        const s = await fetchAdminStats();
+        const s = await fetchAdminStats((step) => {
+          if (mounted) setLastStep(step);
+        });
         if (!mounted) return;
         clearTimeout(timeout);
         console.log("Admin stats loaded successfully.");
@@ -4964,8 +4967,9 @@ function AdminPage({ user, setPage }) {
       </div>
 
       {loading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: "80px 0" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 0", gap: 16 }}>
           <div style={{ width: 32, height: 32, borderRadius: "50%", border: `3px solid ${BORDER}`, borderTopColor: O, animation: "spin 0.8s linear infinite" }} />
+          <div style={{ fontSize: 13, color: MUTED, fontWeight: 500 }}>{lastStep}</div>
         </div>
       ) : error ? (
         <div style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "32px 24px", color: "#B91C1C", textAlign: "center" }}>
@@ -5258,23 +5262,31 @@ function PaymentPage({ user, setUser, setPage }) {
 
 
 
-async function fetchAdminStats() {
+async function fetchAdminStats(onStep = () => {}) {
+  const start = performance.now();
   try {
-    console.log("fetchAdminStats: Starting sequential load...");
+    const mark = (msg) => {
+      const time = ((performance.now() - start) / 1000).toFixed(2);
+      console.log(`[AdminFetch] ${time}s - ${msg}`);
+      onStep(msg);
+    };
 
-    console.log("fetchAdminStats: Fetching user count...");
-    const usersRes = await supabase.from("profiles").select("*", { count: "exact", head: true });
+    mark("Fetching user count...");
+    const usersRes = await supabase.from("profiles").select("*", { count: "estimated", head: true });
     if (usersRes.error) console.error("Admin user count error:", usersRes.error);
-
-    console.log("fetchAdminStats: Fetching kit count...");
-    const kitsRes = await supabase.from("kits").select("*", { count: "exact", head: true });
+    
+    mark("Fetching kit count...");
+    const kitsRes = await supabase.from("kits").select("*", { count: "estimated", head: true });
     if (kitsRes.error) console.error("Admin kit count error:", kitsRes.error);
-
-    console.log("fetchAdminStats: Fetching profiles list...");
-    const profilesRes = await supabase.from("profiles").select("id, name, email, plan, credits, created_at").order("created_at", { ascending: false });
+    
+    mark("Fetching profiles list (last 100)...");
+    const profilesRes = await supabase.from("profiles")
+      .select("id, name, email, plan, credits, created_at")
+      .order("created_at", { ascending: false })
+      .limit(100);
     if (profilesRes.error) console.error("Admin profiles error:", profilesRes.error);
-
-    console.log("fetchAdminStats: Load complete.");
+    
+    mark("Load complete.");
     return {
       totalUsers: usersRes.count || 0,
       totalKits: kitsRes.count || 0,
@@ -5282,6 +5294,7 @@ async function fetchAdminStats() {
     };
   } catch (e) {
     console.error("fetchAdminStats failed fatally:", e);
+    onStep(`Error: ${e.message}`);
     return { totalUsers: 0, totalKits: 0, profiles: [] };
   }
 }
