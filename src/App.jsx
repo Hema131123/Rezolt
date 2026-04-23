@@ -5510,7 +5510,9 @@ export default function App() {
       }
 
       if (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
-        await syncSessionUser(session.user, (event === "INITIAL_SESSION" || event === "SIGNED_IN") ? (recoveryFlow ? "reset-password" : "dashboard") : undefined);
+        // Only auto-navigate on INITIAL_SESSION (existing session on first boot).
+        // SIGNED_IN navigation is handled by handleAuth to respect the page the user was on.
+        await syncSessionUser(session.user, event === "INITIAL_SESSION" ? (recoveryFlow ? "reset-password" : "dashboard") : undefined);
       }
     });
 
