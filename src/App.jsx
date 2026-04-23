@@ -1002,8 +1002,6 @@ function OutreachQuickActions({ type, text }) {
 // ─── GLOBAL CSS ───────────────────────────────────────────────────────────────
 
 const GLOBAL_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&family=Open+Sans:wght@400;500;600;700;800&family=Raleway:wght@400;500;600;700;800&display=swap');
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
