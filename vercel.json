@@ -4,6 +4,9 @@
       "maxDuration": 60
     }
   },
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
   "redirects": [
     {
       "source": "/(.*)",

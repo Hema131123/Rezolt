@@ -3,13 +3,13 @@ import "./premium-ui.css";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import { Document, Packer, Paragraph, TextRun } from "docx";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/core/supabase";
 import { FiLayout, FiEdit3, FiBookOpen } from "react-icons/fi";
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+import { createClient } from "@supabase/supabase-js";
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 async function fetchWithAuth(url, options = {}, token = null) {
   let accessToken = token;
@@ -20,11 +20,16 @@ async function fetchWithAuth(url, options = {}, token = null) {
       const { data } = await supabase.auth.getSession();
       accessToken = data?.session?.access_token;
     } catch (e) {
-      console.warn("Manual session check failed in fetchWithAuth");
+      console.warn("Manual session check failed in fetchWithAuth:", e);
     }
   }
 
-  if (!accessToken) throw new Error("Please sign in to continue.");
+  if (!accessToken) {
+    console.error("No auth token available for:", url);
+    throw new Error("Please sign in to continue.");
+  }
+  
+  console.log("Fetching:", url, "with auth token length:", accessToken.length);
   const headers = { ...options.headers, Authorization: `Bearer ${accessToken}` };
   return fetch(url, { ...options, headers });
 }
@@ -96,7 +101,6 @@ const LB = "#A4B4C9"; // muted navy tint
 const PB = "#E4BE47"; // premium gold highlight
 const G = AC; // success uses the brand color
 const ER = "#EF4444"; // error
-
 // Legacy aliases (used throughout components)
 const O = AC;
 const DARK = "var(--text-primary)";
@@ -114,12 +118,23 @@ const RZP_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID;
 const RZP_IS_TEST = RZP_KEY?.startsWith("rzp_test_");
 
 function loadRazorpay() {
-  return new Promise(resolve => {
-    if (window.Razorpay) return resolve(true);
+  return new Promise((resolve, reject) => {
+    if (window.Razorpay) {
+      console.log("✓ Razorpay already loaded");
+      return resolve(true);
+    }
+    
     const s = document.createElement("script");
     s.src = "https://checkout.razorpay.com/v1/checkout.js";
-    s.onload = () => resolve(true);
-    s.onerror = () => resolve(false);
+    s.async = true;
+    s.onload = () => {
+      console.log("✓ Razorpay script loaded");
+      resolve(true);
+    };
+    s.onerror = (err) => {
+      console.error("✗ Razorpay load failed:", err);
+      reject(new Error("Razorpay CDN unreachable"));
+    };
     document.body.appendChild(s);
   });
 }
@@ -1964,7 +1979,7 @@ function TopBar({ page, setPage, user, onSignOut }) {
 
         {/* Logo */}
         <div onClick={() => setPage("landing")} style={{ display: "flex", alignItems: "center", cursor: "pointer", userSelect: "none" }}>
-          <BrandLogo height={70} />
+          <BrandLogo height={50} />
         </div>
 
         {/* Desktop nav */}
@@ -2986,7 +3001,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
       <div style={{ borderTop: "1px solid var(--border)", background: "var(--surface)", padding: "28px clamp(16px,5vw,80px)" }} className="section-pad">
         <div className="footer-grid" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center" }}>
-            <BrandLogo height={84} />
+            <BrandLogo height={60} />
           </div>
           <div style={{ fontSize: 13, color: "var(--text-muted)" }}>© 2026 Rezolt. Career Kit for Indian Job Seekers.</div>
           <div style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
@@ -3267,7 +3282,7 @@ function AuthPage({ onAuth, setPage }) {
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-            <BrandLogo height={132} />
+            <BrandLogo height={90} />
           </div>
           <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 30, fontWeight: 400, color: "var(--text)", marginBottom: 6 }}>
             {mode === "signup" ? "Create your account" : "Welcome back"}
@@ -4888,7 +4903,7 @@ function ContactPage({ setPage, user }) {
 // ─── ADMIN PAGE ───────────────────────────────────────────────────────────────
 
 function AdminPage({ user, setPage }) {
-  console.log("AdminPage Rendered. user:", user?.email);
+  const ADMIN_EMAIL = "hema.manoharan13@outlook.com";
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -4897,8 +4912,11 @@ function AdminPage({ user, setPage }) {
   const [planFilter, setPlanFilter] = useState("all");
 
   useEffect(() => {
-    if (!user || user?.email?.trim()?.toLowerCase() !== ADMIN_EMAIL.trim().toLowerCase()) {
-      console.log("Admin blocked. Logged in as:", user?.email, "| Expected:", ADMIN_EMAIL);
+    const isAdmin = user?.email?.trim().toLowerCase() === ADMIN_EMAIL.trim().toLowerCase();
+    console.log("🔐 Admin check:", { userEmail: user?.email, isAdmin, expectedEmail: ADMIN_EMAIL });
+    
+    if (!isAdmin) {
+      console.warn("⚠ Unauthorized admin access attempt");
       setPage("dashboard");
       return;
     }
@@ -4914,6 +4932,10 @@ function AdminPage({ user, setPage }) {
 
     const load = async () => {
       try {
+        console.log("AdminPage: Checking auth state...");
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log("AdminPage: Session found:", !!session, "Token length:", session?.access_token?.length || 0);
+
         const s = await fetchAdminStats((step) => {
           if (mounted) setLastStep(step);
         });
@@ -4935,6 +4957,14 @@ function AdminPage({ user, setPage }) {
     load();
     return () => { mounted = false; clearTimeout(timeout); };
   }, [user]);
+
+  const resetSession = async () => {
+    console.log("AdminPage: Resetting session...");
+    localStorage.clear();
+    sessionStorage.clear();
+    await supabase.auth.signOut();
+    window.location.reload();
+  };
 
   if (!user || user.email?.trim().toLowerCase() !== ADMIN_EMAIL.trim().toLowerCase()) return null;
 
@@ -4970,13 +5000,17 @@ function AdminPage({ user, setPage }) {
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 0", gap: 16 }}>
           <div style={{ width: 32, height: 32, borderRadius: "50%", border: `3px solid ${BORDER}`, borderTopColor: O, animation: "spin 0.8s linear infinite" }} />
           <div style={{ fontSize: 13, color: MUTED, fontWeight: 500 }}>{lastStep}</div>
+          <button onClick={resetSession} style={{ marginTop: 24, padding: "8px 16px", fontSize: 12, background: "none", border: `1px solid ${BORDER}`, borderRadius: 8, cursor: "pointer", color: MUTED }}>Reset Session & Log In Fresh</button>
         </div>
       ) : error ? (
         <div style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "32px 24px", color: "#B91C1C", textAlign: "center" }}>
           <div style={{ fontSize: 32, marginBottom: 16 }}>⚠</div>
           <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Admin Loading Failed</div>
           <div style={{ fontSize: 14, opacity: 0.8, maxWidth: 400, margin: "0 auto 24px", lineHeight: 1.6 }}>{error}</div>
-          <button onClick={() => window.location.reload()} style={{ background: "#B91C1C", color: "white", border: "none", borderRadius: 8, padding: "10px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Retry Load</button>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+            <button onClick={() => window.location.reload()} style={{ background: "#B91C1C", color: "white", border: "none", borderRadius: 8, padding: "10px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Retry Load</button>
+            <button onClick={resetSession} style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "10px 24px", fontSize: 14, color: MUTED, cursor: "pointer", fontFamily: "inherit" }}>Reset Session & Log In Fresh</button>
+          </div>
         </div>
       ) : (
         <>
@@ -5262,7 +5296,7 @@ function PaymentPage({ user, setUser, setPage }) {
 
 
 
-async function fetchAdminStats(onStep = () => {}) {
+async function fetchAdminStats(onStep = () => { }) {
   const start = performance.now();
   try {
     const mark = (msg) => {
@@ -5274,18 +5308,18 @@ async function fetchAdminStats(onStep = () => {}) {
     mark("Fetching user list...");
     const usersRes = await supabase.from("profiles").select("id");
     if (usersRes.error) console.error("Admin user list error:", usersRes.error);
-    
+
     mark("Fetching kits list...");
     const kitsRes = await supabase.from("kits").select("id");
     if (kitsRes.error) console.error("Admin kits list error:", kitsRes.error);
-    
+
     mark("Fetching profiles details...");
     const profilesRes = await supabase.from("profiles")
       .select("id, name, email, plan, credits, created_at")
       .order("created_at", { ascending: false })
       .limit(100);
     if (profilesRes.error) console.error("Admin profiles detail error:", profilesRes.error);
-    
+
     mark("Load complete.");
     return {
       totalUsers: usersRes.data?.length || 0,
@@ -5555,7 +5589,7 @@ export default function App() {
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: N1 }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
         <div style={{ padding: "12px 18px", borderRadius: 18, background: "rgba(255,255,255,0.96)", boxShadow: "0 10px 30px rgba(0,0,0,0.12)" }}>
-          <BrandLogo height={132} />
+          <BrandLogo height={90} />
         </div>
         <div style={{ display: "flex", gap: 6 }}>
           {[0, 1, 2].map(i => <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: LB, animation: `dotPulse 1.2s ease ${i * 0.18}s infinite` }} />)}
