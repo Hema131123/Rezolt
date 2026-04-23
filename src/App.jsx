@@ -5534,7 +5534,7 @@ export default function App() {
   const handleAuth = async (u) => {
     // Render dashboard immediately; avoid blocking on history/profile reads.
     setUser(u);
-    setPage("dashboard");
+    setPage(page === "payment" ? "payment" : "dashboard");
 
     // Sequentialize fetches to prevent auth lock collisions
     const profile = await fetchProfile(u.id);
