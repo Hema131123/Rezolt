@@ -3,7 +3,6 @@ import "./premium-ui.css";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import { Document, Packer, Paragraph, TextRun } from "docx";
-import { supabase } from "@/core/supabase";
 import { FiLayout, FiEdit3, FiBookOpen } from "react-icons/fi";
 
 import { createClient } from "@supabase/supabase-js";
@@ -145,7 +144,14 @@ async function openRazorpay({ planId, amount, name, description, prefill, onSucc
     return false;
   }
 
-  const loaded = await loadRazorpay();
+  let loaded = false;
+  try {
+    loaded = await loadRazorpay();
+  } catch (e) {
+    console.error("Razorpay CDN load failed:", e);
+    alert("Failed to load payment gateway. Please disable any ad blockers and try again.");
+    return false;
+  }
   if (!loaded) { alert("Failed to load payment gateway. Please try again."); return false; }
 
   let orderId = null;
@@ -5179,27 +5185,30 @@ function PaymentPage({ user, setUser, setPage }) {
 
   const handlePay = async (plan) => {
     setLoading(plan.id);
-    await openRazorpay({
-      planId: plan.id,
-      amount: plan.price,
-      name: plan.id,
-      description: `Rezolt ${plan.name} — ${plan.tag}`,
-      prefill: { name: user.name, email: user.email, userId: user.id },
-      onSuccess: async () => {
-        await syncPaymentProfile(plan);
-      },
-      onDismiss: async () => {
-        const profile = await fetchProfile(user.id).catch(() => null);
-        const maybeUpdated = plan.type === "subscription"
-          ? (profile?.plan ?? user.plan) === "unlimited"
-          : (profile?.credits ?? 0) > (user.credits ?? 0);
-        if (maybeUpdated) {
-          setUser(prev => ({ ...prev, credits: profile?.credits ?? prev?.credits ?? 0, plan: profile?.plan ?? prev?.plan ?? "starter", name: profile?.name || prev?.name }));
-          setSuccess({ ...plan, synced: true });
-        }
-      },
-    });
-    setLoading(null);
+    try {
+      await openRazorpay({
+        planId: plan.id,
+        amount: plan.price,
+        name: plan.id,
+        description: `Rezolt ${plan.name} — ${plan.tag}`,
+        prefill: { name: user.name, email: user.email, userId: user.id },
+        onSuccess: async () => {
+          await syncPaymentProfile(plan);
+        },
+        onDismiss: async () => {
+          const profile = await fetchProfile(user.id).catch(() => null);
+          const maybeUpdated = plan.type === "subscription"
+            ? (profile?.plan ?? user.plan) === "unlimited"
+            : (profile?.credits ?? 0) > (user.credits ?? 0);
+          if (maybeUpdated) {
+            setUser(prev => ({ ...prev, credits: profile?.credits ?? prev?.credits ?? 0, plan: profile?.plan ?? prev?.plan ?? "starter", name: profile?.name || prev?.name }));
+            setSuccess({ ...plan, synced: true });
+          }
+        },
+      });
+    } finally {
+      setLoading(null);
+    }
   };
 
   if (success) return (
@@ -5615,7 +5624,7 @@ export default function App() {
       {page === "payment" && (user ? <PaymentPage user={user} setUser={setUser} setPage={setPage} /> : <AuthPage onAuth={handleAuth} setPage={setPage} />)}
       {page === "dashboard" && user && <Dashboard user={user} history={history} setPage={setPage} onBuyCredits={handleBuyCredits} />}
       {page === "generate" && user && <KitGenerator sessionToken={sessionToken} user={user} setUser={setUser} onSaveKit={handleSaveKit} onUseCredit={handleUseCredit} setPage={setPage} selectedTemplate={selectedTemplate} setSelectedTemplate={setSelectedTemplate} />}
-      {(page === "dashboard" || page === "generate" || page === "admin" || page === "payment") && !user && <AuthPage onAuth={handleAuth} setPage={setPage} />}
+      {(page === "dashboard" || page === "generate" || page === "admin") && !user && <AuthPage onAuth={handleAuth} setPage={setPage} />}
 
       {/* Mobile bottom nav — logged in users only */}
       {user && (
