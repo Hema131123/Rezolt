@@ -228,7 +228,11 @@ const TABS = [
   { id: "negotiate", iconClass: "fi fi-sr-badge-dollar", label: "Negotiate", minPlan: "unlimited" },
 ];
 const PLAN_ORDER = ["Free", "starter", "Pro", "unlimited"];
-const canAccess = (userPlan, minPlan) => PLAN_ORDER.indexOf(userPlan ?? "starter") >= PLAN_ORDER.indexOf(minPlan);
+const normalizePlan = (plan) => {
+  const map = { free: "Free", starter: "starter", pro: "Pro", unlimited: "unlimited" };
+  return plan ? (map[plan.toLowerCase()] ?? null) : null;
+};
+const canAccess = (userPlan, minPlan) => PLAN_ORDER.indexOf(userPlan ?? "Free") >= PLAN_ORDER.indexOf(minPlan);
 const ADMIN_EMAIL = "hema.manoharan13@outlook.com";
 const MAX_RESUME_CHARS = 12000;
 const MAX_JD_CHARS = 8000;
@@ -3243,7 +3247,7 @@ function AuthPage({ onAuth, setPage }) {
         setLoading(false);
         return;
       }
-      if (data.user) { const profile = await fetchProfile(data.user.id); onAuth({ id: data.user.id, name: profile?.name || name, email, credits: profile?.credits ?? 3, plan: profile?.plan ?? "starter" }); }
+      if (data.user) { const profile = await fetchProfile(data.user.id); onAuth({ id: data.user.id, name: profile?.name || name, email, credits: profile?.credits ?? 1, plan: normalizePlan(profile?.plan) ?? "Free" }); }
     } else {
       const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
       if (err) {
@@ -3256,7 +3260,7 @@ function AuthPage({ onAuth, setPage }) {
         setLoading(false);
         return;
       }
-      if (data.user) { const profile = await fetchProfile(data.user.id); onAuth({ id: data.user.id, name: profile?.name || data.user.email.split("@")[0], email, credits: profile?.credits ?? 3, plan: profile?.plan ?? "starter" }); }
+      if (data.user) { const profile = await fetchProfile(data.user.id); onAuth({ id: data.user.id, name: profile?.name || data.user.email.split("@")[0], email, credits: profile?.credits ?? 1, plan: normalizePlan(profile?.plan) ?? "Free" }); }
     }
     setLoading(false);
   };
@@ -5111,7 +5115,7 @@ function PaymentPage({ user, setUser, setPage }) {
     for (let attempt = 0; attempt < 5; attempt++) {
       const profile = await fetchProfile(user.id).catch(() => null);
       const latestCredits = profile?.credits ?? user.credits ?? 0;
-      const latestPlan = profile?.plan ?? user?.plan;
+      const latestPlan = normalizePlan(profile?.plan) ?? user?.plan;
       const synced = plan.type === "subscription"
         ? latestPlan === "unlimited"
         : latestCredits > (user.credits ?? 0);
@@ -5465,7 +5469,7 @@ export default function App() {
         const profile = await fetchProfile(authUser?.id);
         const kits = await fetchKits(authUser?.id);
         if (cancelled) return;
-        setUser({ id: authUser.id, name: profile?.name || authUser.email.split("@")[0], email: authUser.email, credits: profile?.credits ?? 1, plan: profile?.plan ?? "Free" });
+        setUser({ id: authUser.id, name: profile?.name || authUser.email.split("@")[0], email: authUser.email, credits: profile?.credits ?? 1, plan: normalizePlan(profile?.plan) ?? "Free" });
         setHistory(kits.map(k => ({ role: k.role, outputs: k.outputs, date: new Date(k.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) })));
       } catch (e) {
         console.error("Session sync failed:", e);
@@ -5539,7 +5543,7 @@ export default function App() {
         ...prev,
         name: profile?.name || prev?.name,
         credits: profile?.credits ?? prev?.credits ?? 1,
-        plan: profile?.plan ?? prev?.plan ?? "Free",
+        plan: normalizePlan(profile?.plan) ?? prev?.plan ?? "Free",
       }));
     }
   };
