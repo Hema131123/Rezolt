@@ -5450,6 +5450,26 @@ export default function App() {
     if (user && page === "auth") setPage("dashboard");
   }, [user]);
 
+  // Refresh profile + kits from DB every time the dashboard page opens
+  useEffect(() => {
+    if (page !== "dashboard" || !user?.id) return;
+    const uid = user.id;
+    fetchProfile(uid).then(profile => {
+      if (profile) setUser(prev => ({
+        ...prev,
+        credits: profile.credits ?? prev.credits,
+        plan: normalizePlan(profile.plan) ?? prev.plan,
+      }));
+    });
+    fetchKits(uid).then(kits => {
+      setHistory(kits.map(k => ({
+        role: k.role,
+        outputs: k.outputs,
+        date: new Date(k.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
+      })));
+    });
+  }, [page, user?.id]);
+
   // Restore session on load
   useEffect(() => {
     let cancelled = false;
@@ -5581,16 +5601,24 @@ export default function App() {
 
   const handleSaveKit = async (kit) => {
     setHistory(prev => [kit, ...prev]);
-    if (user?.id) await saveKit(user.id, kit);
+    if (!user?.id) return;
+    await saveKit(user.id, kit);
+    const kits = await fetchKits(user.id);
+    setHistory(kits.map(k => ({
+      role: k.role,
+      outputs: k.outputs,
+      date: new Date(k.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
+    })));
   };
 
   const handleUseCredit = async () => {
     if (!user?.id || user?.plan === "unlimited") return;
-    const next = await decrementCredits(user?.id, user?.credits);
-    setUser(prev => ({ ...prev, credits: next }));
-    // Re-fetch from DB to confirm actual value
     const profile = await fetchProfile(user.id);
-    if (profile) setUser(prev => ({ ...prev, credits: profile.credits }));
+    const current = profile?.credits ?? user?.credits ?? 0;
+    const next = Math.max(0, current - 1);
+    const { error } = await supabase.from("profiles").update({ credits: next }).eq("id", user.id);
+    if (!error) setUser(prev => ({ ...prev, credits: next }));
+    else console.error("Credit decrement failed:", error);
   };
 
   const handleBuyCredits = async () => {
