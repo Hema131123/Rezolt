@@ -2037,10 +2037,6 @@ function TopBar({ page, setPage, user, onSignOut }) {
                     <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)", marginBottom: 6 }}>
                       <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{user.name}</div>
                       <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>{user.email}</div>
-                      <div style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 6, background: "var(--accent-soft)", padding: "3px 10px", borderRadius: 20 }}>
-                        <div style={{ width: 6, height: 6, borderRadius: "50%", background: AC }} />
-                        <span style={{ fontSize: 11, fontWeight: 700, color: AC, textTransform: "capitalize" }}>{user?.plan || "starter"} · {user?.plan === "unlimited" ? "∞" : user?.credits} credits</span>
-                      </div>
                     </div>
                     {[
                       { key: "plans", label: (<><i className="fi fi-sr-badge-dollar" style={{ marginRight: 8 }} />Plans & Billing</>), action: () => { setPage("payment"); setMenuOpen(false); } },
