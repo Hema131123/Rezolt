@@ -3278,7 +3278,7 @@ function AuthPage({ onAuth, setPage }) {
         setLoading(false);
         return;
       }
-      if (data.user) { onAuth({ id: data.user.id, name: data.user.email.split("@")[0], email, credits: 1, plan: "Free" }); setPage("dashboard"); }
+      if (data.user) { onAuth({ id: data.user.id, name: data.user.email.split("@")[0], email, credits: 1, plan: "Free" }, data.session?.access_token); setPage("dashboard"); }
     }
     setLoading(false);
   };
@@ -3824,10 +3824,17 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
     try {
       try { await Promise.race([supabase.auth.refreshSession(), new Promise((_, r) => setTimeout(r, 1500))]); } catch (e) { console.warn("Session refresh failed:", e); }
 
-      const freshProfile = await Promise.race([
-        fetchProfile(user.id),
-        new Promise(r => setTimeout(() => r(null), 2500)),
-      ]).catch(() => null);
+      let freshProfile = null;
+      try {
+        const profileRes = await Promise.race([
+          fetchWithAuth("/api/get-profile", { method: "GET" }, sessionToken),
+          new Promise((_, r) => setTimeout(() => r(new Error("timeout")), 4000)),
+        ]);
+        const profileData = await profileRes.json().catch(() => ({}));
+        freshProfile = profileData?.profile ?? null;
+      } catch (e) {
+        console.warn("Profile fetch in generate() failed:", e);
+      }
       const effectivePlan = normalizePlan(freshProfile?.plan) ?? user?.plan ?? "Free";
       if (freshProfile) setUser(prev => ({
         ...prev,
@@ -5483,15 +5490,19 @@ export default function App() {
 
   // Refresh profile (credits + plan) whenever dashboard or generate page opens
   useEffect(() => {
-    if (!["dashboard", "generate"].includes(page) || !user?.id) return;
+    if (!["dashboard", "generate"].includes(page) || !user?.id || !sessionToken) return;
     const uid = user.id;
-    fetchProfile(uid).then(profile => {
-      if (profile) setUser(prev => ({
-        ...prev,
-        credits: profile.credits ?? prev.credits,
-        plan: normalizePlan(profile.plan) ?? prev.plan,
-      }));
-    });
+    fetchWithAuth("/api/get-profile", { method: "GET" }, sessionToken)
+      .then(r => r.json())
+      .then(data => {
+        const profile = data?.profile;
+        if (profile) setUser(prev => ({
+          ...prev,
+          credits: profile.credits ?? prev.credits,
+          plan: normalizePlan(profile.plan) ?? prev.plan,
+        }));
+      })
+      .catch(e => console.warn("Page-change profile refresh failed:", e));
     if (page === "dashboard") {
       fetchKits(uid).then(kits => {
         setHistory(kits.map(k => ({
@@ -5590,13 +5601,24 @@ export default function App() {
     };
   }, []);
 
-  const handleAuth = async (u) => {
+  const handleAuth = async (u, token) => {
     // Render dashboard immediately; avoid blocking on history/profile reads.
     setUser(u);
+    if (token) setSessionToken(token);
     setPage(prev => prev === "payment" ? "payment" : "dashboard");
 
-    // Sequentialize fetches to prevent auth lock collisions
-    const profile = await fetchProfile(u.id);
+    const authToken = token || sessionToken;
+    let profile = null;
+    try {
+      if (authToken) {
+        const res = await fetchWithAuth("/api/get-profile", { method: "GET" }, authToken);
+        const data = await res.json().catch(() => ({}));
+        profile = data?.profile ?? null;
+      }
+      if (!profile) profile = await fetchProfile(u.id);
+    } catch (e) {
+      console.warn("handleAuth profile fetch failed:", e);
+    }
     const kits = await fetchKits(u.id);
 
     setHistory(kits.map(k => ({ role: k.role, outputs: k.outputs, date: new Date(k.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) })));
