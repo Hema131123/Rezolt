@@ -61,25 +61,44 @@ function normalizeExportText(value) {
 
 async function exportTextToDocx(text, fileName, title = "Rezolt Output") {
   const cleaned = normalizeExportText(text);
-  const paragraphs = cleaned
-    .split(/\n+/)
-    .map(line => line.trim())
-    .filter(Boolean)
-    .map(line => new Paragraph({
-      children: [new TextRun({ text: line, size: 24 })],
-      spacing: { after: 120 },
-    }));
+  const lines = cleaned.split(/\n+/).map(l => l.trim()).filter(Boolean);
+
+  const isSectionHeader = line => /^[A-Z][A-Z\s&\/\-]+:?\s*$/.test(line);
+  const isBullet = line => line.startsWith("•") || line.startsWith("-");
+  const isContactLine = line => /\|/.test(line) || /^[+\d][\d\s\-]+$/.test(line) || /@/.test(line);
+
+  const paragraphs = lines.map(line => {
+    if (isSectionHeader(line)) {
+      return new Paragraph({
+        children: [new TextRun({ text: line.replace(/:$/, ""), bold: true, size: 26, color: "031D40" })],
+        spacing: { before: 200, after: 80 },
+        border: { bottom: { style: "single", size: 4, color: "031D40", space: 4 } },
+      });
+    }
+    if (isBullet(line)) {
+      return new Paragraph({
+        children: [new TextRun({ text: line, size: 22 })],
+        spacing: { after: 60 },
+        indent: { left: 360 },
+      });
+    }
+    if (isContactLine(line)) {
+      return new Paragraph({
+        children: [new TextRun({ text: line, size: 22, color: "444444" })],
+        spacing: { after: 40 },
+        alignment: "center",
+      });
+    }
+    return new Paragraph({
+      children: [new TextRun({ text: line, size: 22 })],
+      spacing: { after: 80 },
+    });
+  });
 
   const doc = new Document({
     sections: [{
       properties: {},
-      children: [
-        new Paragraph({
-          children: [new TextRun({ text: title, bold: true, size: 30 })],
-          spacing: { after: 240 },
-        }),
-        ...(paragraphs.length ? paragraphs : [new Paragraph("No content available for export yet.")]),
-      ],
+      children: paragraphs.length ? paragraphs : [new Paragraph("No content available for export yet.")],
     }],
   });
 
@@ -284,15 +303,14 @@ COMPANY RULE: The TARGET company is named in the JOB DESCRIPTION. The RESUME con
 
 ${TEMPLATE_INSTRUCTIONS[template] || TEMPLATE_INSTRUCTIONS.creative}
 
-FAANG/MAANG RESUME STANDARDS:
-- Every bullet must follow the XYZ formula: "Accomplished [X] as measured by [Y] by doing [Z]"
+RESUME STANDARDS:
 - Lead with impact, not responsibility. What changed because of this person?
-- Power verbs: Architected, Spearheaded, Engineered, Pioneered, Orchestrated, Transformed, Scaled, Optimised, Delivered, Drove
-- Every bullet must contain a metric (%, INR, users, time saved, revenue, scale, reduction in TAT)
-- If no metric exists in the resume, derive a reasonable proxy using context clues
+- Power verbs: Spearheaded, Orchestrated, Transformed, Scaled, Optimised, Delivered, Drove, Partnered, Streamlined, Championed
+- Use real metrics from the resume where they exist (%, headcount, revenue, time saved, scale)
+- If the candidate did not provide a metric for something, describe the impact clearly and specifically — do NOT invent or estimate numbers that are not in the resume
 - ATS keywords must be exact-match to the JD, not synonyms
 - Summary must position the candidate as a domain expert, not a generalist
-- Highlight scale: team size led, budget managed, users impacted, geographic scope
+- Highlight scope: team size led, geography, business units, budget ownership — only if mentioned in the resume
 
 FORMATTING:
 - Plain text only. No markdown (no **, *, ##, ---)
@@ -300,7 +318,7 @@ FORMATTING:
 - Section headers in ALL CAPS followed by a colon
 - Bullets use: •
 - Blank line between sections
-- Every role: minimum 6 bullet points, all quantified
+- Every role: 4-6 bullet points. Use a metric only when one is genuinely present in the source resume.
 
 OUTPUT FORMAT (start immediately, no preamble):
 
@@ -339,7 +357,7 @@ EDUCATION:
 CERTIFICATIONS AND AWARDS:
 [Certification name] | [Issuing body] | [Year]
 
-RULE: Use only real details from the resume. Expand, reframe, and quantify what exists. Do not invent experiences.
+RULE: Use only real details from the resume. Expand and reframe what exists. Do not invent experiences, numbers, or metrics that are not in the source resume.
 
 RESUME:
 ${r}
@@ -5450,9 +5468,9 @@ export default function App() {
     if (user && page === "auth") setPage("dashboard");
   }, [user]);
 
-  // Refresh profile + kits from DB every time the dashboard page opens
+  // Refresh profile (credits + plan) whenever dashboard or generate page opens
   useEffect(() => {
-    if (page !== "dashboard" || !user?.id) return;
+    if (!["dashboard", "generate"].includes(page) || !user?.id) return;
     const uid = user.id;
     fetchProfile(uid).then(profile => {
       if (profile) setUser(prev => ({
@@ -5461,13 +5479,15 @@ export default function App() {
         plan: normalizePlan(profile.plan) ?? prev.plan,
       }));
     });
-    fetchKits(uid).then(kits => {
-      setHistory(kits.map(k => ({
-        role: k.role,
-        outputs: k.outputs,
-        date: new Date(k.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
-      })));
-    });
+    if (page === "dashboard") {
+      fetchKits(uid).then(kits => {
+        setHistory(kits.map(k => ({
+          role: k.role,
+          outputs: k.outputs,
+          date: new Date(k.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
+        })));
+      });
+    }
   }, [page, user?.id]);
 
   // Restore session on load
