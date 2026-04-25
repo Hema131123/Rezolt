@@ -5444,6 +5444,12 @@ export default function App() {
   const [selectedTemplate, setSelectedTemplate] = useState("creative");
   const [selectedArticle, setSelectedArticle] = useState(0);
   const [sessionToken, setSessionToken] = useState(null);
+
+  // Safety net: if user gets set while on the auth page, navigate to dashboard
+  useEffect(() => {
+    if (user && page === "auth") setPage("dashboard");
+  }, [user]);
+
   // Restore session on load
   useEffect(() => {
     let cancelled = false;
@@ -5473,7 +5479,9 @@ export default function App() {
         setHistory(kits.map(k => ({ role: k.role, outputs: k.outputs, date: new Date(k.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) })));
       } catch (e) {
         console.error("Session sync failed:", e);
-        if (!cancelled) setPage("landing");
+        if (!cancelled) setPage(prev =>
+          (prev === "dashboard" || prev === "generate" || prev === "admin") ? prev : "landing"
+        );
       }
     };
 
