@@ -1125,7 +1125,7 @@ const GLOBAL_CSS = `
   @keyframes rotate-light { from { transform: rotate(0deg) } to { transform: rotate(6deg) } }
   @keyframes ambientDrift { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(0,-10px,0) scale(1.02); } }
   @keyframes sheenMove { 0% { transform: translateX(-130%) skewX(-18deg); } 100% { transform: translateX(130%) skewX(-18deg); } }
-  @keyframes pageFade { from { opacity: 0; transform: translateY(12px) scale(0.995); } to { opacity: 1; transform: none; } }
+  @keyframes pageFade { from { opacity: 0; } to { opacity: 1; } }
   .scan-line { position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(3,29,64,.6), transparent); animation: scanline 2.5s ease-in-out infinite; pointer-events: none; }
   .arrow-pulse { animation: arrowPulse 1.2s ease-in-out infinite; }
   .after-glow  { animation: glow 2.5s ease-in-out infinite; }
@@ -1368,8 +1368,9 @@ const GLOBAL_CSS = `
 
   /* ── FEATURE CARD EQUAL HEIGHT ──────────────────────────────────── */
   .feature-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 18px;
     align-items: stretch;
     width: 100%;
@@ -1377,28 +1378,23 @@ const GLOBAL_CSS = `
     margin: 0 auto;
   }
   .feature-grid > * {
+    flex: 0 0 calc(25% - 13.5px);
     min-width: 0;
-    max-width: none;
   }
   @media (max-width: 1200px) {
-    .feature-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+    .feature-grid > * {
+      flex: 0 0 calc(33.333% - 12px);
     }
   }
   @media (max-width: 768px) {
-    .feature-grid {
-      grid-template-columns: repeat(2, 1fr) !important;
+    .feature-grid > * {
+      flex: 0 0 calc(50% - 9px) !important;
     }
   }
   @media (max-width: 560px) {
-    .feature-grid {
-      grid-template-columns: 1fr !important;
+    .feature-grid > * {
+      flex: 0 0 100% !important;
     }
-  }
-  @media (min-width: 1201px) {
-    .feature-grid > :nth-child(5):nth-last-child(3) { grid-column: 2; }
-    .feature-grid > :nth-child(6):nth-last-child(2) { grid-column: 3; }
-    .feature-grid > :nth-child(7):nth-last-child(1) { grid-column: 4; }
   }
   .feature-card {
     display: flex;
@@ -1851,7 +1847,7 @@ const GLOBAL_CSS = `
     .three-col        { grid-template-columns: 1fr !important; }
     .two-col-md       { grid-template-columns: 1fr !important; }
     .pricing-grid     { grid-template-columns: 1fr !important; }
-    .feature-grid     { grid-template-columns: 1fr 1fr !important; }
+    .feature-grid > * { flex: 0 0 calc(50% - 9px) !important; }
     .kit-grid         { grid-template-columns: 1fr !important; }
 
     /* ── HERO before/after ── */
@@ -1902,7 +1898,7 @@ const GLOBAL_CSS = `
   }
   @media (max-width: 380px) {
     .hero-title { font-size: 28px !important; }
-    .feature-grid { grid-template-columns: 1fr !important; }
+    .feature-grid > * { flex: 0 0 100% !important; }
     .pricing-grid { grid-template-columns: 1fr !important; }
     .dash-stats { grid-template-columns: 1fr !important; }
     .stats-bar { grid-template-columns: repeat(2,1fr) !important; }
@@ -1990,16 +1986,16 @@ function TopBar({ page, setPage, user, onSignOut }) {
         {!user ? (
           <div className="desktop-only" style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <button onClick={() => setPage("landing")} className="nav-item" style={{ background: "none", border: "none", padding: "8px 14px", fontSize: 14, color: "var(--text-muted)", cursor: "pointer", borderRadius: 8, fontFamily: "inherit", fontWeight: 500 }}>Home</button>
-            <button onClick={() => { setPage("landing"); setTimeout(() => { document.getElementById("pricing-section")?.scrollIntoView({ behavior: "smooth" }); }, 120); }} className="nav-item" style={{ background: "none", border: "none", padding: "8px 14px", fontSize: 14, color: "var(--text-muted)", cursor: "pointer", borderRadius: 8, fontFamily: "inherit", fontWeight: 500 }}>Pricing</button>
             <button onClick={() => setPage("articles")} className="nav-item" style={{ background: "none", border: "none", padding: "8px 14px", fontSize: 14, color: page === "articles" ? AC : "var(--text-muted)", cursor: "pointer", borderRadius: 8, fontFamily: "inherit", fontWeight: page === "articles" ? 700 : 500 }}>Articles</button>
+            <button onClick={() => { setPage("landing"); setTimeout(() => { document.getElementById("pricing-section")?.scrollIntoView({ behavior: "smooth" }); }, 120); }} className="nav-item" style={{ background: "none", border: "none", padding: "8px 14px", fontSize: 14, color: "var(--text-muted)", cursor: "pointer", borderRadius: 8, fontFamily: "inherit", fontWeight: 500 }}>Pricing</button>
             <button onClick={() => setPage("auth")} className="btn-primary" style={{ background: "var(--grad)", color: WHITE, border: "none", borderRadius: 10, padding: "10px 22px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--shadow-accent)" }}>Get Started</button>
           </div>
         ) : (
           <div className="desktop-only" style={{ display: "flex", gap: 4, alignItems: "center" }}>
             {[
               { key: "home", label: "Home", page: "landing" },
-              { key: "pricing", label: "Pricing", page: "landing", scroll: "pricing-section" },
               { key: "articles", label: "Articles", page: "articles" },
+              { key: "pricing", label: "Pricing", page: "landing", scroll: "pricing-section" },
               { key: "dashboard", label: "Dashboard", page: "dashboard" },
               { key: "create", label: "Create Kit", page: "generate" },
               ...(user?.email?.trim()?.toLowerCase() === ADMIN_EMAIL.trim().toLowerCase() ? [{ key: "admin", label: "Admin", page: "admin" }] : []),
@@ -2094,8 +2090,8 @@ function TopBar({ page, setPage, user, onSignOut }) {
           {!user ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <button onClick={() => { setPage("landing"); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 15, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 600 }}><i className="fi fi-sr-home" style={{ marginRight: 8 }} />Home</button>
-              <button onClick={() => { setPage("landing"); setTimeout(() => document.getElementById("pricing-section")?.scrollIntoView({ behavior: "smooth" }), 120); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 15, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 600 }}><i className="fi fi-sr-badge-dollar" style={{ marginRight: 8 }} />Pricing</button>
               <button onClick={() => { setPage("articles"); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 15, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 600 }}><i className="fi fi-sr-newspaper" style={{ marginRight: 8 }} />Articles</button>
+              <button onClick={() => { setPage("landing"); setTimeout(() => document.getElementById("pricing-section")?.scrollIntoView({ behavior: "smooth" }), 120); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 15, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 600 }}><i className="fi fi-sr-badge-dollar" style={{ marginRight: 8 }} />Pricing</button>
               <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
               <button onClick={() => { setPage("auth"); setMobileNav(false); }} style={{ background: "var(--grad)", color: WHITE, border: "none", borderRadius: 12, padding: "14px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Get Started Free</button>
               <button onClick={() => { setPage("auth"); setMobileNav(false); }} style={{ background: "none", border: "1px solid var(--border)", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", color: "var(--text-muted)" }}>Sign In</button>
