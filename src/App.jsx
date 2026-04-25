@@ -5621,24 +5621,33 @@ export default function App() {
 
   const handleSaveKit = async (kit) => {
     setHistory(prev => [kit, ...prev]);
-    if (!user?.id) return;
-    await saveKit(user.id, kit);
-    const kits = await fetchKits(user.id);
-    setHistory(kits.map(k => ({
-      role: k.role,
-      outputs: k.outputs,
-      date: new Date(k.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
-    })));
+    if (!user?.id || !sessionToken) return;
+    try {
+      await fetchWithAuth("/api/save-kit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: kit.role, outputs: kit.outputs }),
+      }, sessionToken);
+    } catch (err) {
+      console.error("Kit save failed:", err.message);
+    }
   };
 
   const handleUseCredit = async () => {
-    if (!user?.id || user?.plan === "unlimited") return;
-    const profile = await fetchProfile(user.id);
-    const current = profile?.credits ?? user?.credits ?? 0;
-    const next = Math.max(0, current - 1);
-    const { error } = await supabase.from("profiles").update({ credits: next }).eq("id", user.id);
-    if (!error) setUser(prev => ({ ...prev, credits: next }));
-    else console.error("Credit decrement failed:", error);
+    if (!user?.id || user?.plan === "unlimited" || !sessionToken) return;
+    try {
+      const res = await fetchWithAuth("/api/use-credit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      }, sessionToken);
+      const data = await res.json();
+      if (data.credits !== undefined && data.credits !== null) {
+        setUser(prev => ({ ...prev, credits: data.credits }));
+      }
+    } catch (err) {
+      console.error("Credit update failed:", err.message);
+    }
   };
 
   const handleBuyCredits = async () => {
