@@ -3247,7 +3247,7 @@ function AuthPage({ onAuth, setPage }) {
         setLoading(false);
         return;
       }
-      if (data.user) { const profile = await fetchProfile(data.user.id); onAuth({ id: data.user.id, name: profile?.name || name, email, credits: profile?.credits ?? 1, plan: normalizePlan(profile?.plan) ?? "Free" }); }
+      if (data.user) { onAuth({ id: data.user.id, name: name, email, credits: 1, plan: "Free" }); }
     } else {
       const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
       if (err) {
@@ -3260,7 +3260,7 @@ function AuthPage({ onAuth, setPage }) {
         setLoading(false);
         return;
       }
-      if (data.user) { const profile = await fetchProfile(data.user.id); onAuth({ id: data.user.id, name: profile?.name || data.user.email.split("@")[0], email, credits: profile?.credits ?? 1, plan: normalizePlan(profile?.plan) ?? "Free" }); }
+      if (data.user) { onAuth({ id: data.user.id, name: data.user.email.split("@")[0], email, credits: 1, plan: "Free" }); }
     }
     setLoading(false);
   };
