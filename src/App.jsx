@@ -220,12 +220,12 @@ async function openRazorpay({ planId, amount, name, description, prefill, onSucc
 // ─── TABS ─────────────────────────────────────────────────────────────────────
 
 const TABS = [
-  { id: "resume", iconClass: "fi fi-sr-file", label: "Resume", minPlan: "Free" },
-  { id: "cover", iconClass: "fi fi-sr-envelope", label: "Cover Letter", minPlan: "starter" },
-  { id: "referral", iconClass: "fi fi-sr-handshake", label: "Referral", minPlan: "starter" },
-  { id: "interview", iconClass: "fi fi-sr-bullseye", label: "Interview Prep", minPlan: "starter" },
-  { id: "reach", iconClass: "fi fi-sr-search", label: "Find & Reach", minPlan: "starter" },
-  { id: "negotiate", iconClass: "fi fi-sr-badge-dollar", label: "Negotiate", minPlan: "unlimited" },
+  { id: "resume", iconClass: "fa-solid fa-file", label: "Resume", minPlan: "Free" },
+  { id: "cover", iconClass: "fa-solid fa-envelope", label: "Cover Letter", minPlan: "starter" },
+  { id: "referral", iconClass: "fa-solid fa-handshake", label: "Referral", minPlan: "starter" },
+  { id: "interview", iconClass: "fa-solid fa-bullseye", label: "Interview Prep", minPlan: "starter" },
+  { id: "reach", iconClass: "fa-solid fa-magnifying-glass", label: "Find & Reach", minPlan: "starter" },
+  { id: "negotiate", iconClass: "fa-solid fa-dollar-sign", label: "Negotiate", minPlan: "unlimited" },
 ];
 const PLAN_ORDER = ["Free", "starter", "Pro", "unlimited"];
 const normalizePlan = (plan) => {
@@ -2043,7 +2043,7 @@ function TopBar({ page, setPage, user, onSignOut }) {
                       <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>{user.email}</div>
                     </div>
                     {[
-                      { key: "plans", label: (<><i className="fi fi-sr-badge-dollar" style={{ marginRight: 8 }} />Plans & Billing</>), action: () => { setPage("payment"); setMenuOpen(false); } },
+                      { key: "plans", label: (<><i className="fa-solid fa-dollar-sign" style={{ marginRight: 8 }} />Plans & Billing</>), action: () => { setPage("payment"); setMenuOpen(false); } },
                       { key: "dashboard", label: (<><FiLayout style={{ marginRight: 8 }} />Dashboard</>), action: () => { setPage("dashboard"); setMenuOpen(false); } },
                       { key: "create", label: (<><FiEdit3 style={{ marginRight: 8 }} />Create Kit</>), action: () => { setPage("generate"); setMenuOpen(false); } },
                     ].map(item => (
@@ -2057,7 +2057,7 @@ function TopBar({ page, setPage, user, onSignOut }) {
                       <button onClick={() => { onSignOut(); setMenuOpen(false); }} style={{ width: "100%", textAlign: "left", background: "none", border: "none", padding: "10px 16px", fontSize: 13, color: ER, cursor: "pointer", borderRadius: 10, fontFamily: "inherit", transition: "all 0.15s ease" }}
                         onMouseEnter={e => e.currentTarget.style.background = "rgba(239,68,68,0.08)"}
                         onMouseLeave={e => e.currentTarget.style.background = "none"}>
-                        <i className="fi fi-sr-exit" style={{ marginRight: 8 }} />Sign Out
+                        <i className="fa-solid fa-right-from-bracket" style={{ marginRight: 8 }} />Sign Out
                       </button>
                     </div>
                   </div>
@@ -2076,7 +2076,7 @@ function TopBar({ page, setPage, user, onSignOut }) {
             </div>
           )}
           <button className="menu-toggle" onClick={() => setMobileNav(p => !p)} style={{ background: "none", border: "1px solid var(--border)", borderRadius: 8, padding: "6px 10px", cursor: "pointer", fontSize: 18, color: "var(--text)" }}>
-            <i className={mobileNav ? "fi fi-sr-cross-small" : "fi fi-sr-menu-burger"} />
+            <i className={mobileNav ? "fa-solid fa-xmark" : "fa-solid fa-bars"} />
           </button>
         </div>
       </div>
@@ -2086,9 +2086,9 @@ function TopBar({ page, setPage, user, onSignOut }) {
         <div className="mobile-only" style={{ background: "var(--surface)", borderBottom: "1px solid var(--border)", padding: "8px 16px 16px", boxShadow: "var(--shadow-md)", zIndex: 99, position: "relative" }}>
           {!user ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <button onClick={() => { setPage("landing"); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 15, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 600 }}><i className="fi fi-sr-home" style={{ marginRight: 8 }} />Home</button>
-              <button onClick={() => { setPage("articles"); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 15, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 600 }}><i className="fi fi-sr-newspaper" style={{ marginRight: 8 }} />Articles</button>
-              <button onClick={() => { setPage("landing"); setTimeout(() => document.getElementById("pricing-section")?.scrollIntoView({ behavior: "smooth" }), 120); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 15, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 600 }}><i className="fi fi-sr-badge-dollar" style={{ marginRight: 8 }} />Pricing</button>
+              <button onClick={() => { setPage("landing"); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 15, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 600 }}><i className="fa-solid fa-house" style={{ marginRight: 8 }} />Home</button>
+              <button onClick={() => { setPage("articles"); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 15, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 600 }}><i className="fa-solid fa-newspaper" style={{ marginRight: 8 }} />Articles</button>
+              <button onClick={() => { setPage("landing"); setTimeout(() => document.getElementById("pricing-section")?.scrollIntoView({ behavior: "smooth" }), 120); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 15, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 600 }}><i className="fa-solid fa-dollar-sign" style={{ marginRight: 8 }} />Pricing</button>
               <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
               <button onClick={() => { setPage("auth"); setMobileNav(false); }} style={{ background: "var(--grad)", color: WHITE, border: "none", borderRadius: 12, padding: "14px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Get Started Free</button>
               <button onClick={() => { setPage("auth"); setMobileNav(false); }} style={{ background: "none", border: "1px solid var(--border)", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", color: "var(--text-muted)" }}>Sign In</button>
@@ -2106,16 +2106,16 @@ function TopBar({ page, setPage, user, onSignOut }) {
                 {[
                   { key: "dashboard", label: (<><FiLayout style={{ marginRight: 8 }} />Dashboard</>), page: "dashboard" },
                   { key: "create", label: (<><FiEdit3 style={{ marginRight: 8 }} />Create Kit</>), page: "generate" },
-                  { key: "home", label: (<><i className="fi fi-sr-home" style={{ marginRight: 8 }} />Home</>), page: "landing" },
-                  { key: "pricing", label: (<><i className="fi fi-sr-badge-dollar" style={{ marginRight: 8 }} />Pricing</>), page: "landing", scroll: "pricing-section" },
+                  { key: "home", label: (<><i className="fa-solid fa-house" style={{ marginRight: 8 }} />Home</>), page: "landing" },
+                  { key: "pricing", label: (<><i className="fa-solid fa-dollar-sign" style={{ marginRight: 8 }} />Pricing</>), page: "landing", scroll: "pricing-section" },
                   { key: "articles", label: (<><FiBookOpen style={{ marginRight: 8 }} />Articles</>), page: "articles" },
-                  { key: "plans", label: (<><i className="fi fi-sr-badge-dollar" style={{ marginRight: 8 }} />Plans & Billing</>), page: "payment" },
-                  ...(user?.email?.trim()?.toLowerCase() === ADMIN_EMAIL.trim().toLowerCase() ? [{ key: "admin", label: (<><i className="fi fi-sr-settings-sliders" style={{ marginRight: 8 }} />Admin</>), page: "admin" }] : []),
+                  { key: "plans", label: (<><i className="fa-solid fa-dollar-sign" style={{ marginRight: 8 }} />Plans & Billing</>), page: "payment" },
+                  ...(user?.email?.trim()?.toLowerCase() === ADMIN_EMAIL.trim().toLowerCase() ? [{ key: "admin", label: (<><i className="fa-solid fa-sliders" style={{ marginRight: 8 }} />Admin</>), page: "admin" }] : []),
                 ].map(item => (
                   <button key={item.key} onClick={() => { setPage(item.page); if (item.scroll) setTimeout(() => document.getElementById(item.scroll)?.scrollIntoView({ behavior: "smooth" }), 100); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 14, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 500 }}>{item.label}</button>
                 ))}
                 <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
-                <button onClick={() => { onSignOut(); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 14, color: ER, cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left" }}><i className="fi fi-sr-exit" style={{ marginRight: 8 }} />Sign Out</button>
+                <button onClick={() => { onSignOut(); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 14, color: ER, cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left" }}><i className="fa-solid fa-right-from-bracket" style={{ marginRight: 8 }} />Sign Out</button>
               </div>
             </div>
           )}
@@ -2654,7 +2654,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
                     <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, color: DARK, marginBottom: 4 }}>{sampleModalContent[sampleTab].title}</div>
                     <div style={{ fontSize: 13, color: MUTED }}>{sampleModalContent[sampleTab].subtitle}</div>
                   </div>
-                  <button onClick={() => setSampleModalOpen(false)} style={{ background: "var(--surface2)", border: `1px solid ${BORDER}`, borderRadius: 10, width: 34, height: 34, cursor: "pointer", color: MUTED, fontSize: 16 }}><i className="fi fi-sr-cross-small" /></button>
+                  <button onClick={() => setSampleModalOpen(false)} style={{ background: "var(--surface2)", border: `1px solid ${BORDER}`, borderRadius: 10, width: 34, height: 34, cursor: "pointer", color: MUTED, fontSize: 16 }}><i className="fa-solid fa-xmark" /></button>
                 </div>
                 <div className="two-col-md" style={{ display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 14 }}>
                   <div style={{ background: "var(--surface2)", border: `1px solid ${BORDER}`, borderRadius: 18, padding: "16px 18px" }}>
@@ -3119,7 +3119,7 @@ function ArticlesPage({ setPage, user, selectedArticle = 0, setSelectedArticle =
       <div className="hero-gradient" style={{ padding: "56px clamp(16px,5vw,80px) 54px", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "relative", zIndex: 1, maxWidth: 1040, margin: "0 auto", textAlign: "center" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--accent-soft)", border: "1px solid rgba(3,29,64,0.08)", borderRadius: 999, padding: "6px 14px", marginBottom: 18, color: AC, fontSize: 12, fontWeight: 700 }}>
-            <i className="fi fi-sr-newspaper" />Articles & Insights
+            <i className="fa-solid fa-newspaper" />Articles & Insights
           </div>
           <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(32px,4vw,50px)", fontWeight: 400, color: "var(--text)", marginBottom: 12 }}>
             Career guidance worth reading in full
@@ -3414,7 +3414,7 @@ function Dashboard({ user, history, setPage, onBuyCredits }) {
         <div style={{ textAlign: "left", alignItems: "flex-start" }}>
           <button onClick={() => setViewingKit(null)} style={{ background: "none", border: "none", color: MUTED, fontSize: 13, cursor: "pointer", padding: 0, marginBottom: 6, fontFamily: "inherit", display: "block", textAlign: "left" }}>Back to Dashboard</button>
           <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, fontWeight: 500, color: DARK, textAlign: "left" }}>Your Career Kit</div>
-          <div style={{ fontSize: 13, color: MUTED, marginTop: 3, textAlign: "left" }}><i className="fi fi-sr-bullseye" style={{ marginRight: 6 }} />{viewingKit.role} · {viewingKit.date}</div>
+          <div style={{ fontSize: 13, color: MUTED, marginTop: 3, textAlign: "left" }}><i className="fa-solid fa-bullseye" style={{ marginRight: 6 }} />{viewingKit.role} · {viewingKit.date}</div>
         </div>
       </div>
 
@@ -3522,7 +3522,7 @@ function Dashboard({ user, history, setPage, onBuyCredits }) {
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: FAINT, marginBottom: 14 }}>Recent Kits</div>
         {history.length === 0 ? (
           <div style={{ background: BG, border: `1px dashed ${BORDER}`, borderRadius: 24, padding: "56px 36px", textAlign: "center", boxShadow: "var(--soft-shadow)" }}>
-            <div style={{ fontSize: 34, marginBottom: 14 }}><i className="fi fi-sr-magic-wand" /></div>
+            <div style={{ fontSize: 34, marginBottom: 14 }}><i className="fa-solid fa-wand-magic-sparkles" /></div>
             <div style={{ color: MUTED, fontSize: 15, marginBottom: 20 }}>Ready to land your dream role? Let’s build your first kit together.</div>
             <button onClick={() => setPage("generate")} style={{ background: O, color: WHITE, border: "none", borderRadius: 16, padding: "12px 26px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)" }}>Let’s build the first kit</button>
           </div>
@@ -3531,7 +3531,7 @@ function Dashboard({ user, history, setPage, onBuyCredits }) {
             {history.map((kit, i) => (
               <div key={i} className="card-hover" onClick={() => { setViewingKit(kit); setActiveTab(Object.keys(kit.outputs || {})[0] || "resume"); }} style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 22, padding: "18px 22px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", transition: "all 0.15s", boxShadow: "var(--soft-shadow)" }}>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: DARK, marginBottom: 3 }}><i className="fi fi-sr-bullseye" style={{ marginRight: 6 }} />{kit.role}</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: DARK, marginBottom: 3 }}><i className="fa-solid fa-bullseye" style={{ marginRight: 6 }} />{kit.role}</div>
                   <div style={{ fontSize: 12, color: FAINT }}>{kit.date} · {Object.keys(kit.outputs || {}).length} outputs saved</div>
                 </div>
                 <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
@@ -4039,7 +4039,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                 Share your resume and the role you're eyeing. Rezolt helps shape everything into a thoughtful, role-matched kit in under a minute.
               </div>
               <div className="marine-chip-row">
-                {[[<i className="fi fi-sr-check" />, "ATS-aware"], [<i className="fi fi-sr-user-check" />, "Role-matched"], [<i className="fi fi-sr-clock-three" />, "~60 sec turnaround"]].map(([icon, label]) => (
+                {[[<i className="fa-solid fa-check" />, "ATS-aware"], [<i className="fa-solid fa-user-check" />, "Role-matched"], [<i className="fa-solid fa-clock" />, "~60 sec turnaround"]].map(([icon, label]) => (
                   <span key={label} className="marine-chip"><span>{icon}</span>{label}</span>
                 ))}
               </div>
@@ -4086,14 +4086,14 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                           </>
                         ) : resume.length > 50 ? (
                           <>
-                            <div style={{ fontSize: 30 }}><i className="fi fi-sr-check" /></div>
+                            <div style={{ fontSize: 30 }}><i className="fa-solid fa-check" /></div>
                             <div style={{ fontSize: 14, fontWeight: 700, color: G }}>{uploadedFileName}</div>
                             <div style={{ fontSize: 12, color: MUTED }}>{resume.length} characters extracted</div>
                             <div style={{ fontSize: 12, color: O, textDecoration: "underline", cursor: "pointer" }}>Upload different file</div>
                           </>
                         ) : (
                           <>
-                            <div style={{ fontSize: 34 }}><i className="fi fi-sr-magic-wand" /></div>
+                            <div style={{ fontSize: 34 }}><i className="fa-solid fa-wand-magic-sparkles" /></div>
                             <div style={{ fontSize: 14, fontWeight: 700, color: DARK }}>Bring in your current resume</div>
                             <div style={{ fontSize: 13, color: MUTED }}>PDF, DOCX or TXT — we’ll take it from here</div>
                             <div style={{ background: O, color: WHITE, borderRadius: 14, padding: "10px 22px", fontSize: 13, fontWeight: 600 }}>Select Resume</div>
@@ -4167,7 +4167,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                   ))}
                 </div>
                 <div style={{ marginTop: 12, background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "12px 14px" }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: DARK, marginBottom: 6 }}><i className="fi fi-sr-shield-check" style={{ marginRight: 6 }} />Private by default</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: DARK, marginBottom: 6 }}><i className="fa-solid fa-shield-halved" style={{ marginRight: 6 }} />Private by default</div>
                   <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.7 }}>
                     Your resume and JD are only used to generate your kit. They are not posted publicly or shared with employers, and photos or styling from uploaded files are ignored.
                   </div>
@@ -4211,7 +4211,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
             <div>
               <button onClick={() => { setStep("input"); setOutputs({}); setLoading({}); }} style={{ background: "none", border: "none", color: MUTED, fontSize: 13, cursor: "pointer", padding: 0, marginBottom: 6, fontFamily: "inherit" }}>Back</button>
               <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, fontWeight: 500, color: DARK }}>Your Career Kit</div>
-              <div style={{ fontSize: 13, color: MUTED, marginTop: 3 }}><i className="fi fi-sr-bullseye" style={{ marginRight: 6 }} />{currentRole}</div>
+              <div style={{ fontSize: 13, color: MUTED, marginTop: 3 }}><i className="fa-solid fa-bullseye" style={{ marginRight: 6 }} />{currentRole}</div>
             </div>
             <button onClick={() => { setStep("input"); setOutputs({}); setLoading({}); setResume(""); setJd(""); }}
               style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "9px 18px", fontSize: 13, color: MUTED, cursor: "pointer", fontFamily: "inherit" }}>
@@ -4408,7 +4408,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                 <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 24, color: DARK }}>See what Rezolt produces</div>
                 <div style={{ fontSize: 13, color: MUTED, marginTop: 4 }}>HRBP Manager · pharma analytics hiring</div>
               </div>
-              <button onClick={() => setShowSample(false)} style={{ background: "var(--surface2)", border: `1px solid ${BORDER}`, borderRadius: 10, width: 34, height: 34, cursor: "pointer", color: MUTED, fontSize: 16 }}><i className="fi fi-sr-cross-small" /></button>
+              <button onClick={() => setShowSample(false)} style={{ background: "var(--surface2)", border: `1px solid ${BORDER}`, borderRadius: 10, width: 34, height: 34, cursor: "pointer", color: MUTED, fontSize: 16 }}><i className="fa-solid fa-xmark" /></button>
             </div>
 
             {/* Tab switcher */}
@@ -4537,7 +4537,7 @@ function ResetPasswordPage({ setPage }) {
         <div style={{ background: WHITE, border: `1.5px solid ${O}`, borderRadius: 14, padding: 36, boxShadow: "0 0 0 4px rgba(249,115,22,0.06)" }}>
           {success ? (
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 36, marginBottom: 16 }}><i className="fi fi-sr-check" /></div>
+              <div style={{ fontSize: 36, marginBottom: 16 }}><i className="fa-solid fa-check" /></div>
               <div style={{ fontSize: 15, fontWeight: 700, color: DARK, marginBottom: 8 }}>Password updated</div>
               <div style={{ fontSize: 13, color: MUTED, lineHeight: 1.7, marginBottom: 24 }}>Your password has been reset successfully. You can now sign in normally.</div>
               <button onClick={() => setPage("auth")} style={{ background: O, color: WHITE, border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Back to Sign In</button>
@@ -4644,9 +4644,9 @@ function FAQPage({ setPage, user }) {
   ];
 
   const quickTopics = [
-    { title: "Resume & tailoring", desc: "ATS, rewriting, and export help.", icon: <i className="fi fi-sr-file" /> },
-    { title: "Plans & credits", desc: "Starter, Pro, Unlimited, and pricing.", icon: <i className="fi fi-sr-badge-dollar" /> },
-    { title: "Support & enquiries", desc: "Billing, feedback, or partnership questions.", icon: <i className="fi fi-sr-handshake" /> },
+    { title: "Resume & tailoring", desc: "ATS, rewriting, and export help.", icon: <i className="fa-solid fa-file" /> },
+    { title: "Plans & credits", desc: "Starter, Pro, Unlimited, and pricing.", icon: <i className="fa-solid fa-dollar-sign" /> },
+    { title: "Support & enquiries", desc: "Billing, feedback, or partnership questions.", icon: <i className="fa-solid fa-handshake" /> },
   ];
 
   return (
@@ -4654,7 +4654,7 @@ function FAQPage({ setPage, user }) {
       <div className="hero-gradient" style={{ padding: "56px clamp(16px,5vw,80px) 52px", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "relative", zIndex: 1, maxWidth: 1080, margin: "0 auto", textAlign: "center" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--accent-soft)", border: "1px solid rgba(3,29,64,0.08)", borderRadius: 999, padding: "6px 14px", marginBottom: 18, color: AC, fontSize: 12, fontWeight: 700 }}>
-            <i className="fi fi-sr-interrogation" />Help Center
+            <i className="fa-solid fa-circle-question" />Help Center
           </div>
           <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(32px,4vw,50px)", fontWeight: 400, color: "var(--text)", marginBottom: 12 }}>
             Answers for every step of your application
@@ -4773,7 +4773,7 @@ function ContactPage({ setPage, user }) {
       <div className="hero-gradient" style={{ padding: "56px clamp(16px,5vw,80px) 52px", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "relative", zIndex: 1, maxWidth: 1040, margin: "0 auto", textAlign: "center" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--accent-soft)", border: "1px solid rgba(3,29,64,0.08)", borderRadius: 999, padding: "6px 14px", marginBottom: 18, color: AC, fontSize: 12, fontWeight: 700 }}>
-            <i className="fi fi-sr-envelope" />Contact Rezolt
+            <i className="fa-solid fa-envelope" />Contact Rezolt
           </div>
           <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(32px,4vw,50px)", fontWeight: 400, color: "var(--text)", marginBottom: 12 }}>
             We’d love to hear from you
@@ -4875,9 +4875,9 @@ function ContactPage({ setPage, user }) {
             </div>
 
             {[
-              { title: "Response time", desc: "Usually within 1–2 business days.", icon: <i className="fi fi-sr-clock-three" /> },
-              { title: "Email us", desc: "hello@rezolt.in", icon: <i className="fi fi-sr-envelope" /> },
-              { title: "Best for", desc: "Plans, support, feedback, and partnership enquiries.", icon: <i className="fi fi-sr-handshake" /> },
+              { title: "Response time", desc: "Usually within 1–2 business days.", icon: <i className="fa-solid fa-clock" /> },
+              { title: "Email us", desc: "hello@rezolt.in", icon: <i className="fa-solid fa-envelope" /> },
+              { title: "Best for", desc: "Plans, support, feedback, and partnership enquiries.", icon: <i className="fa-solid fa-handshake" /> },
             ].map(card => (
               <div key={card.title} style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 22, padding: "18px 20px", boxShadow: "var(--soft-shadow)" }}>
                 <div style={{ fontSize: 22, marginBottom: 8 }}>{card.icon}</div>
@@ -5207,7 +5207,7 @@ function PaymentPage({ user, setUser, setPage }) {
   if (success) return (
     <div className="fade-in" style={{ minHeight: "calc(100vh - 63px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
       <div style={{ textAlign: "center", maxWidth: 420 }}>
-        <div style={{ fontSize: 52, marginBottom: 20 }}><i className="fi fi-sr-badge-check" /></div>
+        <div style={{ fontSize: 52, marginBottom: 20 }}><i className="fa-solid fa-circle-check" /></div>
         <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, fontWeight: 500, color: DARK, marginBottom: 10 }}>Payment successful!</div>
         <div style={{ fontSize: 15, color: MUTED, marginBottom: 8 }}>{success.synced ? <>You're now on the <strong style={{ color: O }}>{success.name}</strong> plan.</> : <>We are verifying your <strong style={{ color: O }}>{success.name}</strong> payment.</>}</div>
         <div style={{ fontSize: 14, color: MUTED, marginBottom: 32 }}>{success.synced ? (success.type === "subscription" ? "Unlimited kits unlocked." : `${success.credits} credit${success.credits > 1 ? "s" : ""} added to your account.`) : "If the browser closed during checkout, your verified payment will still sync automatically when you reopen Rezolt."}</div>
@@ -5625,10 +5625,10 @@ export default function App() {
       {user && (
         <div className="mobile-only" style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "var(--surface)", borderTop: "1px solid var(--border)", display: "flex", zIndex: 200, boxShadow: "0 -4px 20px rgba(0,27,72,.1)", paddingBottom: "env(safe-area-inset-bottom)" }}>
           {[
-            { icon: <i className="fi fi-sr-home" />, label: "Home", pg: "landing" },
+            { icon: <i className="fa-solid fa-house" />, label: "Home", pg: "landing" },
             { icon: <FiLayout />, label: "Dashboard", pg: "dashboard" },
             { icon: <FiEdit3 />, label: "Create", pg: "generate" },
-            { icon: <i className="fi fi-sr-badge-dollar" />, label: "Plans", pg: "payment" },
+            { icon: <i className="fa-solid fa-dollar-sign" />, label: "Plans", pg: "payment" },
           ].map(item => (
             <button key={item.pg} onClick={() => setPage(item.pg)} style={{
               flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
