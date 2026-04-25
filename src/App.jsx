@@ -5539,7 +5539,14 @@ export default function App() {
         const profile = await fetchProfile(authUser?.id);
         const kits = await fetchKits(authUser?.id);
         if (cancelled) return;
-        setUser({ id: authUser.id, name: profile?.name || authUser.email.split("@")[0], email: authUser.email, credits: profile?.credits ?? 1, plan: normalizePlan(profile?.plan) ?? "Free" });
+        setUser(prev => ({
+          ...(prev || {}),
+          id: authUser.id,
+          name: profile?.name || prev?.name || authUser.email.split("@")[0],
+          email: authUser.email,
+          credits: profile?.credits ?? prev?.credits ?? 1,
+          plan: normalizePlan(profile?.plan) ?? prev?.plan ?? "Free",
+        }));
         setHistory(kits.map(k => ({ role: k.role, outputs: k.outputs, date: new Date(k.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) })));
         setProfileLoaded(true);
       } catch (e) {
@@ -5577,9 +5584,10 @@ export default function App() {
         return;
       }
 
-      if (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
-        // Only auto-navigate on INITIAL_SESSION (existing session on first boot).
-        // SIGNED_IN navigation is handled by handleAuth to respect the page the user was on.
+      if (event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
+        // SIGNED_IN is handled by handleAuth (called directly from AuthPage) which uses
+        // the API route for profile fetching. Running syncSessionUser for SIGNED_IN too
+        // causes a race where syncSessionUser overwrites the correctly-set plan with "Free".
         await syncSessionUser(session.user, event === "INITIAL_SESSION" ? (recoveryFlow ? "reset-password" : "dashboard") : undefined);
       }
     });
