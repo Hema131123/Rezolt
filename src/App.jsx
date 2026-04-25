@@ -1105,6 +1105,7 @@ const GLOBAL_CSS = `
   @keyframes fadeIn       { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
   @keyframes slideRight   { from { opacity:0; transform:translateX(-16px); } to { opacity:1; transform:none; } }
   @keyframes scaleIn      { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+  @keyframes modalIn      { from { opacity:0; transform:translate(-50%,-50%) scale(0.95); } to { opacity:1; transform:translate(-50%,-50%) scale(1); } }
   @keyframes float        { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
   @keyframes pulse-ring   { 0% { transform:scale(1); opacity:.8; } 100% { transform:scale(1.6); opacity:0; } }
   @keyframes gradShift    { 0%,100% { background-position:0% 50%; } 50% { background-position:100% 50%; } }
@@ -1603,7 +1604,7 @@ const GLOBAL_CSS = `
 
   /* ── MODAL/POPUP ANIMATIONS ──────────────────────────────────────── */
   .modal-enter {
-    animation: scaleIn 0.3s cubic-bezier(.4,0,.2,1) both;
+    animation: modalIn 0.3s cubic-bezier(.4,0,.2,1) both;
   }
 
   /* ── HOVER LIFT EFFECT ───────────────────────────────────────────── */
@@ -2654,7 +2655,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
           {sampleModalOpen && (
             <>
               <div onClick={() => setSampleModalOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(3,29,64,0.45)", zIndex: 300 }} />
-              <div className="modal-enter" style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "min(760px, calc(100vw - 24px))", maxHeight: "85vh", overflowY: "auto", background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 24, padding: 22, boxShadow: "var(--shadow-lg)", zIndex: 301 }}>
+              <div className="modal-enter" style={{ position: "fixed", top: "50%", left: "50%", width: "min(760px, calc(100vw - 24px))", maxHeight: "85vh", overflowY: "auto", background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 24, padding: 22, boxShadow: "var(--shadow-lg)", zIndex: 301 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 18 }}>
                   <div>
                     <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: AC, marginBottom: 8 }}>Sample career kit</div>
@@ -4409,7 +4410,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
       {showSample && (
         <>
           <div onClick={() => setShowSample(false)} style={{ position: "fixed", inset: 0, background: "rgba(3,29,64,0.5)", zIndex: 400 }} />
-          <div className="modal-enter" style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "min(720px,calc(100vw - 24px))", maxHeight: "88vh", overflowY: "auto", background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 24, padding: "22px 24px", boxShadow: "var(--shadow-lg)", zIndex: 401 }}>
+          <div className="modal-enter" style={{ position: "fixed", top: "50%", left: "50%", width: "min(720px,calc(100vw - 24px))", maxHeight: "88vh", overflowY: "auto", background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 24, padding: "22px 24px", boxShadow: "var(--shadow-lg)", zIndex: 401 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
               <div>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: AC, marginBottom: 6 }}>Sample career kit</div>
