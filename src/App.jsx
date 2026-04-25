@@ -3824,7 +3824,10 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
     try {
       try { await Promise.race([supabase.auth.refreshSession(), new Promise((_, r) => setTimeout(r, 1500))]); } catch (e) { console.warn("Session refresh failed:", e); }
 
-      const freshProfile = await fetchProfile(user.id).catch(() => null);
+      const freshProfile = await Promise.race([
+        fetchProfile(user.id),
+        new Promise(r => setTimeout(() => r(null), 2500)),
+      ]).catch(() => null);
       const effectivePlan = normalizePlan(freshProfile?.plan) ?? user?.plan ?? "Free";
       if (freshProfile) setUser(prev => ({
         ...prev,
