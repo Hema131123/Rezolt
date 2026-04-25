@@ -2009,10 +2009,6 @@ function TopBar({ page, setPage, user, onSignOut }) {
                 fontWeight: page === item.page && !item.scroll ? 700 : 500,
               }}>{item.label}</button>
             ))}
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 999, padding: "6px 12px", marginLeft: 6 }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: creditTone, flexShrink: 0 }} />
-              <span style={{ fontSize: 12, fontWeight: 700, color: creditTone }}>{creditLabel}</span>
-            </div>
             <div style={{ width: 1, height: 24, background: "var(--border)", margin: "0 6px" }} />
             <div style={{ position: "relative" }}>
               <div onClick={() => setMenuOpen(p => !p)} style={{
@@ -2104,10 +2100,6 @@ function TopBar({ page, setPage, user, onSignOut }) {
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{user.name}</div>
                   <div style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, textTransform: "capitalize", marginTop: 2 }}>{user.plan || "starter"} plan</div>
-                  <div style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 6, background: WHITE, border: "1px solid var(--border)", borderRadius: 999, padding: "4px 10px" }}>
-                    <span style={{ width: 7, height: 7, borderRadius: "50%", background: creditTone, flexShrink: 0 }} />
-                    <span style={{ fontSize: 11, color: creditTone, fontWeight: 700 }}>{creditLabel}</span>
-                  </div>
                 </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
