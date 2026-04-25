@@ -3386,7 +3386,7 @@ function AuthPage({ onAuth, setPage }) {
 
 // ─── DASHBOARD ────────────────────────────────────────────────────────────────
 
-function Dashboard({ user, history, setPage, onBuyCredits }) {
+function Dashboard({ user, history, setPage, onBuyCredits, profileLoaded = true }) {
   const [viewingKit, setViewingKit] = useState(null);
   const [activeTab, setActiveTab] = useState("resume");
   const [copied, setCopied] = useState("");
@@ -3515,9 +3515,9 @@ function Dashboard({ user, history, setPage, onBuyCredits }) {
 
       <div className="dash-stats" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18, marginBottom: 36 }}>
         {[
-          { label: "Credits Left", value: user?.plan === "unlimited" ? "∞" : user?.credits, color: O, sub: user?.plan === "unlimited" ? "unlimited plan" : user?.plan === "Free" ? "free resume available" : "Career Kits available" },
-          { label: "Kits Generated", value: history.length, color: DARK, sub: "total" },
-          { label: "Status", value: (user?.credits ?? 0) > 0 || user?.plan === "unlimited" ? "Active" : "No Credits", color: (user?.credits ?? 0) > 0 || user?.plan === "unlimited" ? G : "#EF4444", sub: (user?.credits ?? 0) > 0 || user?.plan === "unlimited" ? "ready to apply" : "buy credits to continue" },
+          { label: "Credits Left", value: !profileLoaded ? "—" : user?.plan === "unlimited" ? "∞" : user?.credits, color: O, sub: !profileLoaded ? "loading..." : user?.plan === "unlimited" ? "unlimited plan" : user?.plan === "Free" ? "free resume available" : "Career Kits available" },
+          { label: "Kits Generated", value: !profileLoaded ? "—" : history.length, color: DARK, sub: "total" },
+          { label: "Status", value: !profileLoaded ? "—" : (user?.credits ?? 0) > 0 || user?.plan === "unlimited" ? "Active" : "No Credits", color: !profileLoaded ? FAINT : (user?.credits ?? 0) > 0 || user?.plan === "unlimited" ? G : "#EF4444", sub: !profileLoaded ? "loading..." : (user?.credits ?? 0) > 0 || user?.plan === "unlimited" ? "ready to apply" : "buy credits to continue" },
         ].map(s => (
           <div key={s.label} style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 24, padding: "24px 26px", boxShadow: "var(--soft-shadow)" }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: FAINT, marginBottom: 10 }}>{s.label}</div>
@@ -3824,6 +3824,15 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
     try {
       try { await Promise.race([supabase.auth.refreshSession(), new Promise((_, r) => setTimeout(r, 1500))]); } catch (e) { console.warn("Session refresh failed:", e); }
 
+      const freshProfile = await fetchProfile(user.id).catch(() => null);
+      const effectivePlan = normalizePlan(freshProfile?.plan) ?? user?.plan ?? "Free";
+      if (freshProfile) setUser(prev => ({
+        ...prev,
+        credits: freshProfile.credits ?? prev.credits,
+        plan: effectivePlan,
+      }));
+      const freshGeneratableTabs = TABS.filter(t => canAccess(effectivePlan, t.minPlan) && PROMPTS[t.id]);
+
       const safeResume = prepareInputForAi(resume, MAX_RESUME_CHARS, "Resume");
       const safeJd = prepareInputForAi(jd, MAX_JD_CHARS, "Job description");
       if (safeResume.trimmed || safeJd.trimmed) {
@@ -3859,11 +3868,11 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
       setStep("output");
       setOutputs({});
       setActiveTab("resume");
-      setLoading(Object.fromEntries(generatableTabs.map(t => [t.id, true])));
+      setLoading(Object.fromEntries(freshGeneratableTabs.map(t => [t.id, true])));
 
       setSubStep("2/3: Connecting to AI...");
       const results = {};
-      await Promise.all(generatableTabs.map(async (tab) => {
+      await Promise.all(freshGeneratableTabs.map(async (tab) => {
         try {
           const res = await fetchWithAuth("/api/claude-generate", {
             method: "POST",
@@ -5458,6 +5467,7 @@ export default function App() {
   const [page, setPage] = useState("landing");
   const [user, setUser] = useState(null);
   const [history, setHistory] = useState([]);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [booting, setBooting] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState("creative");
   const [selectedArticle, setSelectedArticle] = useState(0);
@@ -5517,6 +5527,7 @@ export default function App() {
         if (cancelled) return;
         setUser({ id: authUser.id, name: profile?.name || authUser.email.split("@")[0], email: authUser.email, credits: profile?.credits ?? 1, plan: normalizePlan(profile?.plan) ?? "Free" });
         setHistory(kits.map(k => ({ role: k.role, outputs: k.outputs, date: new Date(k.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) })));
+        setProfileLoaded(true);
       } catch (e) {
         console.error("Session sync failed:", e);
         if (!cancelled) setPage(prev =>
@@ -5594,6 +5605,7 @@ export default function App() {
         plan: normalizePlan(profile?.plan) ?? prev?.plan ?? "Free",
       }));
     }
+    setProfileLoaded(true);
   };
 
   const handleSignOut = async () => {
@@ -5603,6 +5615,7 @@ export default function App() {
       setHistory([]);
       setPage("landing");
       setSessionToken(null);
+      setProfileLoaded(false);
 
       // Attempt to tell Supabase, but don't hang if the lock is stuck
       await Promise.race([
@@ -5682,7 +5695,7 @@ export default function App() {
       {page === "reset-password" && <ResetPasswordPage setPage={setPage} />}
       {page === "admin" && user && <AdminPage user={user} setPage={setPage} />}
       {page === "payment" && (user ? <PaymentPage user={user} setUser={setUser} setPage={setPage} /> : <AuthPage onAuth={handleAuth} setPage={setPage} />)}
-      {page === "dashboard" && user && <Dashboard user={user} history={history} setPage={setPage} onBuyCredits={handleBuyCredits} />}
+      {page === "dashboard" && user && <Dashboard user={user} history={history} setPage={setPage} onBuyCredits={handleBuyCredits} profileLoaded={profileLoaded} />}
       {page === "generate" && user && <KitGenerator sessionToken={sessionToken} user={user} setUser={setUser} onSaveKit={handleSaveKit} onUseCredit={handleUseCredit} setPage={setPage} selectedTemplate={selectedTemplate} setSelectedTemplate={setSelectedTemplate} />}
       {(page === "dashboard" || page === "generate" || page === "admin") && !user && <AuthPage onAuth={handleAuth} setPage={setPage} />}
 
