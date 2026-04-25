@@ -2772,13 +2772,12 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
               price: "0",
               tag: "forever free",
               popular: false,
-              note: "Try it before you commit",
+              note: "Try it out, no card needed",
               includes: [
-                "1 career kit — one time",
-                "Resume rewrite",
-                { text: "Cover letter + referral message", cross: true },
-                { text: "ATS keyword fit support", cross: true },
+                "1 free resume rewrite",
+                { text: "Cover letter + Referral DM", cross: true },
                 { text: "Interview Prep + Find & Reach", cross: true },
+                { text: "Salary Negotiation tool", cross: true },
               ],
             },
             {
@@ -2786,14 +2785,14 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
               price: "99",
               tag: "1 Career kit",
               popular: false,
-              note: "Best for one strong application",
+              note: "One strong application, fully built",
               includes: [
                 "1 complete career kit",
-                "Resume rewrite tailored to one role",
-                "Cover letter + referral message",
-                "ATS keyword fit support",
-                "Clean PDF-ready export",
-                "Valid for 30 days",
+                "Resume rewrite",
+                "Cover letter + Referral DM",
+                "Interview Prep + Find & Reach",
+                "PDF & DOCX export",
+                { text: "Salary Negotiation tool", cross: true },
               ],
             },
             {
@@ -2804,11 +2803,11 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
               note: "Best for active job seekers",
               includes: [
                 "5 complete career kits",
-                "All 5 outputs per kit",
+                "Resume, Cover letter, Referral DM",
                 "Interview Prep + Find & Reach",
-                "Faster generation",
-                "Outreach templates with stronger positioning",
+                "Priority generation",
                 "Valid for 90 days",
+                { text: "Salary Negotiation tool", cross: true },
               ],
             },
             {
@@ -2816,13 +2815,13 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
               price: "599",
               tag: "per month",
               popular: false,
-              note: "Best for ongoing search and negotiation",
+              note: "Best for negotiation and ongoing search",
               includes: [
                 "Unlimited career kits",
-                "All 5 outputs + updates",
+                "All 5 kit outputs",
                 "Salary Negotiation tool",
                 "Notice Period scripts",
-                "First access to new Rezolt features",
+                "First access to new features",
                 "Cancel anytime",
               ],
             },
@@ -4202,9 +4201,9 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
           </div>
           {!hasCredits && (
             <div style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 16, padding: "20px 24px", marginTop: 16, textAlign: "center" }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: "#B91C1C", marginBottom: 6 }}>You've used your {user?.plan === "Free" ? "free resume" : "credits"}</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#B91C1C", marginBottom: 6 }}>You've used your {user?.plan === "Free" ? "free resume rewrite" : "credits"}</div>
               <div style={{ fontSize: 13, color: MUTED, marginBottom: 14, lineHeight: 1.7 }}>
-                {user?.plan === "Free" ? "Upgrade to Starter for a full career kit, or go Pro for 5 kits with interview prep and outreach." : "Purchase more credits to continue generating kits."}
+                {user?.plan === "Free" ? "Upgrade to Starter (₹99) for a full career kit — resume, cover letter, referral DM, interview prep, and outreach." : "Purchase more credits to continue generating kits."}
               </div>
               <button onClick={() => setPage("payment")} className="btn-primary" style={{ background: "var(--grad)", color: "white", border: "none", borderRadius: 12, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
                 View Plans & Upgrade
@@ -4282,7 +4281,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
             {TABS.map(t => {
               const active = activeTab === t.id;
               const locked = !canAccess(user?.plan, t.minPlan);
-              const planNeeded = t.minPlan === "Pro" ? "Pro" : "Unlimited";
+              const planNeeded = t.minPlan === "unlimited" ? "Unlimited" : "Starter";
               return (
                 <button key={t.id} className="tab-pill" onClick={() => setActiveTab(t.id)}
                   style={{
@@ -4353,7 +4352,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "52px 0", gap: 14, textAlign: "center" }}>
                   <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#FFF7ED", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🔒</div>
                   <div style={{ fontSize: 16, fontWeight: 700, color: DARK }}>
-                    {TABS.find(t => t.id === activeTab)?.label} is a {TABS.find(t => t.id === activeTab)?.minPlan === "Pro" ? "Pro" : "Unlimited"} feature
+                    {TABS.find(t => t.id === activeTab)?.label} is a {TABS.find(t => t.id === activeTab)?.minPlan === "unlimited" ? "Unlimited" : "Starter"} feature
                   </div>
                   <div style={{ fontSize: 13, color: MUTED, maxWidth: 320, lineHeight: 1.7 }}>
                     Upgrade your plan to unlock this output and generate a complete kit for every application.
@@ -5148,22 +5147,22 @@ function PaymentPage({ user, setUser, setPage }) {
       type: "one-time",
       name: "Starter",
       price: 99,
-      tag: "1 job kit",
+      tag: "1 Career kit",
       credits: 1,
-      plan: null,
+      plan: "starter",
       popular: false,
-      includes: ["1 complete job kit", "Resume rewrite", "Cover letter", "Referral DM", "Valid 30 days"],
+      includes: ["1 complete career kit", "Resume rewrite", "Cover letter + Referral DM", "Interview Prep + Find & Reach", "PDF & DOCX export", "Valid 30 days"],
     },
     {
       id: "Pro_kit",
       type: "one-time",
       name: "Pro",
       price: 299,
-      tag: "5 Career Kits",
+      tag: "5 Career kits",
       credits: 5,
       plan: "Pro",
       popular: true,
-      includes: ["5 complete Career Kits", "All 5 outputs per kit", "Interview Prep + Find & Reach", "Priority generation", "Valid 90 days"],
+      includes: ["5 complete career kits", "Resume, Cover letter, Referral DM", "Interview Prep + Find & Reach", "Priority generation", "Valid 90 days"],
     },
     {
       id: "unlimited_monthly",
@@ -5174,7 +5173,7 @@ function PaymentPage({ user, setUser, setPage }) {
       credits: 999,
       plan: "unlimited",
       popular: false,
-      includes: ["Unlimited Career Kits", "All 5 outputs", "Salary Negotiation tool", "Notice Period Framing", "Cancel anytime"],
+      includes: ["Unlimited career kits", "All 5 kit outputs", "Salary Negotiation tool", "Notice Period scripts", "Cancel anytime"],
     },
   ];
 
@@ -5188,7 +5187,14 @@ function PaymentPage({ user, setUser, setPage }) {
         description: `Rezolt ${plan.name} — ${plan.tag}`,
         prefill: { name: user.name, email: user.email, userId: user.id },
         onSuccess: async () => {
-          await syncPaymentProfile(plan);
+          const synced = await syncPaymentProfile(plan);
+          if (!synced && plan.plan) {
+            setUser(prev => ({
+              ...prev,
+              credits: (prev.credits ?? 0) + plan.credits,
+              plan: plan.plan,
+            }));
+          }
         },
         onDismiss: async () => {
           const profile = await fetchProfile(user.id).catch(() => null);
@@ -5544,8 +5550,8 @@ export default function App() {
       setUser(prev => ({
         ...prev,
         name: profile?.name || prev?.name,
-        credits: profile?.credits ?? prev?.credits ?? 3,
-        plan: profile?.plan ?? prev?.plan ?? "starter",
+        credits: profile?.credits ?? prev?.credits ?? 1,
+        plan: profile?.plan ?? prev?.plan ?? "Free",
       }));
     }
   };
