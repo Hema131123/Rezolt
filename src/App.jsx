@@ -3247,7 +3247,7 @@ function AuthPage({ onAuth, setPage }) {
         setLoading(false);
         return;
       }
-      if (data.user) { onAuth({ id: data.user.id, name: name, email, credits: 1, plan: "Free" }); }
+      if (data.user) { onAuth({ id: data.user.id, name: name, email, credits: 1, plan: "Free" }); setPage("dashboard"); }
     } else {
       const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
       if (err) {
@@ -3260,7 +3260,7 @@ function AuthPage({ onAuth, setPage }) {
         setLoading(false);
         return;
       }
-      if (data.user) { onAuth({ id: data.user.id, name: data.user.email.split("@")[0], email, credits: 1, plan: "Free" }); }
+      if (data.user) { onAuth({ id: data.user.id, name: data.user.email.split("@")[0], email, credits: 1, plan: "Free" }); setPage("dashboard"); }
     }
     setLoading(false);
   };
@@ -5531,7 +5531,7 @@ export default function App() {
   const handleAuth = async (u) => {
     // Render dashboard immediately; avoid blocking on history/profile reads.
     setUser(u);
-    setPage(page === "payment" ? "payment" : "dashboard");
+    setPage(prev => prev === "payment" ? "payment" : "dashboard");
 
     // Sequentialize fetches to prevent auth lock collisions
     const profile = await fetchProfile(u.id);
