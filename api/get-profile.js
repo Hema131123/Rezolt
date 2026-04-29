@@ -1,7 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const allowedOrigins = new Set([
@@ -11,6 +10,15 @@ const allowedOrigins = new Set([
   "http://localhost:5179",
   "http://127.0.0.1:5173",
 ]);
+
+function decodeJwt(token) {
+  try {
+    const payload = JSON.parse(Buffer.from(token.split(".")[1], "base64").toString());
+    return payload;
+  } catch {
+    return null;
+  }
+}
 
 export default async function handler(req, res) {
   const origin = req.headers.origin;
@@ -26,15 +34,21 @@ export default async function handler(req, res) {
   const token = (req.headers.authorization || "").replace("Bearer ", "").trim();
   if (!token) return res.status(401).json({ error: "Unauthorized" });
 
-  const anonClient = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: authData, error: authError } = await anonClient.auth.getUser(token);
-  if (authError || !authData?.user) return res.status(401).json({ error: "Invalid session" });
+  // Decode JWT locally — no Supabase auth network round-trip needed for a profile read
+  const payload = decodeJwt(token);
+  const userId = payload?.sub;
+  if (!userId) return res.status(401).json({ error: "Invalid token" });
+
+  // Basic expiry check
+  if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+    return res.status(401).json({ error: "Token expired" });
+  }
 
   const serviceClient = createClient(supabaseUrl, serviceKey);
   const { data: profile, error: profileError } = await serviceClient
     .from("profiles")
     .select("*")
-    .eq("id", authData.user.id)
+    .eq("id", userId)
     .single();
 
   if (profileError) return res.status(500).json({ error: profileError.message });

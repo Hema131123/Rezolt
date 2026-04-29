@@ -3828,7 +3828,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
       try {
         const profileRes = await Promise.race([
           fetchWithAuth("/api/get-profile", { method: "GET" }, sessionToken),
-          new Promise((_, r) => setTimeout(() => r(new Error("timeout")), 4000)),
+          new Promise((_, r) => setTimeout(() => r(new Error("timeout")), 8000)),
         ]);
         const profileData = await profileRes.json().catch(() => ({}));
         freshProfile = profileData?.profile ?? null;
@@ -5543,7 +5543,7 @@ export default function App() {
         try {
           const res = await Promise.race([
             fetchWithAuth("/api/get-profile", { method: "GET" }, accessToken),
-            new Promise((_, r) => setTimeout(() => r(new Error("timeout")), 5000)),
+            new Promise((_, r) => setTimeout(() => r(new Error("timeout")), 8000)),
           ]);
           const data = await res.json().catch(() => ({}));
           profile = data?.profile ?? null;
