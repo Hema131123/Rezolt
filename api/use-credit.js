@@ -38,7 +38,8 @@ export default async function handler(req, res) {
     .single();
 
   if (profileError) return res.status(500).json({ error: profileError.message });
-  if (profile?.plan === "unlimited") return res.status(200).json({ credits: null });
+  const planLower = (profile?.plan || "").toLowerCase();
+  if (planLower === "unlimited" || planLower === "free") return res.status(200).json({ credits: null });
 
   const current = profile?.credits ?? 0;
   const next = Math.max(0, current - 1);

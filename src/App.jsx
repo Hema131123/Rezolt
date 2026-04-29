@@ -3764,7 +3764,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
   ];
 
   const isReady = resume.trim().length > 50 && jd.trim().length > 50;
-  const hasCredits = user?.plan === "unlimited" || user?.credits > 0;
+  const hasCredits = user?.plan === "unlimited" || user?.plan === "Free" || (user?.credits ?? 0) > 0;
   const anyLoading = Object.values(loading).some(Boolean);
   const doneCount = Object.keys(outputs).length;
   const rawProgress = Math.round((doneCount / Math.max(TABS.filter(t => canAccess(user?.plan, t.minPlan)).length, 1)) * 100);
@@ -4215,11 +4215,13 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                 <div style={{ fontSize: 12, color: MUTED, background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 12px", lineHeight: 1.7, textAlign: "center" }}>
                   Text only, no photo storage.
                 </div>
-                <div style={{ fontSize: 13, color: MUTED }}>
-                  <span style={{ color: hasCredits ? G : "#EF4444", fontWeight: 700 }}>
-                    {user?.plan === "unlimited" ? "Unlimited kits" : `${user?.credits ?? 0} ${user?.plan === "starter" ? "free kit" : "credit"}${user?.credits !== 1 ? "s" : ""}`}
-                  </span> left
-                </div>
+                {user?.plan !== "Free" && (
+                  <div style={{ fontSize: 13, color: MUTED }}>
+                    <span style={{ color: hasCredits ? G : "#EF4444", fontWeight: 700 }}>
+                      {user?.plan === "unlimited" ? "Unlimited kits" : `${user?.credits ?? 0} ${user?.plan === "starter" ? "kit" : "credit"}${(user?.credits ?? 0) !== 1 ? "s" : ""}`}
+                    </span> left
+                  </div>
+                )}
                 <button onClick={() => setShowSample(true)} style={{ background: "none", border: "none", color: AC, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", padding: 0 }}>See a sample output</button>
                 <button className="gen-btn" onClick={generate} disabled={!isReady || !hasCredits || generating}
                   style={{ background: isReady && hasCredits && !generating ? O : "#E2E8F0", color: isReady && hasCredits && !generating ? WHITE : FAINT, border: "none", borderRadius: 12, padding: "13px 30px", fontSize: 15, fontWeight: 700, cursor: isReady && hasCredits && !generating ? "pointer" : "not-allowed", fontFamily: "inherit", boxShadow: isReady && hasCredits && !generating ? "0 8px 22px rgba(3,29,64,0.18)" : "none", transition: "all 0.2s", minWidth: 180 }}>
@@ -5504,6 +5506,7 @@ export default function App() {
       })
       .catch(e => console.warn("Page-change profile refresh failed:", e));
     if (page === "dashboard") {
+
       fetchKits(uid).then(kits => {
         setHistory(kits.map(k => ({
           role: k.role,
@@ -5512,7 +5515,7 @@ export default function App() {
         })));
       });
     }
-  }, [page, user?.id]);
+  }, [page, user?.id, sessionToken]);
 
   // Restore session on load
   useEffect(() => {
@@ -5524,7 +5527,7 @@ export default function App() {
       setBooting(false);
     }, 5000);
 
-    const syncSessionUser = async (authUser, nextPage) => {
+    const syncSessionUser = async (authUser, accessToken, nextPage) => {
       try {
         // Yield execution thread by 150ms so Supabase can safely resolve and drop its native initialization locks before Database queries run
         await new Promise(r => setTimeout(r, 150));
@@ -5535,8 +5538,20 @@ export default function App() {
           if (nextPage) setPage(nextPage);
         }
 
-        // Sequentialize initial fetches to prevent Supabase v2 client auto-refresh lock collision
-        const profile = await fetchProfile(authUser?.id);
+        // Use the API route (service role) so the Supabase client lock never blocks profile fetch
+        let profile = null;
+        try {
+          const res = await Promise.race([
+            fetchWithAuth("/api/get-profile", { method: "GET" }, accessToken),
+            new Promise((_, r) => setTimeout(() => r(new Error("timeout")), 5000)),
+          ]);
+          const data = await res.json().catch(() => ({}));
+          profile = data?.profile ?? null;
+        } catch (e) {
+          console.warn("syncSessionUser API profile fetch failed, falling back:", e);
+          profile = await fetchProfile(authUser?.id).catch(() => null);
+        }
+
         const kits = await fetchKits(authUser?.id);
         if (cancelled) return;
         setUser(prev => ({
@@ -5580,7 +5595,7 @@ export default function App() {
       }
 
       if (event === "PASSWORD_RECOVERY") {
-        await syncSessionUser(session.user, "reset-password");
+        await syncSessionUser(session.user, session.access_token, "reset-password");
         return;
       }
 
@@ -5588,7 +5603,7 @@ export default function App() {
         // SIGNED_IN is handled by handleAuth (called directly from AuthPage) which uses
         // the API route for profile fetching. Running syncSessionUser for SIGNED_IN too
         // causes a race where syncSessionUser overwrites the correctly-set plan with "Free".
-        await syncSessionUser(session.user, event === "INITIAL_SESSION" ? (recoveryFlow ? "reset-password" : "dashboard") : undefined);
+        await syncSessionUser(session.user, session.access_token, event === "INITIAL_SESSION" ? (recoveryFlow ? "reset-password" : "dashboard") : undefined);
       }
     });
 
@@ -5680,7 +5695,7 @@ export default function App() {
   };
 
   const handleUseCredit = async () => {
-    if (!user?.id || user?.plan === "unlimited" || !sessionToken) return;
+    if (!user?.id || user?.plan === "unlimited" || user?.plan === "Free" || !sessionToken) return;
     try {
       const res = await fetchWithAuth("/api/use-credit", {
         method: "POST",
