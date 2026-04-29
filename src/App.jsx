@@ -4386,8 +4386,8 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                   <div style={{ fontSize: 13, color: MUTED, maxWidth: 320, lineHeight: 1.7 }}>
                     Upgrade your plan to unlock this output and generate a complete kit for every application.
                   </div>
-                  <button onClick={() => setPage("landing")} style={{ background: O, color: WHITE, border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 2px 10px rgba(249,115,22,0.25)", marginTop: 4 }}>
-                    View Plans
+                  <button onClick={() => setPage("payment")} style={{ background: O, color: WHITE, border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 2px 10px rgba(249,115,22,0.25)", marginTop: 4 }}>
+                    View Plans & Upgrade
                   </button>
                 </div>
               ) : loading[activeTab] ? (
@@ -5180,7 +5180,7 @@ function PaymentPage({ user, setUser, setPage }) {
       credits: 1,
       plan: "starter",
       popular: false,
-      includes: ["1 complete career kit", "Resume rewrite", "Cover letter + Referral DM", "Interview Prep + Find & Reach", "PDF & DOCX export", "Valid 30 days"],
+      includes: ["1 complete career kit", "Resume rewrite", "Cover letter + Referral DM", "Interview Prep + Find & Reach", "PDF & DOCX export"],
     },
     {
       id: "Pro_kit",
@@ -5191,7 +5191,7 @@ function PaymentPage({ user, setUser, setPage }) {
       credits: 5,
       plan: "Pro",
       popular: true,
-      includes: ["5 complete career kits", "Resume, Cover letter, Referral DM", "Interview Prep + Find & Reach", "Priority generation", "Valid 90 days"],
+      includes: ["5 complete career kits", "Resume rewrite", "Cover letter + Referral DM", "Interview Prep + Find & Reach", "PDF & DOCX export"],
     },
     {
       id: "unlimited_monthly",
@@ -5202,7 +5202,7 @@ function PaymentPage({ user, setUser, setPage }) {
       credits: 999,
       plan: "unlimited",
       popular: false,
-      includes: ["Unlimited career kits", "All 5 kit outputs", "Salary Negotiation tool", "Notice Period scripts", "Cancel anytime"],
+      includes: ["Unlimited career kits", "All 5 kit outputs", "Salary Negotiation tool", "PDF & DOCX export", "Cancel anytime"],
     },
   ];
 
