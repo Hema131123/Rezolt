@@ -383,25 +383,27 @@ ${jd}`,
 
 CRITICAL COMPANY RULE: The TARGET company is named in the JOB DESCRIPTION. Address only the TARGET company. Never reference a resume company as the target.
 
-FORMATTING: Plain text only. No markdown. No em dashes. Three paragraphs. No headers. No "I am writing to apply."
+FORMATTING: Plain text only. No markdown. No em dashes. Four paragraphs. No headers. No "I am writing to apply."
 
 FAANG/MAANG COVER LETTER STANDARDS:
-- Open with a bold, specific claim that earns immediate attention, not a compliment to the company
+- Open with a warm, human greeting that names the role and company — then immediately pivot to your strongest achievement
 - Every claim backed by a real number or outcome from the resume
 - Show you understand the company's actual problems or goals (infer from the JD)
 - Avoid all clichés: "passionate", "results-driven", "team player", "dynamic", "excited to"
-- Tone: confident, direct, intelligent, like a peer conversation not a plea
-- End with a specific confident call to action
+- Tone: warm yet confident, direct, intelligent — like a message from someone who genuinely wants this role
+- End with a specific, confident call to action
 
 FORMAT:
 
 Dear Hiring Manager,
 
-[Paragraph 1: 3 sentences maximum. Open with your most impressive relevant achievement, lead with the number. Connect it directly to why you are the right person for THIS role at THIS company. Make them want to keep reading.]
+[Paragraph 1 — WARM OPENING: 2 sentences. Open with a genuine, specific expression of interest in this exact role at this exact company, grounded in something real from the JD (a mission, a challenge, a product). Keep it human and warm, not corporate. Do NOT start with "I am writing to apply."]
 
-[Paragraph 2: 3-4 sentences. Pick 2 quantified achievements from the resume that map directly to JD requirements. Show you understand what the company is trying to solve. Demonstrate you have done this before at measurable scale.]
+[Paragraph 2 — STRONGEST PROOF: 3 sentences maximum. Lead immediately with your most impressive relevant achievement backed by a real number from the resume. Connect it directly to why you are the right person for THIS role at THIS company. Make them want to keep reading.]
 
-[Paragraph 3: 2-3 sentences. Show genuine insight about the company or role from the JD. Express specific interest, not general excitement. Close with a confident direct call to action: not "I hope to hear from you" but "I would welcome a conversation."]
+[Paragraph 3 — SECOND PROOF + COMPANY INSIGHT: 3-4 sentences. Pick a second quantified achievement from the resume that maps directly to a JD requirement. Show you understand what the company is trying to solve. Demonstrate you have done this before at measurable scale.]
+
+[Paragraph 4 — CLOSE: 2 sentences. Express specific, grounded interest in the role. Close with a confident direct call to action: not "I hope to hear from you" but "I would welcome a conversation to discuss how I can contribute."]
 
 Warm regards,
 [Full name from resume]
@@ -412,34 +414,34 @@ ${r}
 JOB DESCRIPTION:
 ${jd}`,
 
-  referral: (r, jd) => `You are a networking expert writing referral messages for a candidate targeting a competitive role. These messages must feel human, specific, and compelling, not like templates.
+  referral: (r, jd) => `You are writing referral outreach messages AS THE CANDIDATE THEMSELVES. The candidate is reaching out directly to their contacts to ask for a referral or introduction. Write in first person ("I", "my", "I've"). These messages must feel personal, human, and compelling, not templated.
 
-CRITICAL COMPANY RULE: The TARGET company is named in the JOB DESCRIPTION. All messages must reference that company. Resume companies are past or current employers only.
+CRITICAL COMPANY RULE: The TARGET company is named in the JOB DESCRIPTION. All messages must reference that company. Resume companies are where the candidate has worked before.
 
 FORMATTING: Plain text only. No markdown. No em dashes. Use exact labels below.
 
 FAANG/MAANG REFERRAL STANDARDS:
-- Be specific, generic messages get ignored
-- Name one real impressive achievement from the resume to establish credibility fast
-- Show the contact exactly why THIS candidate is worth referring, make it easy for them to say yes
-- The DM must feel written by a real person, not an AI
-- Include a specific ask that is easy for the contact to action
+- First-person throughout — the candidate is writing this to a contact they know (or want to know)
+- Be specific: name the exact role, the exact company, one real impressive achievement from the resume
+- Keep it brief and easy to respond to — the contact should be able to read it in 30 seconds
+- Sound like a real person, not a robot — warm, direct, confident without being arrogant
+- End with a single easy ask (referral, intro, or quick call)
 
 OUTPUT FORMAT:
 
 VERSION 1: COLD OUTREACH MESSAGE
-(Under 300 characters. For a new or weak contact. Specific, direct, no fluff.)
+(Under 300 characters. For a new or weak contact. First person, direct, no fluff.)
 
-[Message: Open with their name. Name the exact role and company from JD. Drop one specific impressive stat or strength from the resume. End with a friendly low-friction ask.]
+[Message: Greet them by name. Say who you are in one phrase. Mention the exact role and company from JD. Drop one specific impressive stat from the resume (written in first person, e.g. "I reduced time-to-fill by 20%"). End with a friendly, low-friction ask like "Would you be open to a quick referral or chat?"]
 
 VERSION 2: WARM CONTACT MESSAGE
-(For a warm contact. 8-10 lines. Human, specific, easy to action.)
+(For a warm contact. 8-10 lines. First person, human, specific, easy to action.)
 
-[Line 1: Warm personal opener]
-[Lines 2-3: Mention the specific role at the target company, show genuine excitement for THIS role]
-[Lines 4-6: Two specific quantified reasons they are a strong fit, pulled directly from the resume. Make the contact feel confident referring them.]
-[Lines 7-8: Specific easy ask, "would you be open to a referral or share any insights on the process?"]
-[Lines 9-10: Offer to send resume directly. Thank them genuinely.]
+[Line 1: Warm personal opener — greet them by name, reference how you know them or a shared context]
+[Lines 2-3: Tell them about the specific role you are applying to at the target company, and why you are genuinely excited about it]
+[Lines 4-6: Share two specific, quantified achievements from your resume in first person to show you are a strong fit. E.g. "I built a Power BI dashboard that...", "In my last role, I reduced... by 20%"]
+[Lines 7-8: Ask them directly — "Would you be open to referring me or sharing any insights about the process?"]
+[Lines 9-10: Offer to share your resume. Thank them genuinely and keep it warm.]
 
 RESUME:
 ${r}
@@ -565,7 +567,9 @@ function parseResumeSections(text) {
   lines.forEach(line => {
     const t = line.trim();
     // Match ANY all-caps line ending with colon as a section header
-    const isHeader = t.length > 2 && t.length < 70 && t === t.toUpperCase() && (t.endsWith(":") || /^(CONTACT|PROFESSIONAL|WORK|KEY SKILLS|SKILLS|EDUCATION|CERTIFICATIONS|SUMMARY|EXPERIENCE)/.test(t)) && !/^[•\d\-]/.test(t);
+    const isHeader = t.length > 2 && t.length < 80 && t === t.toUpperCase()
+      && !/^[•\d\-]/.test(t)
+      && (t.endsWith(":") || /^(CONTACT|PROFESSIONAL|WORK|CORE|KEY|SKILLS|EDUCATION|CERTIFICATIONS?|SUMMARY|EXPERIENCE|PUBLICATIONS?|AWARDS?|ACHIEVEMENTS?)/.test(t));
     if (isHeader) {
       flush();
       currentSection = t.replace(/:$/, "").trim().toLowerCase().replace(/\s+/g, "_");
@@ -581,9 +585,11 @@ function parseResumeSections(text) {
       contact_information: ["contact", "personal_information", "personal_details"],
       professional_summary: ["summary", "profile", "objective", "professional_profile", "career_summary"],
       work_experience: ["experience", "employment", "employment_history", "professional_experience", "career_history"],
-      key_skills: ["skills", "technical_skills", "core_competencies", "competencies", "areas_of_expertise"],
+      key_skills: ["skills", "technical_skills", "core_competencies", "competencies", "areas_of_expertise", "core_skills"],
+      key_achievements: ["achievements", "key_highlights", "highlights", "career_highlights"],
+      certifications: ["certification", "courses", "training", "professional_development", "certifications_and_awards", "awards", "certifications_&_awards"],
+      publications: ["publications_and_speaking", "speaking", "publications_&_speaking"],
       education: ["educational_background", "academic_background", "qualifications"],
-      certifications: ["certification", "courses", "training", "professional_development"],
     };
     Object.entries(map).forEach(([canonical, aliases]) => {
       if (!obj[canonical]) {
@@ -611,10 +617,12 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
   const contact = headerLines[1] || "";
   const location = headerLines[2] || "";
   const summary = (s.professional_summary || "").trim();
+  const achievements = (s.key_achievements || "").trim();
   const experience = (s.work_experience || "").trim();
   const skills = (s.key_skills || s.skills || "").trim();
   const education = (s.education || "").trim();
   const certs = (s.certifications || "").trim();
+  const publications = (s.publications || "").trim();
 
   const tmplColors = {
     creative: "#031D40", modern: "#374151", bold: "#111827",
@@ -656,8 +664,11 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
         </div>
         <div style={{ flex: 1, padding: "24px 20px", background: "white", minWidth: 0 }}>
           {summary && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#02457A", marginBottom: 7, borderBottom: "1.5px solid #02457A", paddingBottom: 4, display: "inline-block" }}>Professional Summary</div><p style={{ fontSize: 11, color: "#374151", lineHeight: 1.8, marginBottom: 18 }}>{summary}</p></>}
+          {achievements && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#02457A", marginBottom: 8, borderBottom: "1.5px solid #02457A", paddingBottom: 4, display: "inline-block" }}>Key Achievements</div><div style={{ marginTop: 6 }}>{renderLines(achievements, "#02457A")}</div><div style={{ marginBottom: 16 }} /></>}
           {experience && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#02457A", marginBottom: 8, borderBottom: "1.5px solid #02457A", paddingBottom: 4, display: "inline-block" }}>Experience</div><div style={{ marginTop: 4 }}>{renderLines(experience, "#02457A")}</div></>}
           {education && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#02457A", marginBottom: 8, borderBottom: "1.5px solid #02457A", paddingBottom: 4, display: "inline-block", marginTop: 16 }}>Education</div><div style={{ marginTop: 4 }}>{renderLines(education, "#02457A")}</div></>}
+          {certs && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#02457A", marginBottom: 8, borderBottom: "1.5px solid #02457A", paddingBottom: 4, display: "inline-block", marginTop: 16 }}>Certifications & Awards</div><div style={{ marginTop: 4 }}>{renderLines(certs, "#02457A")}</div></>}
+          {publications && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#02457A", marginBottom: 8, borderBottom: "1.5px solid #02457A", paddingBottom: 4, display: "inline-block", marginTop: 16 }}>Publications & Speaking</div><div style={{ marginTop: 4 }}>{renderLines(publications, "#02457A")}</div></>}
         </div>
       </div>
     </div>
@@ -677,8 +688,11 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
         <div style={{ padding: "20px 24px", background: "var(--surface)" }}>
           {skills && <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>{skills.split(",").slice(0, 12).map((sk, i) => <span key={i} style={{ background: "var(--surface2)", color: "var(--text-mid)", fontSize: 11, padding: "3px 10px", borderRadius: 20, border: "1px solid var(--border)" }}>{sk.trim()}</span>)}</div>}
           {summary && <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 1.85, marginBottom: 18 }}>{summary}</p>}
+          {achievements && <><div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Key Achievements</div>{renderLines(achievements, "#374151")}<div style={{ marginBottom: 14 }} /></>}
           {experience && <><div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>Experience</div>{renderLines(experience, "#374151")}</>}
           {education && <><div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8, marginTop: 16 }}>Education</div>{renderLines(education, "#374151")}</>}
+          {certs && <><div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8, marginTop: 16 }}>Certifications & Awards</div>{renderLines(certs, "#374151")}</>}
+          {publications && <><div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8, marginTop: 16 }}>Publications & Speaking</div>{renderLines(publications, "#374151")}</>}
         </div>
       </div>
     </div>
@@ -695,9 +709,12 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
         </div>
         <div style={{ padding: "20px 24px", background: "var(--surface)" }}>
           {summary && <><div style={{ fontSize: 10, fontWeight: 800, letterSpacing: ".1em", color: "#111827", borderBottom: "2px solid #111827", paddingBottom: 4, marginBottom: 8, display: "inline-block" }}>PROFESSIONAL SUMMARY</div><p style={{ fontSize: 12, color: "var(--text-mid)", lineHeight: 1.8, marginBottom: 18 }}>{summary}</p></>}
+          {skills && <><div style={{ fontSize: 10, fontWeight: 800, letterSpacing: ".1em", color: "#111827", borderBottom: "2px solid #111827", paddingBottom: 4, marginBottom: 8, display: "inline-block" }}>KEY SKILLS</div><div style={{ fontSize: 12, color: "var(--text-mid)", lineHeight: 1.9, marginTop: 4, marginBottom: 16 }}>{skills}</div></>}
+          {achievements && <><div style={{ fontSize: 10, fontWeight: 800, letterSpacing: ".1em", color: "#111827", borderBottom: "2px solid #111827", paddingBottom: 4, marginBottom: 8, display: "inline-block" }}>KEY ACHIEVEMENTS</div><div style={{ marginTop: 4, marginBottom: 16 }}>{renderLines(achievements, "#111827")}</div></>}
           {experience && <><div style={{ fontSize: 10, fontWeight: 800, letterSpacing: ".1em", color: "#111827", borderBottom: "2px solid #111827", paddingBottom: 4, marginBottom: 8, display: "inline-block" }}>WORK EXPERIENCE</div><div style={{ marginTop: 4 }}>{renderLines(experience, "#111827")}</div></>}
-          {skills && <><div style={{ fontSize: 10, fontWeight: 800, letterSpacing: ".1em", color: "#111827", borderBottom: "2px solid #111827", paddingBottom: 4, marginTop: 16, marginBottom: 8, display: "inline-block" }}>KEY SKILLS</div><div style={{ fontSize: 12, color: "var(--text-mid)", lineHeight: 1.9, marginTop: 4 }}>{skills}</div></>}
           {education && <><div style={{ fontSize: 10, fontWeight: 800, letterSpacing: ".1em", color: "#111827", borderBottom: "2px solid #111827", paddingBottom: 4, marginTop: 16, marginBottom: 8, display: "inline-block" }}>EDUCATION</div><div style={{ marginTop: 4 }}>{renderLines(education, "#111827")}</div></>}
+          {certs && <><div style={{ fontSize: 10, fontWeight: 800, letterSpacing: ".1em", color: "#111827", borderBottom: "2px solid #111827", paddingBottom: 4, marginTop: 16, marginBottom: 8, display: "inline-block" }}>CERTIFICATIONS & AWARDS</div><div style={{ marginTop: 4 }}>{renderLines(certs, "#111827")}</div></>}
+          {publications && <><div style={{ fontSize: 10, fontWeight: 800, letterSpacing: ".1em", color: "#111827", borderBottom: "2px solid #111827", paddingBottom: 4, marginTop: 16, marginBottom: 8, display: "inline-block" }}>PUBLICATIONS & SPEAKING</div><div style={{ marginTop: 4 }}>{renderLines(publications, "#111827")}</div></>}
         </div>
       </div>
     </div>
@@ -714,9 +731,12 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
           {location && <div style={{ fontSize: 12, color: "#5A6D88" }}>{location}</div>}
         </div>
         {summary && <><div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "#1E3A5F", marginBottom: 8 }}>Objective</div><p style={{ fontSize: 12, color: "#374151", lineHeight: 1.9, marginBottom: 18 }}>{summary}</p><div style={{ borderBottom: "1px solid #CBD5E1", marginBottom: 16 }} /></>}
-        {experience && <><div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "#1E3A5F", marginBottom: 10 }}>Professional Experience</div>{renderLines(experience, "#1E3A5F")}<div style={{ borderBottom: "1px solid #CBD5E1", margin: "16px 0" }} /></>}
         {skills && <><div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "#1E3A5F", marginBottom: 8 }}>Skills</div><div style={{ fontSize: 12, color: "#374151", lineHeight: 1.9, marginBottom: 16 }}>{skills}</div><div style={{ borderBottom: "1px solid #CBD5E1", marginBottom: 16 }} /></>}
+        {achievements && <><div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "#1E3A5F", marginBottom: 8 }}>Key Achievements</div>{renderLines(achievements, "#1E3A5F")}<div style={{ borderBottom: "1px solid #CBD5E1", margin: "16px 0" }} /></>}
+        {experience && <><div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "#1E3A5F", marginBottom: 10 }}>Professional Experience</div>{renderLines(experience, "#1E3A5F")}<div style={{ borderBottom: "1px solid #CBD5E1", margin: "16px 0" }} /></>}
         {education && <><div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "#1E3A5F", marginBottom: 8 }}>Education</div>{renderLines(education, "#1E3A5F")}</>}
+        {certs && <><div style={{ borderBottom: "1px solid #CBD5E1", margin: "16px 0" }} /><div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "#1E3A5F", marginBottom: 8 }}>Certifications & Awards</div>{renderLines(certs, "#1E3A5F")}</>}
+        {publications && <><div style={{ borderBottom: "1px solid #CBD5E1", margin: "16px 0" }} /><div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", color: "#1E3A5F", marginBottom: 8 }}>Publications & Speaking</div>{renderLines(publications, "#1E3A5F")}</>}
       </div>
     </div>
   );
@@ -734,9 +754,12 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
           </div>
           <div style={{ height: 1, background: "linear-gradient(90deg,#C9A96E,transparent)", marginBottom: 18 }} />
           {summary && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#78350F", marginBottom: 8 }}>Profile</div><p style={{ fontSize: 12, color: "#374151", lineHeight: 1.95, marginBottom: 18, fontStyle: "italic" }}>{summary}</p></>}
+          {skills && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#78350F", marginBottom: 8 }}>Competencies</div><div style={{ fontSize: 12, color: "#374151", lineHeight: 1.9, marginBottom: 16 }}>{skills}</div></>}
+          {achievements && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#78350F", marginBottom: 8 }}>Key Achievements</div>{renderLines(achievements, "#C9A96E")}<div style={{ marginBottom: 16 }} /></>}
           {experience && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#78350F", marginBottom: 10 }}>Experience</div>{renderLines(experience, "#C9A96E")}</>}
-          {skills && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#78350F", marginBottom: 8, marginTop: 16 }}>Competencies</div><div style={{ fontSize: 12, color: "#374151", lineHeight: 1.9 }}>{skills}</div></>}
           {education && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#78350F", marginBottom: 8, marginTop: 16 }}>Education</div>{renderLines(education, "#C9A96E")}</>}
+          {certs && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#78350F", marginBottom: 8, marginTop: 16 }}>Certifications & Awards</div>{renderLines(certs, "#C9A96E")}</>}
+          {publications && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#78350F", marginBottom: 8, marginTop: 16 }}>Publications & Speaking</div>{renderLines(publications, "#C9A96E")}</>}
         </div>
       </div>
     </div>
@@ -754,6 +777,7 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
         <div style={{ display: "flex", gap: 0, background: "var(--surface)" }}>
           <div style={{ flex: 2, padding: "18px 20px", borderRight: "1px solid var(--border)", minWidth: 0 }}>
             {summary && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--text-muted)", marginBottom: 6 }}>Summary</div><p style={{ fontSize: 11, color: "var(--text-mid)", lineHeight: 1.7, marginBottom: 14 }}>{summary}</p></>}
+            {achievements && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--text-muted)", marginBottom: 6 }}>Key Achievements</div>{renderLines(achievements, "var(--text-muted)")}<div style={{ marginBottom: 12 }} /></>}
             {experience && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--text-muted)", marginBottom: 6 }}>Experience</div>{renderLines(experience, "var(--text-muted)")}</>}
           </div>
           <div style={{ width: 160, flexShrink: 0, padding: "18px 16px" }}>
@@ -761,6 +785,7 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
             {skills && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--text-muted)", marginBottom: 7 }}>Skills</div><div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginBottom: 14 }}>{skills.split(",").map((sk, i) => <span key={i} style={{ background: "var(--surface2)", color: "var(--text-mid)", fontSize: 9, padding: "2px 6px", borderRadius: 3, border: "1px solid var(--border)" }}>{sk.trim()}</span>)}</div></>}
             {education && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--text-muted)", marginBottom: 6 }}>Education</div>{renderLines(education, "var(--text-muted)")}</>}
             {certs && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--text-muted)", marginBottom: 6, marginTop: 12 }}>Certifications</div>{renderLines(certs, "var(--text-muted)")}</>}
+            {publications && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--text-muted)", marginBottom: 6, marginTop: 12 }}>Publications</div>{renderLines(publications, "var(--text-muted)")}</>}
           </div>
         </div>
       </div>
@@ -777,9 +802,12 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
           <div style={{ fontSize: 12, color: "var(--text-faint)", marginTop: 6, letterSpacing: ".02em" }}>{contact}{location ? ` · ${location}` : ""}</div>
         </div>
         {summary && <p style={{ fontSize: 13, color: "var(--text-mid)", lineHeight: 2, marginBottom: 32, fontWeight: 300 }}>{summary.split(".").slice(0, 2).join(".")}.</p>}
+        {skills && <><div style={{ fontSize: 9, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 10 }}>Skills</div><div style={{ fontSize: 12, color: "var(--text-mid)", lineHeight: 2, fontWeight: 300, marginBottom: 28 }}>{skills}</div></>}
+        {achievements && <><div style={{ fontSize: 9, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 14 }}>Key Achievements</div>{renderLines(achievements, "var(--text-faint)")}<div style={{ marginBottom: 28 }} /></>}
         {experience && <><div style={{ fontSize: 9, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 14 }}>Experience</div>{renderLines(experience, "var(--text-faint)")}</>}
-        {skills && <><div style={{ fontSize: 9, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 10, marginTop: 28 }}>Skills</div><div style={{ fontSize: 12, color: "var(--text-mid)", lineHeight: 2, fontWeight: 300 }}>{skills}</div></>}
         {education && <><div style={{ fontSize: 9, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 10, marginTop: 28 }}>Education</div>{renderLines(education, "var(--text-faint)")}</>}
+        {certs && <><div style={{ fontSize: 9, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 10, marginTop: 28 }}>Certifications & Awards</div>{renderLines(certs, "var(--text-faint)")}</>}
+        {publications && <><div style={{ fontSize: 9, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 10, marginTop: 28 }}>Publications & Speaking</div>{renderLines(publications, "var(--text-faint)")}</>}
       </div>
     </div>
   );
@@ -795,8 +823,11 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
         </div>
         {skills && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#C9D6E4", marginBottom: 8 }}>{">"} Stack</div><div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 18 }}>{skills.split(",").map((sk, i) => <span key={i} style={{ background: "#161b22", border: "1px solid #30363d", color: "#E2EAF3", fontSize: 10, padding: "3px 9px", borderRadius: 4 }}>{sk.trim()}</span>)}</div></>}
         {summary && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#C9D6E4", marginBottom: 8 }}>{">"} About</div><p style={{ fontSize: 11, color: "#8b949e", lineHeight: 1.8, marginBottom: 18 }}>{summary}</p></>}
+        {achievements && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#C9D6E4", marginBottom: 8 }}>{">"} Key Achievements</div>{achievements.split("\n").filter(l => l.trim()).map((l, i) => { const t = l.trim(); if (t.startsWith("•") || t.startsWith("-")) return <div key={i} style={{ fontSize: 11, color: "#8b949e", marginBottom: 5, paddingLeft: 14 }}>{"// "}{t.replace(/^[•\-]\s*/, "")}</div>; return t ? <div key={i} style={{ fontSize: 11, color: "#C9D6E4", marginBottom: 3 }}>{t}</div> : null; })}<div style={{ marginBottom: 18 }} /></>}
         {experience && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#C9D6E4", marginBottom: 10 }}>{">"} Experience</div>{experience.split("\n").filter(l => l.trim()).map((l, i) => { const t = l.trim(); if (t.startsWith("•") || t.startsWith("-")) return <div key={i} style={{ fontSize: 11, color: "#8b949e", marginBottom: 5, paddingLeft: 14 }}>{"// "}{t.replace(/^[•\-]\s*/, "")}</div>; if (t.includes("|")) return <div key={i} style={{ fontSize: 12, color: "#e6edf3", fontWeight: 700, marginTop: 12, marginBottom: 4 }}>{t}</div>; return t ? <div key={i} style={{ fontSize: 11, color: "#C9D6E4", marginBottom: 3 }}>{t}</div> : null; })}</>}
         {education && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#C9D6E4", marginBottom: 8, marginTop: 18 }}>{">"} Education</div>{education.split("\n").filter(l => l.trim()).map((l, i) => <div key={i} style={{ fontSize: 11, color: "#8b949e", marginBottom: 4 }}>{l.trim()}</div>)}</>}
+        {certs && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#C9D6E4", marginBottom: 8, marginTop: 18 }}>{">"} Certifications & Awards</div>{certs.split("\n").filter(l => l.trim()).map((l, i) => <div key={i} style={{ fontSize: 11, color: "#8b949e", marginBottom: 4 }}>{l.trim()}</div>)}</>}
+        {publications && <><div style={{ fontSize: 9, fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", color: "#C9D6E4", marginBottom: 8, marginTop: 18 }}>{">"} Publications & Speaking</div>{publications.split("\n").filter(l => l.trim()).map((l, i) => <div key={i} style={{ fontSize: 11, color: "#8b949e", marginBottom: 4 }}>{l.trim()}</div>)}</>}
       </div>
     </div>
   );
@@ -812,9 +843,12 @@ function renderResumeWithTemplate(text, template, photoUrl, showBranding = true)
         </div>
         <div style={{ padding: "20px 22px" }}>
           {summary && <div style={{ background: "#fef3c7", border: "1px solid #fde68a", borderRadius: 10, padding: "12px 16px", marginBottom: 18 }}><p style={{ fontSize: 12, color: "#374151", lineHeight: 1.85, margin: 0 }}>{summary}</p></div>}
+          {skills && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "#92400e", marginBottom: 8 }}>Skills</div><div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 16 }}>{skills.split(",").map((sk, i) => <span key={i} style={{ background: "#fde68a", color: "#92400e", fontSize: 11, padding: "3px 10px", borderRadius: 20 }}>{sk.trim()}</span>)}</div></>}
+          {achievements && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "#92400e", marginBottom: 8 }}>Key Achievements</div>{renderLines(achievements, "#d97706")}<div style={{ marginBottom: 16 }} /></>}
           {experience && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "#92400e", marginBottom: 10 }}>Experience</div>{renderLines(experience, "#d97706")}</>}
-          {skills && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "#92400e", marginBottom: 8, marginTop: 16 }}>Skills</div><div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{skills.split(",").map((sk, i) => <span key={i} style={{ background: "#fde68a", color: "#92400e", fontSize: 11, padding: "3px 10px", borderRadius: 20 }}>{sk.trim()}</span>)}</div></>}
           {education && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "#92400e", marginBottom: 8, marginTop: 16 }}>Education</div>{renderLines(education, "#d97706")}</>}
+          {certs && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "#92400e", marginBottom: 8, marginTop: 16 }}>Certifications & Awards</div>{renderLines(certs, "#d97706")}</>}
+          {publications && <><div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "#92400e", marginBottom: 8, marginTop: 16 }}>Publications & Speaking</div>{renderLines(publications, "#d97706")}</>}
         </div>
       </div>
     </div>
@@ -841,8 +875,8 @@ function renderOutput(text) {
     const t = line.trim();
     if (!t) { elements.push(<div key={i} style={{ height: 10 }} />); return; }
 
-    const isHeader = (t === t.toUpperCase() && t.length > 4 && t.length < 60 && t.endsWith(":") && !/^[•Q\d]/.test(t)) ||
-      t.match(/^(SECTION \d|VERSION \d|PROFESSIONAL SUMMARY|WORK EXPERIENCE|SKILLS|EDUCATION|CERTIFICATIONS):?$/i);
+    const isHeader = t.length > 4 && t.length < 80 && t === t.toUpperCase() && !/^[•Q\d]/.test(t)
+      && (t.endsWith(":") || /^(SECTION \d|VERSION \d|PROFESSIONAL|WORK EXPERIENCE|CORE|KEY|SKILLS|EDUCATION|CERTIFICATIONS?|SUMMARY|EXPERIENCE|PUBLICATIONS?|AWARDS?)/.test(t));
 
     if (isHeader) {
       elements.push(
