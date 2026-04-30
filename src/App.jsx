@@ -157,7 +157,7 @@ function loadRazorpay() {
   });
 }
 
-async function openRazorpay({ planId, amount, name, description, prefill, onSuccess, onDismiss }) {
+async function openRazorpay({ planId, amount, name, description, prefill, token, onSuccess, onDismiss }) {
   if (!RZP_KEY) {
     alert("Razorpay key is missing. Please check your Vercel environment variables.");
     return false;
@@ -184,7 +184,7 @@ async function openRazorpay({ planId, amount, name, description, prefill, onSucc
         receipt: `rezolt_${Date.now()}`,
         notes: { plan: planId, description },
       }),
-    });
+    }, token);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || "Failed to create Razorpay order");
     if (!data.orderId) throw new Error("Could not create a secure payment order.");
@@ -3853,7 +3853,9 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
       } catch (e) {
         console.warn("Profile fetch in generate() failed:", e);
       }
-      const effectivePlan = normalizePlan(freshProfile?.plan) ?? user?.plan ?? "Free";
+      let effectivePlan = normalizePlan(freshProfile?.plan) ?? user?.plan ?? "Free";
+      // If user has credits but plan is still "Free", they must have bought at least a starter — treat as starter
+      if (effectivePlan === "Free" && (freshProfile?.credits ?? 0) > 0) effectivePlan = "starter";
       if (freshProfile) setUser(prev => ({
         ...prev,
         credits: freshProfile.credits ?? prev.credits,
@@ -5147,7 +5149,7 @@ function AdminPage({ user, setPage }) {
 
 // ─── PAYMENT PAGE ─────────────────────────────────────────────────────────────
 
-function PaymentPage({ user, setUser, setPage }) {
+function PaymentPage({ user, setUser, setPage, sessionToken }) {
   const [loading, setLoading] = useState(null);
   const [success, setSuccess] = useState(null);
   const [showCancel, setShowCancel] = useState(false);
@@ -5170,7 +5172,14 @@ function PaymentPage({ user, setUser, setPage }) {
 
   const syncPaymentProfile = async (plan) => {
     for (let attempt = 0; attempt < 5; attempt++) {
-      const profile = await fetchProfile(user.id).catch(() => null);
+      let profile = null;
+      try {
+        const res = await fetchWithAuth("/api/get-profile", { method: "GET" }, sessionToken);
+        const data = await res.json().catch(() => ({}));
+        profile = data?.profile ?? null;
+      } catch {
+        profile = await fetchProfile(user.id).catch(() => null);
+      }
       const latestCredits = profile?.credits ?? user.credits ?? 0;
       const latestPlan = normalizePlan(profile?.plan) ?? user?.plan;
       const synced = plan.type === "subscription"
@@ -5235,6 +5244,7 @@ function PaymentPage({ user, setUser, setPage }) {
         name: plan.id,
         description: `Rezolt ${plan.name} — ${plan.tag}`,
         prefill: { name: user.name, email: user.email, userId: user.id },
+        token: sessionToken,
         onSuccess: async () => {
           const synced = await syncPaymentProfile(plan);
           if (!synced && plan.plan) {
@@ -5246,12 +5256,19 @@ function PaymentPage({ user, setUser, setPage }) {
           }
         },
         onDismiss: async () => {
-          const profile = await fetchProfile(user.id).catch(() => null);
+          let profile = null;
+          try {
+            const res = await fetchWithAuth("/api/get-profile", { method: "GET" }, sessionToken);
+            const data = await res.json().catch(() => ({}));
+            profile = data?.profile ?? null;
+          } catch {
+            profile = await fetchProfile(user.id).catch(() => null);
+          }
           const maybeUpdated = plan.type === "subscription"
-            ? (profile?.plan ?? user.plan) === "unlimited"
+            ? normalizePlan(profile?.plan) === "unlimited"
             : (profile?.credits ?? 0) > (user.credits ?? 0);
           if (maybeUpdated) {
-            setUser(prev => ({ ...prev, credits: profile?.credits ?? prev?.credits ?? 0, plan: profile?.plan ?? prev?.plan ?? "starter", name: profile?.name || prev?.name }));
+            setUser(prev => ({ ...prev, credits: profile?.credits ?? prev?.credits ?? 0, plan: normalizePlan(profile?.plan) ?? prev?.plan ?? "starter", name: profile?.name || prev?.name }));
             setSuccess({ ...plan, synced: true });
           }
         },
@@ -5760,7 +5777,7 @@ export default function App() {
       {page === "forgot" && <ForgotPasswordPage setPage={setPage} />}
       {page === "reset-password" && <ResetPasswordPage setPage={setPage} />}
       {page === "admin" && user && <AdminPage user={user} setPage={setPage} />}
-      {page === "payment" && (user ? <PaymentPage user={user} setUser={setUser} setPage={setPage} /> : <AuthPage onAuth={handleAuth} setPage={setPage} />)}
+      {page === "payment" && (user ? <PaymentPage user={user} setUser={setUser} setPage={setPage} sessionToken={sessionToken} /> : <AuthPage onAuth={handleAuth} setPage={setPage} />)}
       {page === "dashboard" && user && <Dashboard user={user} history={history} setPage={setPage} onBuyCredits={handleBuyCredits} profileLoaded={profileLoaded} />}
       {page === "generate" && user && <KitGenerator sessionToken={sessionToken} user={user} setUser={setUser} onSaveKit={handleSaveKit} onUseCredit={handleUseCredit} setPage={setPage} selectedTemplate={selectedTemplate} setSelectedTemplate={setSelectedTemplate} />}
       {(page === "dashboard" || page === "generate" || page === "admin") && !user && <AuthPage onAuth={handleAuth} setPage={setPage} />}

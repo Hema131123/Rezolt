@@ -1,8 +1,5 @@
 import Razorpay from "razorpay";
-import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 const allowedOrigins = new Set([
   "https://www.rezolt.in",
   "https://rezolt.in",
@@ -10,6 +7,15 @@ const allowedOrigins = new Set([
   "http://localhost:5179",
   "http://127.0.0.1:5173",
 ]);
+
+function decodeJwt(token) {
+  try {
+    const payload = JSON.parse(Buffer.from(token.split(".")[1], "base64").toString());
+    return payload;
+  } catch {
+    return null;
+  }
+}
 
 const PLAN_CATALOG = {
   starter_kit: { amountInr: 99, label: "Starter" },
@@ -36,17 +42,14 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: "Please sign in before starting a payment." });
   }
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error("Missing Supabase environment variables for payment auth");
-    return res.status(500).json({ error: "Server configuration error" });
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: authData, error: authError } = await supabase.auth.getUser(token);
-  const user = authData?.user;
-  if (authError || !user) {
+  const payload = decodeJwt(token);
+  if (!payload?.sub) {
     return res.status(401).json({ error: "Your session expired. Please sign in again." });
   }
+  if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+    return res.status(401).json({ error: "Your session expired. Please sign in again." });
+  }
+  const user = { id: payload.sub, email: payload.email || "" };
 
   const keyId = process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;

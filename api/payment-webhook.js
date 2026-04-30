@@ -36,11 +36,11 @@ async function updateProfileWithRetry(userId, plan, maxAttempts = 4) {
 
       const currentCredits = Math.max(0, profile?.credits ?? 0);
       const newCredits = plan === "unlimited_monthly" ? 9999 : currentCredits + (creditMap[plan] ?? 0);
-      const newPlan = plan === "unlimited_monthly"
-        ? "unlimited"
-        : plan === "Pro_kit"
-          ? (profile?.plan === "unlimited" ? "unlimited" : "Pro")
-          : (profile?.plan ?? "starter");
+      const planUpgradeMap = { starter_kit: "starter", Pro_kit: "Pro", unlimited_monthly: "unlimited" };
+      const currentPlanRank = ["Free", "starter", "Pro", "unlimited"].indexOf(profile?.plan ?? "Free");
+      const newPlanName = planUpgradeMap[plan] ?? "starter";
+      const newPlanRank = ["Free", "starter", "Pro", "unlimited"].indexOf(newPlanName);
+      const newPlan = newPlanRank > currentPlanRank ? newPlanName : (profile?.plan ?? newPlanName);
 
       const { error: updateErr } = await supabase
         .from("profiles")
