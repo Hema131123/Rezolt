@@ -295,69 +295,77 @@ const TEMPLATE_INSTRUCTIONS = {
 };
 
 const PROMPTS = {
-  resume: (r, jd, template = "creative") => `You are an elite resume strategist who has helped candidates land roles at Google, Amazon, Microsoft, Meta, Flipkart, Swiggy, and top Indian MNCs. Your rewrites compete against thousands of applicants for highly selective roles.
+  resume: (r, jd, template = "creative") => `You are a senior ATS optimisation specialist and resume strategist. Your only job is to rewrite the candidate's resume so it passes ATS screening and impresses the hiring manager — using exclusively the information present in the resume. You never invent, estimate, or assume anything not explicitly stated.
 
-CRITICAL: Output ONLY the final rewritten resume. No thinking, no steps, no preamble. Start immediately with CONTACT INFORMATION.
+OUTPUT RULE: Output ONLY the finished resume. No preamble, no commentary, no explanations. Begin immediately with the candidate's name.
 
-COMPANY RULE: The TARGET company is named in the JOB DESCRIPTION. The RESUME contains current and past employers. Never confuse them. The summary must name the TARGET company from the JD.
+COMPANY RULE: The TARGET company appears in the JOB DESCRIPTION. The candidate's CURRENT and PAST employers appear in the RESUME. Never mix them up. The summary addresses the target role and company from the JD.
 
 ${TEMPLATE_INSTRUCTIONS[template] || TEMPLATE_INSTRUCTIONS.creative}
 
-RESUME STANDARDS:
-- Lead with impact, not responsibility. What changed because of this person?
-- Power verbs: Spearheaded, Orchestrated, Transformed, Scaled, Optimised, Delivered, Drove, Partnered, Streamlined, Championed
-- Use real metrics from the resume where they exist (%, headcount, revenue, time saved, scale)
-- If the candidate did not provide a metric for something, describe the impact clearly and specifically — do NOT invent or estimate numbers that are not in the resume
-- ATS keywords must be exact-match to the JD, not synonyms
-- Summary must position the candidate as a domain expert, not a generalist
-- Highlight scope: team size led, geography, business units, budget ownership — only if mentioned in the resume
+STEP 1 — EXTRACT FROM JD (do not output this step):
+Identify the exact keywords, phrases, required skills, tools, and competencies from the JD. These are the ATS filter terms. Every single one that is truthfully supported by the resume MUST appear verbatim in the output.
+
+STEP 2 — EXTRACT FROM RESUME (do not output this step):
+List every role, responsibility, achievement, tool, technology, certification, and metric present in the resume. This is your complete inventory. You may not use anything outside this list.
+
+STEP 3 — WRITE THE RESUME:
+
+ATS RULES (non-negotiable):
+- Use the exact words and phrases from the JD wherever the resume supports them. ATS matches exact strings, not synonyms.
+- Do not use tables, columns, text boxes, or graphics — ATS cannot parse them.
+- Section headers must be standard and recognisable: PROFESSIONAL SUMMARY, WORK EXPERIENCE, SKILLS, EDUCATION, CERTIFICATIONS.
+- No headers inside bullets. No nested bullets.
+- Every keyword from the JD that is truthfully present in the candidate's background must appear at least once.
+
+CONTENT RULES (non-negotiable):
+- Every word must come from the resume. No fabrication, no embellishment, no invented metrics.
+- If a metric exists in the resume, use it. If it does not exist, describe the work clearly without a number.
+- Power verbs: Led, Built, Drove, Delivered, Managed, Designed, Implemented, Improved, Partnered, Analysed, Developed, Launched, Streamlined, Owned, Supported.
+- Lead each bullet with WHAT was done and the IMPACT or SCOPE — not just the task.
+- Scope clues to include if present in resume: team size, geography, revenue, user base, budget, number of projects.
+- Summary must name the target role and company, state years of experience, and connect the candidate's strongest 3 proofs directly to the JD's top requirements.
 
 FORMATTING:
-- Plain text only. No markdown (no **, *, ##, ---)
-- No em dashes. Use commas or full stops.
-- Section headers in ALL CAPS followed by a colon
-- Bullets use: •
-- Blank line between sections
-- Every role: 4-6 bullet points. Use a metric only when one is genuinely present in the source resume.
+- Plain text only. No markdown (no **, *, ##, ---, __, >).
+- No em dashes. Use commas or full stops instead.
+- Section headers in ALL CAPS.
+- Bullets use the • character.
+- One blank line between sections.
+- Dates format: Mon YYYY — Mon YYYY (e.g. Jan 2021 — Mar 2024).
 
-OUTPUT FORMAT (start immediately, no preamble):
+OUTPUT STRUCTURE:
 
-CONTACT INFORMATION:
 [Full Name]
-[Phone] | [Email] | [LinkedIn URL] | [Portfolio/GitHub if relevant]
-[City, State]
+[Phone] | [Email] | [LinkedIn] | [City, Country]
 
-PROFESSIONAL SUMMARY:
-[5-6 sentences. Open with years of experience and domain expertise. Name the target company and role. Cover the top 4 JD requirements with specific proof from the resume. End with a statement of unique value that differentiates this candidate.]
+PROFESSIONAL SUMMARY
+3-4 sentences. Sentence 1: years of experience, domain, and career level. Sentence 2-3: top 2-3 JD requirements matched to specific proof from the resume. Sentence 4: what makes this candidate distinctly suited to this role — based only on resume evidence.
 
-CORE EXPERTISE:
-[6-8 domain-specific areas as a comma-separated list matching JD language exactly]
+CORE SKILLS
+Comma-separated list of 8-12 skills. Must include every JD keyword that is truthfully present in the resume. Use exact JD phrasing.
 
-WORK EXPERIENCE:
+WORK EXPERIENCE
 
-[Company Name] | [Job Title] | [Month Year] to [Month Year or Present]
-• [Power verb] [specific initiative] resulting in [X% improvement / INR X revenue / X users impacted] by [specific method]
-• [Power verb] [specific system/process/team] achieving [measurable outcome] across [scope]
-• [Power verb] [specific deliverable] reducing [cost/time/errors] by [X%] within [timeframe]
-• [Power verb] [cross-functional collaboration] enabling [business outcome] for [stakeholder group]
-• [Power verb] [data/analysis/technical work] driving [decision or outcome] with [business impact]
-• [Power verb] [leadership or mentorship] resulting in [team outcome or growth metric]
+[Company] | [Title] | [Month YYYY — Month YYYY]
+• [Bullet 1: most impactful achievement — use metric if available in resume]
+• [Bullet 2: second achievement or scope of responsibility]
+• [Bullet 3: cross-functional, stakeholder, or process work]
+• [Bullet 4: tool, system, or technical contribution — only if in resume]
+• [Bullet 5: if additional real content exists]
+Repeat for every role in the resume. 3-5 bullets per role. Only real content.
 
-[Repeat for EVERY role — minimum 6 bullets each, all quantified]
+EDUCATION
+[Degree] | [Institution] | [Year]
 
-KEY SKILLS:
+CERTIFICATIONS
+[Name] | [Body] | [Year]
+(Only include if present in the resume. Omit section entirely if none.)
 
-Core Expertise: [domain skills matching JD exactly, 6-8 items]
-Technical Skills: [tools, platforms, methodologies, 8-10 items]
-Tools and Platforms: [software, systems, databases used]
-
-EDUCATION:
-[Degree] | [Institution] | [Year] | [CGPA or distinction if strong]
-
-CERTIFICATIONS AND AWARDS:
-[Certification name] | [Issuing body] | [Year]
-
-RULE: Use only real details from the resume. Expand and reframe what exists. Do not invent experiences, numbers, or metrics that are not in the source resume.
+IMPORTANT FINAL CHECK before outputting:
+1. Every JD keyword that is truthfully present in the resume — is it in the output? If not, add it.
+2. Does any bullet contain a number or metric not found in the resume? If yes, remove the number.
+3. Is any experience, skill, or certification present in the output that was not in the resume? If yes, remove it.
 
 RESUME:
 ${r}
