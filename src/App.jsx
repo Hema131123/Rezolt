@@ -24,11 +24,9 @@ async function fetchWithAuth(url, options = {}, token = null) {
   }
 
   if (!accessToken) {
-    console.error("No auth token available for:", url);
     throw new Error("Please sign in to continue.");
   }
-  
-  console.log("Fetching:", url, "with auth token length:", accessToken.length);
+
   const headers = { ...options.headers, Authorization: `Bearer ${accessToken}` };
   return fetch(url, { ...options, headers });
 }
@@ -227,11 +225,9 @@ async function openRazorpay({ planId, amount, name, description, prefill, token,
         },
       },
     };
-    console.log("Razorpay opening with options:", { key: RZP_KEY, amount: orderAmountPaise, order_id: orderId });
     const rzp = new window.Razorpay(options);
-    rzp.on("payment.failed", (resp) => { console.error("Payment failed:", resp); resolve(false); });
+    rzp.on("payment.failed", (resp) => { console.error("Payment failed:", resp?.error?.description); resolve(false); });
     rzp.open();
-    console.log("Razorpay rzp.open() called");
   });
 }
 
@@ -4964,7 +4960,6 @@ function AdminPage({ user, setPage }) {
 
   useEffect(() => {
     const isAdmin = user?.email?.trim().toLowerCase() === ADMIN_EMAIL.trim().toLowerCase();
-    console.log("🔐 Admin check:", { userEmail: user?.email, isAdmin, expectedEmail: ADMIN_EMAIL });
     
     if (!isAdmin) {
       console.warn("⚠ Unauthorized admin access attempt");
@@ -4983,9 +4978,7 @@ function AdminPage({ user, setPage }) {
 
     const load = async () => {
       try {
-        console.log("AdminPage: Checking auth state...");
         const { data: { session } } = await supabase.auth.getSession();
-        console.log("AdminPage: Session found:", !!session, "Token length:", session?.access_token?.length || 0);
 
         const s = await fetchAdminStats((step) => {
           if (mounted) setLastStep(step);
