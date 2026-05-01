@@ -5080,8 +5080,6 @@ function AdminPage({ user, setPage }) {
 
     const load = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-
         const s = await fetchAdminStats((step) => {
           if (mounted) setLastStep(step);
         });
