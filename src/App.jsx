@@ -250,7 +250,6 @@ const TABS = [
   { id: "referral", iconClass: "fa-solid fa-handshake", label: "Referral", minPlan: "starter" },
   { id: "interview", iconClass: "fa-solid fa-bullseye", label: "Interview Prep", minPlan: "starter" },
   { id: "reach", iconClass: "fa-solid fa-magnifying-glass", label: "Find & Reach", minPlan: "starter" },
-  { id: "negotiate", iconClass: "fa-solid fa-dollar-sign", label: "Negotiate", minPlan: "unlimited" },
 ];
 const PLAN_ORDER = ["Free", "starter", "Pro", "unlimited"];
 const normalizePlan = (plan) => {
@@ -2111,6 +2110,7 @@ function TopBar({ page, setPage, user, onSignOut }) {
                       { key: "plans", label: (<><i className="fa-solid fa-dollar-sign" style={{ marginRight: 8 }} />Plans & Billing</>), action: () => { setPage("payment"); setMenuOpen(false); } },
                       { key: "dashboard", label: (<><FiLayout style={{ marginRight: 8 }} />Dashboard</>), action: () => { setPage("dashboard"); setMenuOpen(false); } },
                       { key: "create", label: (<><FiEdit3 style={{ marginRight: 8 }} />Create Kit</>), action: () => { setPage("generate"); setMenuOpen(false); } },
+                      { key: "negotiate", label: (<><i className="fa-solid fa-handshake-angle" style={{ marginRight: 8 }} />Negotiate</>), action: () => { setPage("negotiate"); setMenuOpen(false); } },
                     ].map(item => (
                       <button key={item.key} onClick={item.action} style={{ width: "100%", textAlign: "left", background: "none", border: "none", padding: "10px 16px", fontSize: 13, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", display: "block", transition: "all 0.15s ease" }}
                         onMouseEnter={e => { e.currentTarget.style.background = "var(--accent-soft)"; e.currentTarget.style.color = AC; }}
@@ -3574,9 +3574,12 @@ function Dashboard({ user, history, setPage, onBuyCredits, profileLoaded = true 
         ))}
       </div>
 
-      <div className="dash-actions" style={{ display: "flex", gap: 14, marginBottom: 40 }}>
+      <div className="dash-actions" style={{ display: "flex", gap: 14, marginBottom: 40, flexWrap: "wrap" }}>
         <button onClick={() => setPage("generate")} style={{ background: O, color: WHITE, border: "none", borderRadius: 16, padding: "14px 30px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)" }}>
           Start a New Kit
+        </button>
+        <button onClick={() => setPage("negotiate")} style={{ background: WHITE, color: "#7C3AED", border: "1px solid #C4B5FD", borderRadius: 16, padding: "13px 24px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)", display: "flex", alignItems: "center", gap: 8 }}>
+          <i className="fa-solid fa-handshake-angle" style={{ fontSize: 13 }} /> Negotiate
         </button>
         <button onClick={() => setPage("payment")} style={{ background: WHITE, color: O, border: `1px solid ${O}`, borderRadius: 16, padding: "13px 24px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)" }}>
           + Buy Credits
@@ -3600,7 +3603,7 @@ function Dashboard({ user, history, setPage, onBuyCredits, profileLoaded = true 
                   <div style={{ fontSize: 12, color: FAINT }}>{kit.date} · {Object.keys(kit.outputs || {}).length} outputs saved</div>
                 </div>
                 <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                  {TABS.filter(t => t.id !== "negotiate").map(t => <div key={t.id} style={{ width: 7, height: 7, borderRadius: "50%", background: kit.outputs?.[t.id] ? G : BORDER }} />)}
+                  {TABS.map(t => <div key={t.id} style={{ width: 7, height: 7, borderRadius: "50%", background: kit.outputs?.[t.id] ? G : BORDER }} />)}
                   <span style={{ color: O, fontSize: 13, marginLeft: 8, fontWeight: 600 }}>View</span>
                 </div>
               </div>
@@ -3839,6 +3842,50 @@ function NegotiateTab({ sessionToken }) {
   );
 }
 
+// ─── NEGOTIATE PAGE ───────────────────────────────────────────────────────────
+
+function NegotiatePage({ user, setPage, sessionToken }) {
+  const isUnlimited = (user?.plan || "").toLowerCase() === "unlimited";
+
+  return (
+    <div style={{ maxWidth: 680, margin: "0 auto", padding: "32px 20px 80px" }}>
+      <button onClick={() => setPage("dashboard")} style={{ background: "none", border: "none", color: MUTED, fontSize: 13, cursor: "pointer", fontFamily: "inherit", padding: 0, display: "flex", alignItems: "center", gap: 6, marginBottom: 24 }}>
+        <i className="fa-solid fa-arrow-left" style={{ fontSize: 11 }} /> Back to Dashboard
+      </button>
+
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: "linear-gradient(135deg,#7C3AED,#A78BFA)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <i className="fa-solid fa-handshake-angle" style={{ color: WHITE, fontSize: 16 }} />
+          </div>
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: DARK }}>Negotiate</div>
+            <div style={{ fontSize: 13, color: MUTED }}>Salary &amp; notice period scripts — oral and email ready</div>
+          </div>
+          <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: "#7C3AED", background: "#EDE9FE", padding: "3px 10px", borderRadius: 20, textTransform: "uppercase", whiteSpace: "nowrap" }}>Unlimited</span>
+        </div>
+      </div>
+
+      {isUnlimited ? (
+        <div style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "28px 24px", boxShadow: "var(--soft-shadow)" }}>
+          <NegotiateTab sessionToken={sessionToken} />
+        </div>
+      ) : (
+        <div style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "48px 32px", textAlign: "center", boxShadow: "var(--soft-shadow)" }}>
+          <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#EDE9FE", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 26 }}>🔒</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: DARK, marginBottom: 10 }}>Negotiate is an Unlimited feature</div>
+          <div style={{ fontSize: 14, color: MUTED, lineHeight: 1.7, maxWidth: 380, margin: "0 auto 24px" }}>
+            Get salary negotiation scripts and notice period emails — both oral and email-ready — built for the Indian job market. Included in the Unlimited plan.
+          </div>
+          <button onClick={() => setPage("payment")} style={{ background: "linear-gradient(135deg,#7C3AED,#A78BFA)", color: WHITE, border: "none", borderRadius: 12, padding: "13px 32px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 4px 14px rgba(124,58,237,0.3)" }}>
+            Upgrade to Unlimited
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── KIT GENERATOR ────────────────────────────────────────────────────────────
 
 function KitGenerator({ user, setUser, onSaveKit, onUseCredit, setPage, selectedTemplate, setSelectedTemplate, sessionToken }) {
@@ -3911,7 +3958,6 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
     referral: "Personalising your outreach...",
     interview: "Organising your stories...",
     reach: "Planning your next steps...",
-    negotiate: "Preparing your negotiation notes...",
   };
 
   useEffect(() => {
@@ -4523,9 +4569,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
               </div>
             </div>
             <div className="output-pad" style={{ padding: "28px 32px 40px" }}>
-              {activeTab === "negotiate" && canAccess(user?.plan, "unlimited") ? (
-                <NegotiateTab sessionToken={sessionToken} />
-              ) : !canAccess(user?.plan, TABS.find(t => t.id === activeTab)?.minPlan ?? "starter") ? (
+              {!canAccess(user?.plan, TABS.find(t => t.id === activeTab)?.minPlan ?? "starter") ? (
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "52px 0", gap: 14, textAlign: "center" }}>
                   <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#FFF7ED", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🔒</div>
                   <div style={{ fontSize: 16, fontWeight: 700, color: DARK }}>
@@ -5896,7 +5940,8 @@ export default function App() {
       {page === "payment" && (user ? <PaymentPage user={user} setUser={setUser} setPage={setPage} sessionToken={sessionToken} /> : <AuthPage onAuth={handleAuth} setPage={setPage} />)}
       {page === "dashboard" && user && <Dashboard user={user} history={history} setPage={setPage} onBuyCredits={handleBuyCredits} profileLoaded={profileLoaded} />}
       {page === "generate" && user && <KitGenerator sessionToken={sessionToken} user={user} setUser={setUser} onSaveKit={handleSaveKit} onUseCredit={handleUseCredit} setPage={setPage} selectedTemplate={selectedTemplate} setSelectedTemplate={setSelectedTemplate} />}
-      {(page === "dashboard" || page === "generate" || page === "admin") && !user && <AuthPage onAuth={handleAuth} setPage={setPage} />}
+      {page === "negotiate" && user && <NegotiatePage user={user} setPage={setPage} sessionToken={sessionToken} />}
+      {(page === "dashboard" || page === "generate" || page === "admin" || page === "negotiate") && !user && <AuthPage onAuth={handleAuth} setPage={setPage} />}
 
       {/* Mobile bottom nav — logged in users only */}
       {user && (
