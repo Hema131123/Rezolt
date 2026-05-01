@@ -3626,8 +3626,8 @@ function NegotiateTab({ sessionToken }) {
 
   const sF = (k, v) => setSForm(p => ({ ...p, [k]: v }));
   const nF = (k, v) => setNForm(p => ({ ...p, [k]: v }));
-  const sSections = [{ id: "opener", label: "Opening" }, { id: "counter", label: "Counter offer" }, { id: "pushback", label: "If they push back" }, { id: "accept", label: "If you accept" }];
-  const nSections = [{ id: "verbal", label: "Verbal" }, { id: "email", label: "Email" }, { id: "linkedin", label: "LinkedIn" }];
+  const sSections = [{ id: "opener", label: "Opening" }, { id: "counter", label: "Counter offer" }, { id: "pushback", label: "If they push back" }, { id: "accept", label: "If you accept" }, { id: "email", label: "Email to HR" }];
+  const nSections = [{ id: "verbal", label: "Verbal script" }, { id: "email", label: "Email to HR" }, { id: "linkedin", label: "LinkedIn message" }];
 
   const callNegotiateApi = async (prompt) => {
     const timeout = new Promise((_, reject) =>
@@ -3653,7 +3653,7 @@ function NegotiateTab({ sessionToken }) {
     setSLoading(true); setSOut(""); setSError("");
     try {
       const text = await callNegotiateApi(
-        `You are a salary negotiation coach for the Indian job market. Plain text only, no markdown, no em dashes.\n\nOffered CTC: ${sForm.offerCtc} LPA\nExpected CTC: ${sForm.expectedCtc} LPA\nRole: ${sForm.role || "not specified"}\nCompany: ${sForm.company || "not specified"}\nExperience: ${sForm.exp || "not specified"}\nKey Skills: ${sForm.skills || "not specified"}\n\nGenerate 4 sections:\n\nSECTION 1: OPENING SCRIPT\n4-6 lines. Grateful, confident, sets up negotiation.\n\nSECTION 2: COUNTER OFFER\n4-6 lines. Specific ask with justification from skills and experience.\n\nSECTION 3: IF THEY PUSH BACK\n4-5 lines. Handle "budget is fixed." Ask for joining bonus, early appraisal, or extra leave.\n\nSECTION 4: IF YOU ACCEPT\n3-4 lines. Graceful close maintaining goodwill.`
+        `You are a salary negotiation coach for the Indian job market. Plain text only, no markdown, no em dashes.\n\nOffered CTC: ${sForm.offerCtc} LPA\nExpected CTC: ${sForm.expectedCtc} LPA\nRole: ${sForm.role || "not specified"}\nCompany: ${sForm.company || "not specified"}\nExperience: ${sForm.exp || "not specified"}\nKey Skills: ${sForm.skills || "not specified"}\n\nGenerate 5 sections:\n\nSECTION 1: OPENING SCRIPT\n4-6 lines. Spoken script — grateful, confident, sets up negotiation.\n\nSECTION 2: COUNTER OFFER\n4-6 lines. Spoken script — specific ask with justification from skills and experience.\n\nSECTION 3: IF THEY PUSH BACK\n4-5 lines. Spoken script — handle "budget is fixed." Ask for joining bonus, early appraisal, or extra leave.\n\nSECTION 4: IF YOU ACCEPT\n3-4 lines. Spoken script — graceful close maintaining goodwill.\n\nSECTION 5: NEGOTIATION EMAIL\nA professional email to the HR or recruiter. Format exactly as:\nSubject: [subject line]\n\n[email body — 8-10 lines, formal but warm, reference the role and company, state the expected CTC with brief justification based on experience and skills, invite further discussion, end with a courteous sign-off]`
       );
       setSOut(text);
     } catch (err) {
@@ -3668,7 +3668,7 @@ function NegotiateTab({ sessionToken }) {
     setNLoading(true); setNOut(""); setNError("");
     try {
       const text = await callNegotiateApi(
-        `You are a career coach for Indian professionals. Plain text only, no markdown, no em dashes. Always frame the notice period positively.\n\nNotice Period: ${nForm.notice}\nTarget Role: ${nForm.role || "not specified"}\nTarget Company: ${nForm.company || "not specified"}\nCurrent Company: ${nForm.currentCompany || "not specified"}\nReason for leaving: ${nForm.reason || "not specified"}\nBuyout option: ${nForm.buyout || "unsure"}\n\nGenerate 3 sections:\n\nSECTION 1: VERBAL SCRIPT\n5-7 lines spoken answer for "What is your notice period?" Confident framing, mention buyout if applicable.\n\nSECTION 2: EMAIL TO HR\nSubject: [subject line]\n8-10 line professional email to new company HR communicating notice period and any flexibility.\n\nSECTION 3: LINKEDIN MESSAGE\n6-8 line message to recruiter after interview, communicating notice period warmly and positively.`
+        `You are a career coach for Indian professionals. Plain text only, no markdown, no em dashes. Always frame the notice period positively.\n\nNotice Period: ${nForm.notice}\nTarget Role: ${nForm.role || "not specified"}\nTarget Company: ${nForm.company || "not specified"}\nCurrent Company: ${nForm.currentCompany || "not specified"}\nReason for leaving: ${nForm.reason || "not specified"}\nBuyout option: ${nForm.buyout || "unsure"}\n\nGenerate 3 sections:\n\nSECTION 1: VERBAL SCRIPT\n5-7 lines spoken script for answering "What is your notice period?" — confident, positive framing, mention buyout if applicable.\n\nSECTION 2: EMAIL TO HR\nA professional email to the new company HR. Format exactly as:\nSubject: [subject line]\n\n[email body — 8-10 lines, professional and warm, clearly state the notice period, mention any flexibility or buyout possibility, express enthusiasm for the role]\n\nSECTION 3: LINKEDIN MESSAGE\nA message to the recruiter after the interview. Format exactly as:\nSubject: [subject line]\n\n[message body — 6-8 lines, conversational but professional, communicate notice period positively, mention buyout if applicable, end with a warm note]`
       );
       setNOut(text);
     } catch (err) {
@@ -3684,13 +3684,41 @@ function NegotiateTab({ sessionToken }) {
       opener: /SECTION\s*1[:\s]+OPENING\s*SCRIPT[\s\S]*?\n([\s\S]*?)(?=SECTION\s*2|$)/i,
       counter: /SECTION\s*2[:\s]+COUNTER\s*OFFER[\s\S]*?\n([\s\S]*?)(?=SECTION\s*3|$)/i,
       pushback: /SECTION\s*3[:\s]+IF\s*THEY\s*PUSH\s*BACK[\s\S]*?\n([\s\S]*?)(?=SECTION\s*4|$)/i,
-      accept: /SECTION\s*4[:\s]+IF\s*YOU\s*ACCEPT[\s\S]*?\n([\s\S]*?)$/i,
+      accept: /SECTION\s*4[:\s]+IF\s*YOU\s*ACCEPT[\s\S]*?\n([\s\S]*?)(?=SECTION\s*5|$)/i,
+      email: /SECTION\s*5[:\s]+NEGOTIATION\s*EMAIL[\s\S]*?\n([\s\S]*?)$/i,
     } : {
       verbal: /SECTION\s*1[:\s]+VERBAL\s*SCRIPT[\s\S]*?\n([\s\S]*?)(?=SECTION\s*2|$)/i,
       email: /SECTION\s*2[:\s]+EMAIL\s*TO\s*HR[\s\S]*?\n([\s\S]*?)(?=SECTION\s*3|$)/i,
       linkedin: /SECTION\s*3[:\s]+LINKEDIN\s*MESSAGE[\s\S]*?\n([\s\S]*?)$/i,
     };
     const m = text.match(map[id]); return m ? m[1].trim() : text;
+  };
+
+  const renderSectionContent = (text, sectionId) => {
+    const isEmail = sectionId === "email";
+    const isLinkedIn = sectionId === "linkedin";
+    if (!text) return null;
+    if (isEmail || isLinkedIn) {
+      const subjectMatch = text.match(/^Subject:\s*(.+)/im);
+      const subject = subjectMatch ? subjectMatch[1].trim() : "";
+      const body = subject ? text.replace(/^Subject:[^\n]*\n?/im, "").trim() : text;
+      const accent = isLinkedIn ? { bg: "#EFF6FF", border: "#BFDBFE", tag: "#2563EB", tagBg: "#DBEAFE" } : { bg: "#F0FDF4", border: "#BBF7D0", tag: "#15803D", tagBg: "#DCFCE7" };
+      return (
+        <div style={{ border: `1px solid ${accent.border}`, borderRadius: 10, overflow: "hidden", background: WHITE }}>
+          <div style={{ background: accent.bg, borderBottom: `1px solid ${accent.border}`, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: accent.tag, background: accent.tagBg, padding: "2px 8px", borderRadius: 20, textTransform: "uppercase" }}>{isLinkedIn ? "LinkedIn" : "Email"}</span>
+            {subject && <span style={{ fontSize: 13, fontWeight: 600, color: DARK }}>Subject: {subject}</span>}
+          </div>
+          <div style={{ padding: "16px", fontSize: 13, lineHeight: 1.9, color: DARK, whiteSpace: "pre-wrap", fontFamily: "Georgia, serif" }}>{body}</div>
+        </div>
+      );
+    }
+    return (
+      <div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}><span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: "#92400E", background: "#FEF3C7", padding: "2px 8px", borderRadius: 20, textTransform: "uppercase" }}>Oral script</span></div>
+        <div style={{ fontSize: 13, lineHeight: 1.85, color: DARK, whiteSpace: "pre-wrap", fontFamily: "Georgia, serif" }}>{text}</div>
+      </div>
+    );
   };
 
   const gap = () => {
@@ -3748,7 +3776,7 @@ function NegotiateTab({ sessionToken }) {
                 <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
                   <button onClick={() => { navigator.clipboard.writeText(extractSection(sOut, sSection, "salary")); setSCopied(true); setTimeout(() => setSCopied(false), 2000); }} style={{ padding: "5px 12px", border: `1px solid ${sCopied ? G : BORDER}`, borderRadius: 7, background: sCopied ? "#F0FDF4" : WHITE, color: sCopied ? G : MUTED, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>{sCopied ? "Copied!" : "Copy"}</button>
                 </div>
-                <div style={{ fontSize: 13, lineHeight: 1.85, color: DARK, whiteSpace: "pre-wrap", fontFamily: "Georgia, serif" }}>{extractSection(sOut, sSection, "salary")}</div>
+                {renderSectionContent(extractSection(sOut, sSection, "salary"), sSection)}
               </div>
             </div>
           )}
@@ -3801,7 +3829,7 @@ function NegotiateTab({ sessionToken }) {
                 <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
                   <button onClick={() => { navigator.clipboard.writeText(extractSection(nOut, nSection, "notice")); setNCopied(true); setTimeout(() => setNCopied(false), 2000); }} style={{ padding: "5px 12px", border: `1px solid ${nCopied ? G : BORDER}`, borderRadius: 7, background: nCopied ? "#F0FDF4" : WHITE, color: nCopied ? G : MUTED, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>{nCopied ? "Copied!" : "Copy"}</button>
                 </div>
-                <div style={{ fontSize: 13, lineHeight: 1.85, color: DARK, whiteSpace: "pre-wrap", fontFamily: "Georgia, serif" }}>{extractSection(nOut, nSection, "notice")}</div>
+                {renderSectionContent(extractSection(nOut, nSection, "notice"), nSection)}
               </div>
             </div>
           )}
