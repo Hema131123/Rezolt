@@ -5578,18 +5578,9 @@ export default function App() {
       setBooting(false);
     }, 5000);
 
-    const syncSessionUser = async (authUser, accessToken, nextPage) => {
+    const syncSessionUser = async (authUser, accessToken) => {
       try {
-        // Yield execution thread by 150ms so Supabase can safely resolve and drop its native initialization locks before Database queries run
-        await new Promise(r => setTimeout(r, 150));
-
-        // Ensure login feels instant, then hydrate richer data in background.
-        if (!cancelled) {
-          setUser({ id: authUser?.id, name: authUser?.email?.split("@")[0], email: authUser?.email, credits: 1, plan: "Free" });
-          if (nextPage) setPage(nextPage);
-        }
-
-        // Use the API route (service role) so the Supabase client lock never blocks profile fetch
+        // Fetch real profile via API route (no Supabase client lock)
         let profile = null;
         try {
           const res = await Promise.race([
@@ -5599,7 +5590,7 @@ export default function App() {
           const data = await res.json().catch(() => ({}));
           profile = data?.profile ?? null;
         } catch (e) {
-          console.warn("syncSessionUser API profile fetch failed, falling back:", e);
+          console.warn("syncSessionUser profile fetch failed, falling back:", e);
           profile = await fetchProfile(authUser?.id).catch(() => null);
         }
 
@@ -5610,59 +5601,63 @@ export default function App() {
           id: authUser.id,
           name: profile?.name || prev?.name || authUser.email.split("@")[0],
           email: authUser.email,
-          credits: profile?.credits ?? prev?.credits ?? 1,
+          credits: profile?.credits ?? prev?.credits ?? 0,
           plan: normalizePlan(profile?.plan) ?? prev?.plan ?? "Free",
         }));
         setHistory(kits.map(k => ({ role: k.role, outputs: k.outputs, date: new Date(k.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) })));
         setProfileLoaded(true);
       } catch (e) {
         console.error("Session sync failed:", e);
-        if (!cancelled) setPage(prev =>
-          (prev === "dashboard" || prev === "generate" || prev === "admin") ? prev : "landing"
-        );
+        if (!cancelled) setProfileLoaded(true); // unblock UI even on error
       }
     };
 
     const recoveryFlow = typeof window !== "undefined" && /type=recovery/i.test(`${window.location.hash}${window.location.search}`);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.access_token) setSessionToken(session.access_token);
-      // Clear boot lock the moment Supabase answers natively
-      if (!cancelled) {
-        clearTimeout(bootTimeoutId);
-        setBooting(false);
-      }
+      if (session?.access_token && !cancelled) setSessionToken(session.access_token);
+      if (!cancelled) { clearTimeout(bootTimeoutId); setBooting(false); }
 
       if (event === "SIGNED_OUT") {
-        setUser(null);
-        setHistory([]);
-        setPage("landing");
+        if (!cancelled) { setUser(null); setHistory([]); setPage("landing"); }
         return;
       }
 
       if (!session?.user) {
-        if (event === "INITIAL_SESSION") setPage(prev => prev === "loading" ? "landing" : prev);
+        if (event === "INITIAL_SESSION" && !cancelled) setPage(prev => prev === "loading" ? "landing" : prev);
         return;
       }
 
       if (event === "PASSWORD_RECOVERY") {
-        await syncSessionUser(session.user, session.access_token, "reset-password");
+        if (!cancelled) {
+          setUser({ id: session.user.id, email: session.user.email, name: session.user.email.split("@")[0], credits: 0, plan: "Free" });
+          setPage("reset-password");
+        }
+        await syncSessionUser(session.user, session.access_token);
         return;
       }
 
       if (event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
-        // SIGNED_IN is handled by handleAuth (called directly from AuthPage) which uses
-        // the API route for profile fetching. Running syncSessionUser for SIGNED_IN too
-        // causes a race where syncSessionUser overwrites the correctly-set plan with "Free".
-        await syncSessionUser(session.user, session.access_token, event === "INITIAL_SESSION" ? (recoveryFlow ? "reset-password" : "dashboard") : undefined);
+        if (!cancelled) {
+          // Immediately render the dashboard with session data — no waiting for API calls
+          setUser(prev => prev?.id === session.user.id ? prev : {
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.email.split("@")[0],
+            credits: 0,
+            plan: "Free",
+          });
+          if (event === "INITIAL_SESSION") setPage(recoveryFlow ? "reset-password" : "dashboard");
+        }
+        // Hydrate real profile + history in background
+        await syncSessionUser(session.user, session.access_token);
       }
     });
 
     // Fallback: If no cache exists, INITIAL_SESSION may silently not broadcast fast enough. 
     // This perfectly bypasses the old lock conflict because it fails silently backwards to 'landing'.
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.access_token) setSessionToken(session.access_token);
-      if (session?.access_token) setSessionToken(session.access_token);
+      if (!cancelled && session?.access_token) setSessionToken(session.access_token);
       if (!cancelled && !session?.user) setPage(p => p === "loading" ? "landing" : p);
     }).catch(() => {
       if (!cancelled) setPage(p => p === "loading" ? "landing" : p);
