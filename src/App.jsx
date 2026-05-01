@@ -10,16 +10,26 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-async function fetchWithAuth(url, options = {}, token = null) {
-  let accessToken = token;
+function isTokenExpired(token) {
+  try {
+    // JWTs use base64url — replace chars before atob
+    const b64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(atob(b64));
+    return payload.exp && payload.exp < Math.floor(Date.now() / 1000);
+  } catch {
+    return true;
+  }
+}
 
-  // Try provided token, then session check
+async function fetchWithAuth(url, options = {}, token = null) {
+  let accessToken = (token && !isTokenExpired(token)) ? token : null;
+
   if (!accessToken) {
     try {
       const { data } = await supabase.auth.getSession();
-      accessToken = data?.session?.access_token;
+      accessToken = data?.session?.access_token || null;
     } catch (e) {
-      console.warn("Manual session check failed in fetchWithAuth:", e);
+      console.warn("Session check failed in fetchWithAuth:", e);
     }
   }
 
@@ -3604,7 +3614,7 @@ function Dashboard({ user, history, setPage, onBuyCredits, profileLoaded = true 
 
 // ─── NEGOTIATE TAB ────────────────────────────────────────────────────────────
 
-function NegotiateTab() {
+function NegotiateTab({ sessionToken }) {
   const [tool, setTool] = useState("salary");
   const [sForm, setSForm] = useState({ offerCtc: "", expectedCtc: "", role: "", company: "", exp: "", skills: "" });
   const [nForm, setNForm] = useState({ notice: "", role: "", company: "", currentCompany: "", reason: "", buyout: "" });
@@ -3612,47 +3622,73 @@ function NegotiateTab() {
   const [sLoading, setSLoading] = useState(false); const [nLoading, setNLoading] = useState(false);
   const [sCopied, setSCopied] = useState(false); const [nCopied, setNCopied] = useState(false);
   const [sSection, setSSection] = useState("opener"); const [nSection, setNSection] = useState("verbal");
+  const [sError, setSError] = useState(""); const [nError, setNError] = useState("");
 
   const sF = (k, v) => setSForm(p => ({ ...p, [k]: v }));
   const nF = (k, v) => setNForm(p => ({ ...p, [k]: v }));
   const sSections = [{ id: "opener", label: "Opening" }, { id: "counter", label: "Counter offer" }, { id: "pushback", label: "If they push back" }, { id: "accept", label: "If you accept" }];
   const nSections = [{ id: "verbal", label: "Verbal" }, { id: "email", label: "Email" }, { id: "linkedin", label: "LinkedIn" }];
 
+  const callNegotiateApi = async (prompt) => {
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Request timed out — please try again.")), 28000)
+    );
+    const res = await Promise.race([
+      fetchWithAuth("/api/claude-generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      }, sessionToken),
+      timeout,
+    ]);
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(d.error || `Server error (${res.status})`);
+    const text = d.text || d.content?.[0]?.text || "";
+    if (!text) throw new Error("No output returned — please try again.");
+    return text;
+  };
+
   const genSalary = async () => {
     if (!sForm.offerCtc || !sForm.expectedCtc) return;
-    setSLoading(true); setSOut("");
+    setSLoading(true); setSOut(""); setSError("");
     try {
-      const res = await fetchWithAuth("/api/claude-generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: `You are a salary negotiation coach for the Indian job market. Plain text only, no markdown, no em dashes.\n\nOffered CTC: ${sForm.offerCtc} LPA\nExpected CTC: ${sForm.expectedCtc} LPA\nRole: ${sForm.role || "not specified"}\nCompany: ${sForm.company || "not specified"}\nExperience: ${sForm.exp || "not specified"}\nKey Skills: ${sForm.skills || "not specified"}\n\nGenerate 4 sections:\n\nSECTION 1: OPENING SCRIPT\n4-6 lines. Grateful, confident, sets up negotiation.\n\nSECTION 2: COUNTER OFFER\n4-6 lines. Specific ask with justification from skills and experience.\n\nSECTION 3: IF THEY PUSH BACK\n4-5 lines. Handle "budget is fixed." Ask for joining bonus, early appraisal, or extra leave.\n\nSECTION 4: IF YOU ACCEPT\n3-4 lines. Graceful close maintaining goodwill.` }) });
-      const d = await res.json();
-      if (!res.ok) throw new Error(d.error || "AI generation failed");
-      setSOut(d.text || d.content?.[0]?.text || "Error. Try again.");
-    } catch (err) { setSOut(err?.message || "Something went wrong."); }
-    setSLoading(false);
+      const text = await callNegotiateApi(
+        `You are a salary negotiation coach for the Indian job market. Plain text only, no markdown, no em dashes.\n\nOffered CTC: ${sForm.offerCtc} LPA\nExpected CTC: ${sForm.expectedCtc} LPA\nRole: ${sForm.role || "not specified"}\nCompany: ${sForm.company || "not specified"}\nExperience: ${sForm.exp || "not specified"}\nKey Skills: ${sForm.skills || "not specified"}\n\nGenerate 4 sections:\n\nSECTION 1: OPENING SCRIPT\n4-6 lines. Grateful, confident, sets up negotiation.\n\nSECTION 2: COUNTER OFFER\n4-6 lines. Specific ask with justification from skills and experience.\n\nSECTION 3: IF THEY PUSH BACK\n4-5 lines. Handle "budget is fixed." Ask for joining bonus, early appraisal, or extra leave.\n\nSECTION 4: IF YOU ACCEPT\n3-4 lines. Graceful close maintaining goodwill.`
+      );
+      setSOut(text);
+    } catch (err) {
+      setSError(err?.message || "Something went wrong. Please try again.");
+    } finally {
+      setSLoading(false);
+    }
   };
 
   const genNotice = async () => {
     if (!nForm.notice) return;
-    setNLoading(true); setNOut("");
+    setNLoading(true); setNOut(""); setNError("");
     try {
-      const res = await fetchWithAuth("/api/claude-generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: `You are a career coach for Indian professionals. Plain text only, no markdown, no em dashes. Always frame the notice period positively.\n\nNotice Period: ${nForm.notice}\nTarget Role: ${nForm.role || "not specified"}\nTarget Company: ${nForm.company || "not specified"}\nCurrent Company: ${nForm.currentCompany || "not specified"}\nReason for leaving: ${nForm.reason || "not specified"}\nBuyout option: ${nForm.buyout || "unsure"}\n\nGenerate 3 sections:\n\nSECTION 1: VERBAL SCRIPT\n5-7 lines spoken answer for "What is your notice period?" Confident framing, mention buyout if applicable.\n\nSECTION 2: EMAIL TO HR\nSubject: [subject line]\n8-10 line professional email to new company HR communicating notice period and any flexibility.\n\nSECTION 3: LINKEDIN MESSAGE\n6-8 line message to recruiter after interview, communicating notice period warmly and positively.` }) });
-      const d = await res.json();
-      if (!res.ok) throw new Error(d.error || "AI generation failed");
-      setNOut(d.text || d.content?.[0]?.text || "Error. Try again.");
-    } catch (err) { setNOut(err?.message || "Something went wrong."); }
-    setNLoading(false);
+      const text = await callNegotiateApi(
+        `You are a career coach for Indian professionals. Plain text only, no markdown, no em dashes. Always frame the notice period positively.\n\nNotice Period: ${nForm.notice}\nTarget Role: ${nForm.role || "not specified"}\nTarget Company: ${nForm.company || "not specified"}\nCurrent Company: ${nForm.currentCompany || "not specified"}\nReason for leaving: ${nForm.reason || "not specified"}\nBuyout option: ${nForm.buyout || "unsure"}\n\nGenerate 3 sections:\n\nSECTION 1: VERBAL SCRIPT\n5-7 lines spoken answer for "What is your notice period?" Confident framing, mention buyout if applicable.\n\nSECTION 2: EMAIL TO HR\nSubject: [subject line]\n8-10 line professional email to new company HR communicating notice period and any flexibility.\n\nSECTION 3: LINKEDIN MESSAGE\n6-8 line message to recruiter after interview, communicating notice period warmly and positively.`
+      );
+      setNOut(text);
+    } catch (err) {
+      setNError(err?.message || "Something went wrong. Please try again.");
+    } finally {
+      setNLoading(false);
+    }
   };
 
   const extractSection = (text, id, type) => {
     if (!text) return "";
     const map = type === "salary" ? {
-      opener: /SECTION 1[:\s]+OPENING SCRIPT\n([\s\S]*?)(?=SECTION 2|$)/i,
-      counter: /SECTION 2[:\s]+COUNTER OFFER\n([\s\S]*?)(?=SECTION 3|$)/i,
-      pushback: /SECTION 3[:\s]+IF THEY PUSH BACK\n([\s\S]*?)(?=SECTION 4|$)/i,
-      accept: /SECTION 4[:\s]+IF YOU ACCEPT\n([\s\S]*?)$/i,
+      opener: /SECTION\s*1[:\s]+OPENING\s*SCRIPT[\s\S]*?\n([\s\S]*?)(?=SECTION\s*2|$)/i,
+      counter: /SECTION\s*2[:\s]+COUNTER\s*OFFER[\s\S]*?\n([\s\S]*?)(?=SECTION\s*3|$)/i,
+      pushback: /SECTION\s*3[:\s]+IF\s*THEY\s*PUSH\s*BACK[\s\S]*?\n([\s\S]*?)(?=SECTION\s*4|$)/i,
+      accept: /SECTION\s*4[:\s]+IF\s*YOU\s*ACCEPT[\s\S]*?\n([\s\S]*?)$/i,
     } : {
-      verbal: /SECTION 1[:\s]+VERBAL SCRIPT\n([\s\S]*?)(?=SECTION 2|$)/i,
-      email: /SECTION 2[:\s]+EMAIL TO HR\n([\s\S]*?)(?=SECTION 3|$)/i,
-      linkedin: /SECTION 3[:\s]+LINKEDIN MESSAGE\n([\s\S]*?)$/i,
+      verbal: /SECTION\s*1[:\s]+VERBAL\s*SCRIPT[\s\S]*?\n([\s\S]*?)(?=SECTION\s*2|$)/i,
+      email: /SECTION\s*2[:\s]+EMAIL\s*TO\s*HR[\s\S]*?\n([\s\S]*?)(?=SECTION\s*3|$)/i,
+      linkedin: /SECTION\s*3[:\s]+LINKEDIN\s*MESSAGE[\s\S]*?\n([\s\S]*?)$/i,
     };
     const m = text.match(map[id]); return m ? m[1].trim() : text;
   };
@@ -3696,8 +3732,13 @@ function NegotiateTab() {
             <div><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: MUTED, marginBottom: 5 }}>What strengths should we highlight?</label><input value={sForm.skills} onChange={e => sF("skills", e.target.value)} placeholder="e.g. Power BI, SQL" style={tinp} /></div>
           </div>
           <button onClick={genSalary} disabled={!sForm.offerCtc || !sForm.expectedCtc || sLoading} style={{ width: "100%", padding: "14px", background: (!sForm.offerCtc || !sForm.expectedCtc || sLoading) ? "#E2E8F0" : O, color: "white", border: "none", borderRadius: 16, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", transition: "all .2s", boxShadow: "var(--soft-shadow)" }}>
-            {sLoading ? "Refining your tone..." : "Craft my negotiation plan"}
+            {sLoading ? "Crafting your negotiation plan..." : "Craft my negotiation plan"}
           </button>
+          {sError && (
+            <div style={{ marginTop: 12, background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#B91C1C" }}>
+              {sError}
+            </div>
+          )}
           {sOut && (
             <div style={{ marginTop: 20 }}>
               <div style={{ display: "flex", borderBottom: `1px solid ${BORDER}`, marginBottom: 0 }}>
@@ -3744,8 +3785,13 @@ function NegotiateTab() {
             <input value={nForm.reason} onChange={e => nF("reason", e.target.value)} placeholder="e.g. career growth, better domain fit" style={tinp} />
           </div>
           <button onClick={genNotice} disabled={!nForm.notice || nLoading} style={{ width: "100%", padding: "14px", background: (!nForm.notice || nLoading) ? "#E2E8F0" : O, color: "white", border: "none", borderRadius: 16, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", transition: "all .2s", boxShadow: "var(--soft-shadow)" }}>
-            {nLoading ? "Organizing your response..." : "Craft my notice period plan"}
+            {nLoading ? "Crafting your notice period plan..." : "Craft my notice period plan"}
           </button>
+          {nError && (
+            <div style={{ marginTop: 12, background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#B91C1C" }}>
+              {nError}
+            </div>
+          )}
           {nOut && (
             <div style={{ marginTop: 20 }}>
               <div style={{ display: "flex", borderBottom: `1px solid ${BORDER}` }}>
@@ -3786,6 +3832,7 @@ function KitGenerator({ user, setUser, onSaveKit, onUseCredit, setPage, selected
   const [sampleTab, setSampleTab] = useState("resume");
   const [kitFeedback, setKitFeedback] = useState(null);
   const [subStep, setSubStep] = useState("");
+  const [generateError, setGenerateError] = useState("");
 
   const sampleJdText = `Role: HRBP Manager
 Company: Leading pharma analytics firm
@@ -3855,6 +3902,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
       alert("Note: AI generation requires the live server. Please test this on www.rezolt.in");
     }
     if (!isReady || !hasCredits || generating) return;
+    setGenerateError("");
     setLoaderStage(0);
     setGenerating(true);
     setSubStep("1/3: Authenticating...");
@@ -3873,13 +3921,24 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
         console.warn("Profile fetch in generate() failed:", e);
       }
       let effectivePlan = normalizePlan(freshProfile?.plan) ?? user?.plan ?? "Free";
-      // If user has credits but plan is still "Free", they must have bought at least a starter — treat as starter
+      // If user has credits but plan is still "Free", treat as starter (webhook lag)
       if (effectivePlan === "Free" && (freshProfile?.credits ?? 0) > 0) effectivePlan = "starter";
       if (freshProfile) setUser(prev => ({
         ...prev,
         credits: freshProfile.credits ?? prev.credits,
         plan: effectivePlan,
       }));
+
+      // HARD STOP: paid plans must have credits — only enforce when we have a confirmed fresh profile
+      if (freshProfile && effectivePlan !== "Free" && effectivePlan !== "unlimited") {
+        const freshCredits = freshProfile.credits ?? 0;
+        if (freshCredits <= 0) {
+          setUser(prev => ({ ...prev, credits: 0 }));
+          setGenerateError("You have 0 credits remaining. Purchase more to continue generating kits.");
+          return;
+        }
+      }
+
       const freshGeneratableTabs = TABS.filter(t => canAccess(effectivePlan, t.minPlan) && PROMPTS[t.id]);
 
       const safeResume = prepareInputForAi(resume, MAX_RESUME_CHARS, "Resume");
@@ -4262,10 +4321,30 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                   </div>
                 )}
                 <button onClick={() => setShowSample(true)} style={{ background: "none", border: "none", color: AC, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline", padding: 0 }}>See a sample output</button>
+                {user?.plan === "Free" && (
+                  <div style={{ fontSize: 11, color: "#6B7280", textAlign: "center" }}>
+                    Free plan generates <strong>Resume only</strong>.{" "}
+                    <span onClick={() => setPage("payment")} style={{ color: O, cursor: "pointer", textDecoration: "underline", fontWeight: 700 }}>Upgrade for all 5 tabs</span>
+                  </div>
+                )}
                 <button className="gen-btn" onClick={generate} disabled={!isReady || !hasCredits || generating}
                   style={{ background: isReady && hasCredits && !generating ? O : "#E2E8F0", color: isReady && hasCredits && !generating ? WHITE : FAINT, border: "none", borderRadius: 12, padding: "13px 30px", fontSize: 15, fontWeight: 700, cursor: isReady && hasCredits && !generating ? "pointer" : "not-allowed", fontFamily: "inherit", boxShadow: isReady && hasCredits && !generating ? "0 8px 22px rgba(3,29,64,0.18)" : "none", transition: "all 0.2s", minWidth: 180 }}>
-                  {generating ? (subStep || "Curating your experience...") : !hasCredits ? "No credits — upgrade to continue" : "Let's build your kit"}
+                  {generating
+                    ? (subStep || "Curating your experience...")
+                    : !hasCredits
+                      ? "No credits — upgrade to continue"
+                      : user?.plan === "Free"
+                        ? "Generate Resume (Free)"
+                        : user?.plan === "unlimited"
+                          ? "Generate Full Kit"
+                          : `Generate Kit (1 credit)`}
                 </button>
+                {generateError && (
+                  <div style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "10px 14px", fontSize: 12, color: "#B91C1C", textAlign: "center" }}>
+                    {generateError}{" "}
+                    <span onClick={() => setPage("payment")} style={{ textDecoration: "underline", cursor: "pointer", fontWeight: 700 }}>Upgrade now</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -4417,7 +4496,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
             </div>
             <div className="output-pad" style={{ padding: "28px 32px 40px" }}>
               {activeTab === "negotiate" && canAccess(user?.plan, "unlimited") ? (
-                <NegotiateTab />
+                <NegotiateTab sessionToken={sessionToken} />
               ) : !canAccess(user?.plan, TABS.find(t => t.id === activeTab)?.minPlan ?? "starter") ? (
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "52px 0", gap: 14, textAlign: "center" }}>
                   <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#FFF7ED", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🔒</div>
