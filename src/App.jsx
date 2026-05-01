@@ -3578,7 +3578,7 @@ function Dashboard({ user, history, setPage, onBuyCredits, profileLoaded = true 
         <button onClick={() => setPage("generate")} style={{ background: O, color: WHITE, border: "none", borderRadius: 16, padding: "14px 30px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)" }}>
           Start a New Kit
         </button>
-        <button onClick={() => setPage("negotiate")} style={{ background: WHITE, color: "#7C3AED", border: "1px solid #C4B5FD", borderRadius: 16, padding: "13px 24px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)", display: "flex", alignItems: "center", gap: 8 }}>
+        <button onClick={() => setPage("negotiate")} style={{ background: WHITE, color: O, border: `1px solid ${O}`, borderRadius: 16, padding: "13px 24px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)", display: "flex", alignItems: "center", gap: 8 }}>
           <i className="fa-solid fa-handshake-angle" style={{ fontSize: 13 }} /> Negotiate
         </button>
         <button onClick={() => setPage("payment")} style={{ background: WHITE, color: O, border: `1px solid ${O}`, borderRadius: 16, padding: "13px 24px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)" }}>
@@ -3855,14 +3855,14 @@ function NegotiatePage({ user, setPage, sessionToken }) {
 
       <div style={{ marginBottom: 28 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 12, background: "linear-gradient(135deg,#7C3AED,#A78BFA)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: "var(--grad)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <i className="fa-solid fa-handshake-angle" style={{ color: WHITE, fontSize: 16 }} />
           </div>
           <div>
             <div style={{ fontSize: 20, fontWeight: 800, color: DARK }}>Negotiate</div>
             <div style={{ fontSize: 13, color: MUTED }}>Salary &amp; notice period scripts — oral and email ready</div>
           </div>
-          <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: "#7C3AED", background: "#EDE9FE", padding: "3px 10px", borderRadius: 20, textTransform: "uppercase", whiteSpace: "nowrap" }}>Unlimited</span>
+          <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: O, background: "#FFF7ED", padding: "3px 10px", borderRadius: 20, textTransform: "uppercase", whiteSpace: "nowrap" }}>Unlimited</span>
         </div>
       </div>
 
@@ -3872,12 +3872,12 @@ function NegotiatePage({ user, setPage, sessionToken }) {
         </div>
       ) : (
         <div style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "48px 32px", textAlign: "center", boxShadow: "var(--soft-shadow)" }}>
-          <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#EDE9FE", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 26 }}>🔒</div>
+          <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#FFF7ED", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 26 }}>🔒</div>
           <div style={{ fontSize: 18, fontWeight: 800, color: DARK, marginBottom: 10 }}>Negotiate is an Unlimited feature</div>
           <div style={{ fontSize: 14, color: MUTED, lineHeight: 1.7, maxWidth: 380, margin: "0 auto 24px" }}>
             Get salary negotiation scripts and notice period emails — both oral and email-ready — built for the Indian job market. Included in the Unlimited plan.
           </div>
-          <button onClick={() => setPage("payment")} style={{ background: "linear-gradient(135deg,#7C3AED,#A78BFA)", color: WHITE, border: "none", borderRadius: 12, padding: "13px 32px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 4px 14px rgba(124,58,237,0.3)" }}>
+          <button onClick={() => setPage("payment")} style={{ background: "var(--grad)", color: WHITE, border: "none", borderRadius: 12, padding: "13px 32px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--shadow-accent)" }}>
             Upgrade to Unlimited
           </button>
         </div>
