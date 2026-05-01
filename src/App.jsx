@@ -451,44 +451,47 @@ ${jd}`,
 
   interview: (r, jd) => `You are a senior interview coach who has prepped candidates for Google, Amazon, Microsoft, Meta, McKinsey, and top Indian product and consulting companies. Your prep is specific, tactical, and battle-tested.
 
-CRITICAL COMPANY RULE: The company they are interviewing at is named in the JOB DESCRIPTION. All questions and answers must be tailored to that company. Resume companies are past employers.
+CRITICAL COMPANY RULE: The company the candidate is interviewing at is named in the JOB DESCRIPTION. All questions and answers must be tailored to that company. Resume companies are past employers.
 
-FORMATTING: Plain text only. No markdown. No em dashes. Use exact labels.
+FORMATTING: Plain text only. No markdown. No em dashes. Use exact labels. All answers are written in FIRST PERSON — as if the candidate is speaking ("I did...", "I led...", "In my role at X, I..."). Never write in third person.
 
 FAANG/MAANG INTERVIEW PREP STANDARDS:
 - Questions must be the ones THIS company actually asks for THIS type of role
-- STAR answers must use REAL details from the resume, no generic examples
-- Every answer must have a metric in the Result section
+- STAR answers must use REAL details from the resume, written in first person, no generic examples
+- Every answer must include a real metric from the resume in the Result
 - The TIE-BACK must connect explicitly to a JD requirement
 - Smart questions must show strategic thinking and company knowledge
 - Include one curveball or values-based question that top companies commonly ask
 
 OUTPUT FORMAT:
 
+SELF INTRODUCTION
+[Write a compelling 45-60 second self-introduction in first person that the candidate can say at the start of the interview. Structure: 1 sentence on current/most recent role and years of experience. 2 sentences on the strongest 2 achievements from the resume (with real metrics). 1 sentence on why they are specifically excited about this role at this company (inferred from the JD). 1 closing sentence on what they bring to the team. Make it warm, confident, and conversational — not robotic.]
+
 SECTION 1: TOP 5 QUESTIONS THEY WILL ASK
 
 Q1: [Most likely first question for this specific role and company]
-WHY THEY ASK: [One sentence, what competency or signal are they testing]
-SITUATION: [Specific scenario from this candidate's actual resume, name the company, project, or initiative]
-ACTION: [Exactly what they did, specific steps, decisions, methods]
-RESULT: [The outcome with a real number from the resume, if no number derive a credible proxy]
-TIE-BACK: [One sentence connecting this answer to the specific JD requirement it addresses]
+WHY THEY ASK: [One sentence — what competency or signal are they testing]
+SITUATION: [First person — "In my role at [Company], I was responsible for..." — name the specific project or initiative from the resume]
+ACTION: [First person — "I did X by doing Y and Z..." — specific steps, decisions, methods taken]
+RESULT: [First person — "As a result, I achieved..." — real metric from the resume]
+TIE-BACK: [One sentence — "This directly maps to [JD requirement] because..."]
 
-[Repeat format for Q2, Q3, Q4, Q5. Include at least one behavioural, one situational, one role-specific, and one values or culture question.]
+[Repeat for Q2, Q3, Q4, Q5. Include at least one behavioural, one situational, one role-specific, and one values/culture question.]
 
 SECTION 2: 2 POWER QUESTIONS TO ASK THE INTERVIEWER
 
-Q1: [Strategic question showing deep knowledge of the company's current priorities, infer from JD]
-WHY THIS WORKS: [One sentence explaining what signal this sends about the candidate]
+Q1: [Strategic question showing deep knowledge of the company's current priorities, inferred from JD]
+WHY THIS WORKS: [One sentence — what signal this sends about the candidate]
 
-Q2: [Forward-looking question about growth, team, or impact, shows genuine interest and ambition]
+Q2: [Forward-looking question about growth, team, or impact — shows genuine interest and ambition]
 WHY THIS WORKS: [One sentence]
 
 SECTION 3: 3 WATCH-OUTS FOR THIS INTERVIEW
 
-1. [Specific trap or common mistake candidates make for this role or company, with how to avoid it]
-2. [Second watch-out, could be about tone, format, or common interview bias for this role]
-3. [Third watch-out, practical tip for standing out in the final few minutes]
+1. [Specific trap or common mistake candidates make for this role or company — how to avoid it]
+2. [Second watch-out — tone, format, or common interview bias for this role]
+3. [Practical tip for standing out in the final few minutes]
 
 RESUME:
 ${r}
@@ -562,46 +565,32 @@ function parseResumeSections(text) {
   let currentSection = "header";
   let buffer = [];
 
+  const SECTION_HEADERS = [
+    [/^professional\s+summary$/i,"professional_summary"],[/^summary$/i,"professional_summary"],[/^profile$/i,"professional_summary"],[/^objective$/i,"professional_summary"],[/^career\s+summary$/i,"professional_summary"],
+    [/^core\s+skills$/i,"key_skills"],[/^key\s+skills$/i,"key_skills"],[/^skills$/i,"key_skills"],[/^technical\s+skills$/i,"key_skills"],[/^competencies$/i,"key_skills"],[/^core\s+competencies$/i,"key_skills"],[/^areas\s+of\s+expertise$/i,"key_skills"],
+    [/^key\s+achievements$/i,"key_achievements"],[/^achievements$/i,"key_achievements"],[/^key\s+highlights$/i,"key_achievements"],[/^highlights$/i,"key_achievements"],[/^career\s+highlights$/i,"key_achievements"],
+    [/^work\s+experience$/i,"work_experience"],[/^professional\s+experience$/i,"work_experience"],[/^experience$/i,"work_experience"],[/^employment(?:\s+history)?$/i,"work_experience"],[/^career\s+history$/i,"work_experience"],
+    [/^education(?:al\s+background)?$/i,"education"],[/^academic\s+background$/i,"education"],[/^qualifications$/i,"education"],
+    [/^certifications?\s+and\s+awards?$/i,"certifications"],[/^certifications?$/i,"certifications"],[/^awards?\s+and\s+certifications?$/i,"certifications"],[/^awards?$/i,"certifications"],[/^courses$/i,"certifications"],[/^training$/i,"certifications"],
+    [/^publications?\s+and\s+speaking$/i,"publications"],[/^publications?$/i,"publications"],
+    [/^contact(?:\s+information)?$/i,"contact_information"],[/^personal\s+(?:information|details)$/i,"contact_information"],
+  ];
+
   const flush = () => { if (buffer.length) { sections[currentSection] = ((sections[currentSection] || "") + buffer.join("\n")).trim(); buffer = []; } };
 
   lines.forEach(line => {
     const t = line.trim();
-    // Match ANY all-caps line ending with colon as a section header
-    const isHeader = t.length > 2 && t.length < 80 && t === t.toUpperCase()
-      && !/^[•\d\-]/.test(t)
-      && (t.endsWith(":") || /^(CONTACT|PROFESSIONAL|WORK|CORE|KEY|SKILLS|EDUCATION|CERTIFICATIONS?|SUMMARY|EXPERIENCE|PUBLICATIONS?|AWARDS?|ACHIEVEMENTS?)/.test(t));
-    if (isHeader) {
+    const hMatch = SECTION_HEADERS.find(([re]) => re.test(t));
+    if (hMatch) {
       flush();
-      currentSection = t.replace(/:$/, "").trim().toLowerCase().replace(/\s+/g, "_");
+      currentSection = hMatch[1];
     } else {
       buffer.push(line);
     }
   });
   flush();
 
-  // Normalize common section name variants
-  const normalize = (obj) => {
-    const map = {
-      contact_information: ["contact", "personal_information", "personal_details"],
-      professional_summary: ["summary", "profile", "objective", "professional_profile", "career_summary"],
-      work_experience: ["experience", "employment", "employment_history", "professional_experience", "career_history"],
-      key_skills: ["skills", "technical_skills", "core_competencies", "competencies", "areas_of_expertise", "core_skills"],
-      key_achievements: ["achievements", "key_highlights", "highlights", "career_highlights"],
-      certifications: ["certification", "courses", "training", "professional_development", "certifications_and_awards", "awards", "certifications_&_awards"],
-      publications: ["publications_and_speaking", "speaking", "publications_&_speaking"],
-      education: ["educational_background", "academic_background", "qualifications"],
-    };
-    Object.entries(map).forEach(([canonical, aliases]) => {
-      if (!obj[canonical]) {
-        for (const alias of aliases) {
-          if (obj[alias]) { obj[canonical] = obj[alias]; break; }
-        }
-      }
-    });
-    return obj;
-  };
-
-  return normalize(sections);
+  return sections;
 }
 
 function renderResumeWithTemplate(text, template, photoUrl, showBranding = true) {
@@ -876,7 +865,7 @@ function renderOutput(text) {
     if (!t) { elements.push(<div key={i} style={{ height: 10 }} />); return; }
 
     const isHeader = t.length > 4 && t.length < 80 && t === t.toUpperCase() && !/^[•Q\d]/.test(t)
-      && (t.endsWith(":") || /^(SECTION \d|VERSION \d|PROFESSIONAL|WORK EXPERIENCE|CORE|KEY|SKILLS|EDUCATION|CERTIFICATIONS?|SUMMARY|EXPERIENCE|PUBLICATIONS?|AWARDS?)/.test(t));
+      && (t.endsWith(":") || /^(SECTION \d|VERSION \d|SECTION \d:|SELF INTRODUCTION|PROFESSIONAL SUMMARY|WORK EXPERIENCE|CORE SKILLS|KEY SKILLS|KEY ACHIEVEMENTS|EDUCATION|CERTIFICATIONS|PUBLICATIONS|SUMMARY)/.test(t));
 
     if (isHeader) {
       elements.push(
