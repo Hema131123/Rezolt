@@ -1074,12 +1074,14 @@ const GLOBAL_CSS = `
 
   :root {
     --bg: #F9FAFB;
+    --app-bg: #F9FAFB;
     --surface: rgba(255,255,255,0.94);
     --surface-strong: #FFFFFF;
     --surface2: #F3F4F6;
     --surface3: #F9FAFB;
     --border: rgba(31,41,55,0.06);
     --text: #1F2937;
+    --text-primary: #1F2937;
     --text-mid: #374151;
     --text-muted: #6B7280;
     --text-faint: #94A3B8;
@@ -1106,12 +1108,14 @@ const GLOBAL_CSS = `
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #020B1E;
+      --app-bg: #020B1E;
       --surface: rgba(3,28,74,0.90);
       --surface-strong: #031D40;
       --surface2: #08284F;
       --surface3: #08264F;
       --border: rgba(228,190,71,0.14);
       --text: #EEF3F9;
+      --text-primary: #EEF3F9;
       --text-mid: #C7D4E5;
       --text-muted: #9BAEC7;
       --text-faint: rgba(199,212,229,0.58);
@@ -3705,11 +3709,10 @@ function NegotiateTab({ sessionToken }) {
       const subjectMatch = text.match(/^Subject:\s*(.+)/im);
       const subject = subjectMatch ? subjectMatch[1].trim() : "";
       const body = subject ? text.replace(/^Subject:[^\n]*\n?/im, "").trim() : text;
-      const accent = isLinkedIn ? { bg: "#EFF6FF", border: "#BFDBFE", tag: "#2563EB", tagBg: "#DBEAFE" } : { bg: "#F0FDF4", border: "#BBF7D0", tag: "#15803D", tagBg: "#DCFCE7" };
       return (
-        <div style={{ border: `1px solid ${accent.border}`, borderRadius: 10, overflow: "hidden", background: WHITE }}>
-          <div style={{ background: accent.bg, borderBottom: `1px solid ${accent.border}`, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: accent.tag, background: accent.tagBg, padding: "2px 8px", borderRadius: 20, textTransform: "uppercase" }}>{isLinkedIn ? "LinkedIn" : "Email"}</span>
+        <div style={{ border: `1px solid ${BORDER}`, borderRadius: 10, overflow: "hidden", background: WHITE }}>
+          <div style={{ background: BG, borderBottom: `1px solid ${BORDER}`, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: WHITE, background: isLinkedIn ? "var(--accent)" : O, padding: "2px 8px", borderRadius: 20, textTransform: "uppercase" }}>{isLinkedIn ? "LinkedIn" : "Email"}</span>
             {subject && <span style={{ fontSize: 13, fontWeight: 600, color: DARK }}>Subject: {subject}</span>}
           </div>
           <div style={{ padding: "16px", fontSize: 13, lineHeight: 1.9, color: DARK, whiteSpace: "pre-wrap", fontFamily: "Georgia, serif" }}>{body}</div>
@@ -3718,7 +3721,7 @@ function NegotiateTab({ sessionToken }) {
     }
     return (
       <div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}><span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: "#92400E", background: "#FEF3C7", padding: "2px 8px", borderRadius: 20, textTransform: "uppercase" }}>Oral script</span></div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}><span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: WHITE, background: O, padding: "2px 8px", borderRadius: 20, textTransform: "uppercase" }}>Oral script</span></div>
         <div style={{ fontSize: 13, lineHeight: 1.85, color: DARK, whiteSpace: "pre-wrap", fontFamily: "Georgia, serif" }}>{text}</div>
       </div>
     );
@@ -3749,7 +3752,7 @@ function NegotiateTab({ sessionToken }) {
             <div style={{ paddingBottom: 10, color: MUTED, fontSize: 14, textAlign: "center", fontWeight: 600 }}>to</div>
             <div><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: MUTED, marginBottom: 5 }}>What would feel right?*</label><input type="number" value={sForm.expectedCtc} onChange={e => sF("expectedCtc", e.target.value)} placeholder="e.g. 13" style={tinp} /></div>
           </div>
-          {g && <div style={{ background: "#FFF7ED", border: "1px solid #FED7AA", borderRadius: 8, padding: "9px 14px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}><span style={{ fontSize: 13, color: "#92400E" }}>Gap from offer</span><div style={{ display: "flex", gap: 10 }}><span style={{ fontWeight: 700, color: O }}>+{g.lpa} LPA</span><span style={{ background: "#FED7AA", color: "#92400E", fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 20 }}>{g.pct}% above offer</span></div></div>}
+          {g && <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "9px 14px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}><span style={{ fontSize: 13, color: MUTED }}>Gap from offer</span><div style={{ display: "flex", gap: 10 }}><span style={{ fontWeight: 700, color: O }}>+{g.lpa} LPA</span><span style={{ background: O, color: WHITE, fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 20 }}>{g.pct}% above offer</span></div></div>}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
             <div><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: MUTED, marginBottom: 5 }}>Which role is this for?</label><input value={sForm.role} onChange={e => sF("role", e.target.value)} placeholder="e.g. HRBP Manager" style={tinp} /></div>
             <div><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: MUTED, marginBottom: 5 }}>Which company is it with?</label><input value={sForm.company} onChange={e => sF("company", e.target.value)} placeholder="e.g. Target Company" style={tinp} /></div>
@@ -3798,7 +3801,7 @@ function NegotiateTab({ sessionToken }) {
             </select>
             <div style={{ fontSize: 11, color: FAINT, marginTop: 6 }}>Common in India: 30, 60, and 90 days — we’ll help you frame any option positively.</div>
           </div>
-          {nForm.notice && <div style={{ background: nForm.notice === "Immediate joiner" ? "#F0FDF4" : nForm.notice === "90 days" ? "#FFFBEB" : "#EFF6FF", border: `1px solid ${nForm.notice === "Immediate joiner" ? "#BBF7D0" : nForm.notice === "90 days" ? "#FDE68A" : "#BFDBFE"}`, borderRadius: 8, padding: "9px 14px", marginBottom: 14, fontSize: 13, color: DARK }}>{nForm.notice === "Immediate joiner" ? "🟢 Immediate joiners are in high demand — we'll frame this as a major strength." : nForm.notice === "90 days" ? "🟡 90 days is long — we'll coach you on framing and explore buyout angles." : nForm.notice === "60 days" ? "🔵 60 days is common in India — we'll help you highlight flexibility and a smooth handover." : `🔵 ${nForm.notice} is standard in India. We'll help you present it with confidence.`}</div>}
+          {nForm.notice && <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "9px 14px", marginBottom: 14, fontSize: 13, color: DARK }}>{nForm.notice === "Immediate joiner" ? "✅ Immediate joiners are in high demand — we'll frame this as a major strength." : nForm.notice === "90 days" ? "⚠️ 90 days is long — we'll coach you on framing and explore buyout angles." : nForm.notice === "60 days" ? "ℹ️ 60 days is common in India — we'll help you highlight flexibility and a smooth handover." : `ℹ️ ${nForm.notice} is standard in India. We'll help you present it with confidence.`}</div>}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
             <div><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: MUTED, marginBottom: 5 }}>Which role are you targeting?</label><input value={nForm.role} onChange={e => nF("role", e.target.value)} placeholder="e.g. HRBP Manager" style={tinp} /></div>
             <div><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: MUTED, marginBottom: 5 }}>Which company is on your mind?</label><input value={nForm.company} onChange={e => nF("company", e.target.value)} placeholder="e.g. Target Company" style={tinp} /></div>
@@ -3862,7 +3865,7 @@ function NegotiatePage({ user, setPage, sessionToken }) {
             <div style={{ fontSize: 20, fontWeight: 800, color: DARK }}>Negotiate</div>
             <div style={{ fontSize: 13, color: MUTED }}>Salary &amp; notice period scripts — oral and email ready</div>
           </div>
-          <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: O, background: "#FFF7ED", padding: "3px 10px", borderRadius: 20, textTransform: "uppercase", whiteSpace: "nowrap" }}>Unlimited</span>
+          <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: WHITE, background: O, padding: "3px 10px", borderRadius: 20, textTransform: "uppercase", whiteSpace: "nowrap" }}>Unlimited</span>
         </div>
       </div>
 
@@ -3872,7 +3875,7 @@ function NegotiatePage({ user, setPage, sessionToken }) {
         </div>
       ) : (
         <div style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "48px 32px", textAlign: "center", boxShadow: "var(--soft-shadow)" }}>
-          <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#FFF7ED", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 26 }}>🔒</div>
+          <div style={{ width: 60, height: 60, borderRadius: "50%", background: BG, border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 26 }}>🔒</div>
           <div style={{ fontSize: 18, fontWeight: 800, color: DARK, marginBottom: 10 }}>Negotiate is an Unlimited feature</div>
           <div style={{ fontSize: 14, color: MUTED, lineHeight: 1.7, maxWidth: 380, margin: "0 auto 24px" }}>
             Get salary negotiation scripts and notice period emails — both oral and email-ready — built for the Indian job market. Included in the Unlimited plan.
