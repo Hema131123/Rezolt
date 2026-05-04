@@ -1037,7 +1037,7 @@ function OutreachQuickActions({ type, text }) {
           <div style={{ fontSize: 11, color: MUTED, marginTop: 3 }}>{type === "referral" ? "Pick the right tone before you copy and send." : "Switch message styles and launch your search faster."}</div>
         </div>
         {linkedInQuery && (
-          <button onClick={launchLinkedIn} style={{ background: "var(--grad)", color: WHITE, border: "none", borderRadius: 999, padding: "8px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+          <button onClick={launchLinkedIn} style={{ background: "var(--grad)", color: "#fff", border: "none", borderRadius: 999, padding: "8px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
             Launch on LinkedIn
           </button>
         )}
@@ -1082,6 +1082,7 @@ const GLOBAL_CSS = `
     --border: rgba(31,41,55,0.06);
     --text: #1F2937;
     --text-primary: #1F2937;
+    --text-secondary: #374151;
     --text-mid: #374151;
     --text-muted: #6B7280;
     --text-faint: #94A3B8;
@@ -1116,6 +1117,7 @@ const GLOBAL_CSS = `
       --border: rgba(228,190,71,0.14);
       --text: #EEF3F9;
       --text-primary: #EEF3F9;
+      --text-secondary: #C7D4E5;
       --text-mid: #C7D4E5;
       --text-muted: #9BAEC7;
       --text-faint: rgba(199,212,229,0.58);
@@ -1146,6 +1148,25 @@ const GLOBAL_CSS = `
     color: var(--text);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      background: #020B1E;
+    }
+    #root::before { opacity: 0.08; }
+    .hero-gradient {
+      background: linear-gradient(135deg, rgba(3,28,74,0.96) 0%, rgba(8,40,79,0.96) 50%, rgba(8,38,79,0.96) 100%) !important;
+      border-color: rgba(228,190,71,0.10) !important;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.40) !important;
+    }
+    .hero-gradient::after {
+      border-color: rgba(228,190,71,0.08) !important;
+      box-shadow: inset 0 1px 0 rgba(228,190,71,0.05) !important;
+    }
+    .marine-hero {
+      background: linear-gradient(135deg, #020B1E 0%, #031D40 60%, #08284F 100%) !important;
+    }
   }
 
   #root {
@@ -2061,7 +2082,7 @@ function TopBar({ page, setPage, user, onSignOut }) {
             <button onClick={() => setPage("landing")} className="nav-item" style={{ background: "none", border: "none", padding: "8px 14px", fontSize: 14, color: "var(--text-muted)", cursor: "pointer", borderRadius: 8, fontFamily: "inherit", fontWeight: 500 }}>Home</button>
             <button onClick={() => setPage("articles")} className="nav-item" style={{ background: "none", border: "none", padding: "8px 14px", fontSize: 14, color: page === "articles" ? AC : "var(--text-muted)", cursor: "pointer", borderRadius: 8, fontFamily: "inherit", fontWeight: page === "articles" ? 700 : 500 }}>Articles</button>
             <button onClick={() => { setPage("landing"); setTimeout(() => { document.getElementById("pricing-section")?.scrollIntoView({ behavior: "smooth" }); }, 120); }} className="nav-item" style={{ background: "none", border: "none", padding: "8px 14px", fontSize: 14, color: "var(--text-muted)", cursor: "pointer", borderRadius: 8, fontFamily: "inherit", fontWeight: 500 }}>Pricing</button>
-            <button onClick={() => setPage("auth")} className="btn-primary" style={{ background: "var(--grad)", color: WHITE, border: "none", borderRadius: 10, padding: "10px 22px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--shadow-accent)" }}>Get Started</button>
+            <button onClick={() => setPage("auth")} className="btn-primary" style={{ background: "var(--grad)", color: "#fff", border: "none", borderRadius: 10, padding: "10px 22px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--shadow-accent)" }}>Get Started</button>
           </div>
         ) : (
           <div className="desktop-only" style={{ display: "flex", gap: 4, alignItems: "center" }}>
@@ -2159,7 +2180,7 @@ function TopBar({ page, setPage, user, onSignOut }) {
               <button onClick={() => { setPage("articles"); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 15, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 600 }}><i className="fa-solid fa-newspaper" style={{ marginRight: 8 }} />Articles</button>
               <button onClick={() => { setPage("landing"); setTimeout(() => document.getElementById("pricing-section")?.scrollIntoView({ behavior: "smooth" }), 120); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 15, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 600 }}><i className="fa-solid fa-dollar-sign" style={{ marginRight: 8 }} />Pricing</button>
               <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
-              <button onClick={() => { setPage("auth"); setMobileNav(false); }} style={{ background: "var(--grad)", color: WHITE, border: "none", borderRadius: 12, padding: "14px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Get Started Free</button>
+              <button onClick={() => { setPage("auth"); setMobileNav(false); }} style={{ background: "var(--grad)", color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Get Started Free</button>
               <button onClick={() => { setPage("auth"); setMobileNav(false); }} style={{ background: "none", border: "1px solid var(--border)", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", color: "var(--text-muted)" }}>Sign In</button>
             </div>
           ) : (
@@ -2746,7 +2767,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
                 </div>
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 18, flexWrap: "wrap" }}>
                   <button onClick={() => setSampleModalOpen(false)} style={{ background: WHITE, color: MUTED, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "11px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Close</button>
-                  <button onClick={() => { setSampleModalOpen(false); setPage(user ? "generate" : "auth"); }} style={{ background: "var(--grad)", color: WHITE, border: "none", borderRadius: 10, padding: "11px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+                  <button onClick={() => { setSampleModalOpen(false); setPage(user ? "generate" : "auth"); }} style={{ background: "var(--grad)", color: "#fff", border: "none", borderRadius: 10, padding: "11px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
                     Try this with my role
                   </button>
                 </div>
@@ -3200,7 +3221,7 @@ function ArticlesPage({ setPage, user, selectedArticle = 0, setSelectedArticle =
             <button onClick={() => setPage("landing")} style={{ background: WHITE, color: AC, border: "1px solid var(--border)", borderRadius: 12, padding: "12px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
               Back to home
             </button>
-            <button onClick={() => setPage(user ? "generate" : "auth")} className="btn-primary" style={{ background: "var(--grad)", color: WHITE, border: "none", borderRadius: 12, padding: "12px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+            <button onClick={() => setPage(user ? "generate" : "auth")} className="btn-primary" style={{ background: "var(--grad)", color: "#fff", border: "none", borderRadius: 12, padding: "12px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
               {user ? "Build a kit" : "Get started"}
             </button>
           </div>
@@ -3579,7 +3600,7 @@ function Dashboard({ user, history, setPage, onBuyCredits, profileLoaded = true 
       </div>
 
       <div className="dash-actions" style={{ display: "flex", gap: 14, marginBottom: 40, flexWrap: "wrap" }}>
-        <button onClick={() => setPage("generate")} style={{ background: O, color: WHITE, border: "none", borderRadius: 16, padding: "14px 30px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)" }}>
+        <button onClick={() => setPage("generate")} style={{ background: O, color: "#fff", border: "none", borderRadius: 16, padding: "14px 30px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)" }}>
           Start a New Kit
         </button>
         <button onClick={() => setPage("negotiate")} style={{ background: WHITE, color: O, border: `1px solid ${O}`, borderRadius: 16, padding: "13px 24px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)", display: "flex", alignItems: "center", gap: 8 }}>
@@ -3596,7 +3617,7 @@ function Dashboard({ user, history, setPage, onBuyCredits, profileLoaded = true 
           <div style={{ background: BG, border: `1px dashed ${BORDER}`, borderRadius: 24, padding: "56px 36px", textAlign: "center", boxShadow: "var(--soft-shadow)" }}>
             <div style={{ fontSize: 34, marginBottom: 14 }}><i className="fa-solid fa-wand-magic-sparkles" /></div>
             <div style={{ color: MUTED, fontSize: 15, marginBottom: 20 }}>Ready to land your dream role? Let’s build your first kit together.</div>
-            <button onClick={() => setPage("generate")} style={{ background: O, color: WHITE, border: "none", borderRadius: 16, padding: "12px 26px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)" }}>Let’s build the first kit</button>
+            <button onClick={() => setPage("generate")} style={{ background: O, color: "#fff", border: "none", borderRadius: 16, padding: "12px 26px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)" }}>Let’s build the first kit</button>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -3712,7 +3733,7 @@ function NegotiateTab({ sessionToken }) {
       return (
         <div style={{ border: `1px solid ${BORDER}`, borderRadius: 10, overflow: "hidden", background: WHITE }}>
           <div style={{ background: BG, borderBottom: `1px solid ${BORDER}`, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: WHITE, background: isLinkedIn ? "var(--accent)" : O, padding: "2px 8px", borderRadius: 20, textTransform: "uppercase" }}>{isLinkedIn ? "LinkedIn" : "Email"}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: "#fff", background: isLinkedIn ? "var(--accent)" : O, padding: "2px 8px", borderRadius: 20, textTransform: "uppercase" }}>{isLinkedIn ? "LinkedIn" : "Email"}</span>
             {subject && <span style={{ fontSize: 13, fontWeight: 600, color: DARK }}>Subject: {subject}</span>}
           </div>
           <div style={{ padding: "16px", fontSize: 13, lineHeight: 1.9, color: DARK, whiteSpace: "pre-wrap", fontFamily: "Georgia, serif" }}>{body}</div>
@@ -3721,7 +3742,7 @@ function NegotiateTab({ sessionToken }) {
     }
     return (
       <div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}><span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: WHITE, background: O, padding: "2px 8px", borderRadius: 20, textTransform: "uppercase" }}>Oral script</span></div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}><span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: "#fff", background: O, padding: "2px 8px", borderRadius: 20, textTransform: "uppercase" }}>Oral script</span></div>
         <div style={{ fontSize: 13, lineHeight: 1.85, color: DARK, whiteSpace: "pre-wrap", fontFamily: "Georgia, serif" }}>{text}</div>
       </div>
     );
@@ -3752,7 +3773,7 @@ function NegotiateTab({ sessionToken }) {
             <div style={{ paddingBottom: 10, color: MUTED, fontSize: 14, textAlign: "center", fontWeight: 600 }}>to</div>
             <div><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: MUTED, marginBottom: 5 }}>What would feel right?*</label><input type="number" value={sForm.expectedCtc} onChange={e => sF("expectedCtc", e.target.value)} placeholder="e.g. 13" style={tinp} /></div>
           </div>
-          {g && <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "9px 14px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}><span style={{ fontSize: 13, color: MUTED }}>Gap from offer</span><div style={{ display: "flex", gap: 10 }}><span style={{ fontWeight: 700, color: O }}>+{g.lpa} LPA</span><span style={{ background: O, color: WHITE, fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 20 }}>{g.pct}% above offer</span></div></div>}
+          {g && <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "9px 14px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}><span style={{ fontSize: 13, color: MUTED }}>Gap from offer</span><div style={{ display: "flex", gap: 10 }}><span style={{ fontWeight: 700, color: O }}>+{g.lpa} LPA</span><span style={{ background: O, color: "#fff", fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 20 }}>{g.pct}% above offer</span></div></div>}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
             <div><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: MUTED, marginBottom: 5 }}>Which role is this for?</label><input value={sForm.role} onChange={e => sF("role", e.target.value)} placeholder="e.g. HRBP Manager" style={tinp} /></div>
             <div><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: MUTED, marginBottom: 5 }}>Which company is it with?</label><input value={sForm.company} onChange={e => sF("company", e.target.value)} placeholder="e.g. Target Company" style={tinp} /></div>
@@ -3859,13 +3880,13 @@ function NegotiatePage({ user, setPage, sessionToken }) {
       <div style={{ marginBottom: 28 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
           <div style={{ width: 40, height: 40, borderRadius: 12, background: "var(--grad)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <i className="fa-solid fa-handshake-angle" style={{ color: WHITE, fontSize: 16 }} />
+            <i className="fa-solid fa-handshake-angle" style={{ color: "#fff", fontSize: 16 }} />
           </div>
           <div>
             <div style={{ fontSize: 20, fontWeight: 800, color: DARK }}>Negotiate</div>
             <div style={{ fontSize: 13, color: MUTED }}>Salary &amp; notice period scripts — oral and email ready</div>
           </div>
-          <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: WHITE, background: O, padding: "3px 10px", borderRadius: 20, textTransform: "uppercase", whiteSpace: "nowrap" }}>Unlimited</span>
+          <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: "#fff", background: O, padding: "3px 10px", borderRadius: 20, textTransform: "uppercase", whiteSpace: "nowrap" }}>Unlimited</span>
         </div>
       </div>
 
@@ -3880,7 +3901,7 @@ function NegotiatePage({ user, setPage, sessionToken }) {
           <div style={{ fontSize: 14, color: MUTED, lineHeight: 1.7, maxWidth: 380, margin: "0 auto 24px" }}>
             Get salary negotiation scripts and notice period emails — both oral and email-ready — built for the Indian job market. Included in the Unlimited plan.
           </div>
-          <button onClick={() => setPage("payment")} style={{ background: "var(--grad)", color: WHITE, border: "none", borderRadius: 12, padding: "13px 32px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--shadow-accent)" }}>
+          <button onClick={() => setPage("payment")} style={{ background: "var(--grad)", color: "#fff", border: "none", borderRadius: 12, padding: "13px 32px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--shadow-accent)" }}>
             Upgrade to Unlimited
           </button>
         </div>
@@ -4308,7 +4329,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                             <div style={{ fontSize: 34 }}><i className="fa-solid fa-wand-magic-sparkles" /></div>
                             <div style={{ fontSize: 14, fontWeight: 700, color: DARK }}>Bring in your current resume</div>
                             <div style={{ fontSize: 13, color: MUTED }}>PDF, DOCX or TXT — we’ll take it from here</div>
-                            <div style={{ background: O, color: WHITE, borderRadius: 14, padding: "10px 22px", fontSize: 13, fontWeight: 600 }}>Select Resume</div>
+                            <div style={{ background: O, color: "#fff", borderRadius: 14, padding: "10px 22px", fontSize: 13, fontWeight: 600 }}>Select Resume</div>
                           </>
                         )}
                       </div>
@@ -4581,7 +4602,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                   <div style={{ fontSize: 13, color: MUTED, maxWidth: 320, lineHeight: 1.7 }}>
                     Upgrade your plan to unlock this output and generate a complete kit for every application.
                   </div>
-                  <button onClick={() => setPage("payment")} style={{ background: O, color: WHITE, border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 2px 10px rgba(249,115,22,0.25)", marginTop: 4 }}>
+                  <button onClick={() => setPage("payment")} style={{ background: O, color: "#fff", border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 2px 10px rgba(249,115,22,0.25)", marginTop: 4 }}>
                     View Plans & Upgrade
                   </button>
                 </div>
@@ -4772,7 +4793,7 @@ function ResetPasswordPage({ setPage }) {
               <div style={{ fontSize: 36, marginBottom: 16 }}><i className="fa-solid fa-check" /></div>
               <div style={{ fontSize: 15, fontWeight: 700, color: DARK, marginBottom: 8 }}>Password updated</div>
               <div style={{ fontSize: 13, color: MUTED, lineHeight: 1.7, marginBottom: 24 }}>Your password has been reset successfully. You can now sign in normally.</div>
-              <button onClick={() => setPage("auth")} style={{ background: O, color: WHITE, border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Back to Sign In</button>
+              <button onClick={() => setPage("auth")} style={{ background: O, color: "#fff", border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Back to Sign In</button>
             </div>
           ) : (
             <>
@@ -4825,7 +4846,7 @@ function ForgotPasswordPage({ setPage }) {
               <div style={{ fontSize: 40, marginBottom: 16 }}>📬</div>
               <div style={{ fontSize: 15, fontWeight: 700, color: DARK, marginBottom: 8 }}>Check your inbox</div>
               <div style={{ fontSize: 13, color: MUTED, lineHeight: 1.7, marginBottom: 24 }}>We sent a password reset link to <strong>{email}</strong>. Open it on this device to set a new password. If you do not see it within a minute, please check Spam or Promotions.</div>
-              <button onClick={() => setPage("auth")} style={{ background: O, color: WHITE, border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Back to Sign In</button>
+              <button onClick={() => setPage("auth")} style={{ background: O, color: "#fff", border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Back to Sign In</button>
             </div>
           ) : (
             <>
@@ -4909,7 +4930,7 @@ function FAQPage({ setPage, user }) {
           </div>
 
           <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
-            <button onClick={() => setPage(user ? "generate" : "auth")} className="btn-primary" style={{ background: "var(--grad)", color: WHITE, border: "none", borderRadius: 12, padding: "12px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+            <button onClick={() => setPage(user ? "generate" : "auth")} className="btn-primary" style={{ background: "var(--grad)", color: "#fff", border: "none", borderRadius: 12, padding: "12px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
               {user ? "Build a kit" : "Get started"}
             </button>
             <button onClick={() => setPage("contact")} style={{ background: WHITE, color: AC, border: "1px solid var(--border)", borderRadius: 12, padding: "12px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
@@ -5080,7 +5101,7 @@ function ContactPage({ setPage, user }) {
             </div>
 
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <button onClick={submitEnquiry} className="btn-primary" style={{ background: "var(--grad)", color: WHITE, border: "none", borderRadius: 12, padding: "12px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+              <button onClick={submitEnquiry} className="btn-primary" style={{ background: "var(--grad)", color: "#fff", border: "none", borderRadius: 12, padding: "12px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
                 Send enquiry
               </button>
               <button onClick={() => setPage("faq")} style={{ background: WHITE, color: AC, border: "1px solid var(--border)", borderRadius: 12, padding: "12px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
@@ -5453,7 +5474,7 @@ function PaymentPage({ user, setUser, setPage, sessionToken }) {
         <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, fontWeight: 500, color: DARK, marginBottom: 10 }}>Payment successful!</div>
         <div style={{ fontSize: 15, color: MUTED, marginBottom: 8 }}>{success.synced ? <>You're now on the <strong style={{ color: O }}>{success.name}</strong> plan.</> : <>We are verifying your <strong style={{ color: O }}>{success.name}</strong> payment.</>}</div>
         <div style={{ fontSize: 14, color: MUTED, marginBottom: 32 }}>{success.synced ? (success.type === "subscription" ? "Unlimited kits unlocked." : `${success.credits} credit${success.credits > 1 ? "s" : ""} added to your account.`) : "If the browser closed during checkout, your verified payment will still sync automatically when you reopen Rezolt."}</div>
-        <button onClick={() => setPage("generate")} style={{ background: O, color: WHITE, border: "none", borderRadius: 10, padding: "14px 32px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 2px 12px rgba(249,115,22,0.3)" }}>
+        <button onClick={() => setPage("generate")} style={{ background: O, color: "#fff", border: "none", borderRadius: 10, padding: "14px 32px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 2px 12px rgba(249,115,22,0.3)" }}>
           Generate Your Kit
         </button>
       </div>
@@ -5476,7 +5497,7 @@ function PaymentPage({ user, setUser, setPage, sessionToken }) {
       <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20, maxWidth: 860, margin: "0 auto" }}>
         {PLANS.map((p) => (
           <div key={p.id} style={{ background: p.popular ? "rgba(249,115,22,0.04)" : WHITE, border: `1.5px solid ${p.popular ? O : BORDER}`, borderRadius: 16, padding: "32px 26px", position: "relative", display: "flex", flexDirection: "column" }}>
-            {p.popular && <div style={{ position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)", background: O, color: WHITE, fontSize: 11, fontWeight: 700, padding: "3px 14px", borderRadius: 20 }}>BEST VALUE</div>}
+            {p.popular && <div style={{ position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)", background: O, color: "#fff", fontSize: 11, fontWeight: 700, padding: "3px 14px", borderRadius: 20 }}>BEST VALUE</div>}
             <div style={{ fontSize: 12, fontWeight: 700, color: FAINT, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>{p.name}</div>
             <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 38, fontWeight: 500, color: p.popular ? O : DARK, lineHeight: 1, marginBottom: 4 }}>₹{p.price}</div>
             <div style={{ fontSize: 13, color: FAINT, marginBottom: 20 }}>{p.tag}</div>
@@ -5520,7 +5541,7 @@ function PaymentPage({ user, setUser, setPage, sessionToken }) {
                 <div style={{ fontSize: 13, color: "#15803D", fontWeight: 700 }}>✓ Cancellation email opened. We will process it within 1 business day.</div>
               ) : (
                 <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-                  <button onClick={handleCancelSubscription} disabled={cancelling} style={{ background: "#EF4444", color: WHITE, border: "none", borderRadius: 9, padding: "10px 20px", fontSize: 13, fontWeight: 700, cursor: cancelling ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
+                  <button onClick={handleCancelSubscription} disabled={cancelling} style={{ background: "#EF4444", color: "#fff", border: "none", borderRadius: 9, padding: "10px 20px", fontSize: 13, fontWeight: 700, cursor: cancelling ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
                     {cancelling ? "Opening email..." : "Send cancellation request"}
                   </button>
                   <button onClick={() => setShowCancel(false)} style={{ background: WHITE, color: MUTED, border: `1px solid ${BORDER}`, borderRadius: 9, padding: "10px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Keep plan</button>
