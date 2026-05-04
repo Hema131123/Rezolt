@@ -120,12 +120,12 @@ async function exportTextToDocx(text, fileName, title = "Rezolt Output") {
 }
 
 // ─── COLOUR SYSTEM ────────────────────────────────────────────────────────────
-const N1 = "#031D40"; // primary navy
+const N1 = "#031D40"; // primary navy — use for explicit dark backgrounds
 const N2 = "#08284F"; // supporting navy
-const AC = "#031D40"; // requested replacement accent
+const AC = "var(--accent)"; // brand accent — adapts: #031D40 light / #A4B4C9 dark
 const LB = "#A4B4C9"; // muted navy tint
 const PB = "#E4BE47"; // premium gold highlight
-const G = AC; // success uses the brand color
+const G = "#22c55e"; // success green — visible on both light and dark surfaces
 const ER = "#EF4444"; // error
 // Legacy aliases (used throughout components)
 const O = AC;
@@ -932,7 +932,7 @@ function renderOutput(text) {
       const num = t.match(/^(\d+)\./)[1];
       elements.push(
         <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8 }}>
-          <span style={{ background: O, color: "#fff", fontSize: 11, fontWeight: 700, width: 20, height: 20, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 3 }}>{num}</span>
+          <span style={{ background: N1, color: "#fff", fontSize: 11, fontWeight: 700, width: 20, height: 20, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 3 }}>{num}</span>
           <span style={{ fontSize: 14, color: MID, lineHeight: 1.75 }}>{t.replace(/^\d+\.\s*/, "")}</span>
         </div>
       );
@@ -954,7 +954,7 @@ function renderOutput(text) {
     if (/^VERSION \d:/.test(t)) {
       elements.push(
         <div key={i} style={{ marginTop: 20, marginBottom: 10 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", color: "#fff", background: O, padding: "3px 10px", borderRadius: 4, textTransform: "uppercase" }}>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", color: "#fff", background: N1, padding: "3px 10px", borderRadius: 4, textTransform: "uppercase" }}>
             {t.replace(/:$/, "")}
           </span>
         </div>
@@ -1155,6 +1155,11 @@ const GLOBAL_CSS = `
       background: #020B1E;
     }
     #root::before { opacity: 0.08; }
+    .topbar-pad {
+      background: linear-gradient(180deg, rgba(3,28,74,0.96), rgba(3,28,74,0.90)) !important;
+      border-color: rgba(228,190,71,0.12) !important;
+      box-shadow: 0 16px 34px rgba(0,0,0,0.40) !important;
+    }
     .hero-gradient {
       background: linear-gradient(135deg, rgba(3,28,74,0.96) 0%, rgba(8,40,79,0.96) 50%, rgba(8,38,79,0.96) 100%) !important;
       border-color: rgba(228,190,71,0.10) !important;
@@ -1166,6 +1171,11 @@ const GLOBAL_CSS = `
     }
     .marine-hero {
       background: linear-gradient(135deg, #020B1E 0%, #031D40 60%, #08284F 100%) !important;
+    }
+    .section-h2 {
+      background: none !important;
+      -webkit-text-fill-color: var(--text) !important;
+      color: var(--text) !important;
     }
   }
 
@@ -2571,7 +2581,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
       <div className="section-pad" style={{ padding: "80px clamp(20px,5vw,80px)", background: "var(--bg)" }}>
         <div style={{ textAlign: "center", marginBottom: 52 }}>
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: AC, marginBottom: 14 }}>How it works</div>
-          <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>A simple path to a sharper application</h2>
+          <h2 className="section-h2" style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>A simple path to a sharper application</h2>
           <p style={{ fontSize: 15, color: "var(--text-muted)", maxWidth: 620, margin: "12px auto 0", lineHeight: 1.75 }}>Built to feel easy, clear, and recruiter-aware from your first draft to your final send.</p>
         </div>
         <div className="three-col" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24 }}>
@@ -2602,7 +2612,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
         <div className="section-pad" style={{ padding: "80px clamp(20px,5vw,80px)" }}>
           <div style={{ textAlign: "center", marginBottom: 44 }}>
             <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: AC, marginBottom: 14 }}>See it in action</div>
-            <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>See what a stronger application can look like</h2>
+            <h2 className="section-h2" style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>See what a stronger application can look like</h2>
             <p style={{ fontSize: 14, color: "var(--text-muted)", maxWidth: 460, margin: "10px auto 0", lineHeight: 1.7 }}>Real sample outputs based on a genuine resume and role brief — designed to feel clearer, sharper, and more recruiter-ready.</p>
           </div>
 
@@ -2781,7 +2791,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
       <div className="section-pad" style={{ padding: "80px clamp(20px,5vw,80px)", background: "var(--bg)" }}>
         <div style={{ textAlign: "center", marginBottom: 52 }}>
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: AC, marginBottom: 14 }}>What you get</div>
-          <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>Everything you need to apply with confidence</h2>
+          <h2 className="section-h2" style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>Everything you need to apply with confidence</h2>
           <p style={{ fontSize: 15, color: "var(--text-muted)", marginTop: 12, maxWidth: 560, margin: "12px auto 0" }}>Every output is tailored to the role and company you&apos;re targeting, so your application feels more complete from the start.</p>
         </div>
         <div className="feature-grid">
@@ -2813,7 +2823,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
         <div className="section-pad" style={{ padding: "72px clamp(20px,5vw,80px)" }}>
           <div style={{ textAlign: "center", marginBottom: 44 }}>
             <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: AC, marginBottom: 14 }}>From our users</div>
-            <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(26px,3.5vw,40px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>What job seekers are saying</h2>
+            <h2 className="section-h2" style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(26px,3.5vw,40px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>What job seekers are saying</h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 18, maxWidth: 1080, margin: "0 auto" }}>
             {[
@@ -2844,7 +2854,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
       <div id="pricing-section" className="section-pad" style={{ padding: "80px clamp(20px,5vw,80px)", background: "var(--bg)" }}>
         <div style={{ textAlign: "center", marginBottom: 52 }}>
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: AC, marginBottom: 14 }}>Pricing</div>
-          <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>Choose a plan that fits your search</h2>
+          <h2 className="section-h2" style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>Choose a plan that fits your search</h2>
           <p style={{ fontSize: 15, color: "var(--text-muted)", marginTop: 12 }}>Start free, then upgrade only when you want more depth and more outputs.</p>
         </div>
         <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 16, maxWidth: 1200, margin: "0 auto", alignItems: "stretch" }}>
@@ -2954,7 +2964,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
         <div className="section-pad" style={{ padding: "80px clamp(20px,5vw,80px)" }}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
             <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".16em", textTransform: "uppercase", color: AC, marginBottom: 14 }}>Career insights</div>
-            <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>
+            <h2 className="section-h2" style={{ fontFamily: "'DM Serif Display', serif", fontSize: "clamp(28px,4vw,44px)", fontWeight: 400, letterSpacing: "-.02em", background: "var(--grad)", WebkitBackgroundClip: "text", MozBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>
               Practical guidance for a tougher job market
             </h2>
             <p style={{ fontSize: 15, color: "var(--text-muted)", marginTop: 14, maxWidth: 560, margin: "14px auto 0", lineHeight: 1.7 }}>
@@ -3060,7 +3070,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
       {/* ── FUN CTA ── */}
       <div style={{ padding: "0 clamp(16px,5vw,80px) 80px", background: "var(--bg)" }} className="section-pad">
         <div className="hero-gradient" style={{ borderRadius: 28, padding: "72px 40px", textAlign: "center", position: "relative", overflow: "hidden" }}>
-          <div className="blob" style={{ width: 300, height: 300, background: AC, top: -80, right: 40 }} />
+          <div className="blob" style={{ width: 300, height: 300, background: N1, top: -80, right: 40 }} />
           <div className="blob" style={{ width: 200, height: 200, background: LB, bottom: -60, left: 60 }} />
           <div style={{ position: "relative", zIndex: 1 }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(3,29,64,0.06)", border: "1px solid rgba(3,29,64,0.10)", borderRadius: 999, padding: "6px 14px", fontSize: 12, fontWeight: 700, color: AC, marginBottom: 16 }}>
@@ -3600,7 +3610,7 @@ function Dashboard({ user, history, setPage, onBuyCredits, profileLoaded = true 
       </div>
 
       <div className="dash-actions" style={{ display: "flex", gap: 14, marginBottom: 40, flexWrap: "wrap" }}>
-        <button onClick={() => setPage("generate")} style={{ background: O, color: "#fff", border: "none", borderRadius: 16, padding: "14px 30px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)" }}>
+        <button onClick={() => setPage("generate")} style={{ background: N1, color: "#fff", border: "none", borderRadius: 16, padding: "14px 30px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)" }}>
           Start a New Kit
         </button>
         <button onClick={() => setPage("negotiate")} style={{ background: WHITE, color: O, border: `1px solid ${O}`, borderRadius: 16, padding: "13px 24px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)", display: "flex", alignItems: "center", gap: 8 }}>
@@ -3617,7 +3627,7 @@ function Dashboard({ user, history, setPage, onBuyCredits, profileLoaded = true 
           <div style={{ background: BG, border: `1px dashed ${BORDER}`, borderRadius: 24, padding: "56px 36px", textAlign: "center", boxShadow: "var(--soft-shadow)" }}>
             <div style={{ fontSize: 34, marginBottom: 14 }}><i className="fa-solid fa-wand-magic-sparkles" /></div>
             <div style={{ color: MUTED, fontSize: 15, marginBottom: 20 }}>Ready to land your dream role? Let’s build your first kit together.</div>
-            <button onClick={() => setPage("generate")} style={{ background: O, color: "#fff", border: "none", borderRadius: 16, padding: "12px 26px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)" }}>Let’s build the first kit</button>
+            <button onClick={() => setPage("generate")} style={{ background: N1, color: "#fff", border: "none", borderRadius: 16, padding: "12px 26px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--soft-shadow)" }}>Let’s build the first kit</button>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -3742,7 +3752,7 @@ function NegotiateTab({ sessionToken }) {
     }
     return (
       <div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}><span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: "#fff", background: O, padding: "2px 8px", borderRadius: 20, textTransform: "uppercase" }}>Oral script</span></div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}><span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: "#fff", background: N1, padding: "2px 8px", borderRadius: 20, textTransform: "uppercase" }}>Oral script</span></div>
         <div style={{ fontSize: 13, lineHeight: 1.85, color: DARK, whiteSpace: "pre-wrap", fontFamily: "Georgia, serif" }}>{text}</div>
       </div>
     );
@@ -3773,7 +3783,7 @@ function NegotiateTab({ sessionToken }) {
             <div style={{ paddingBottom: 10, color: MUTED, fontSize: 14, textAlign: "center", fontWeight: 600 }}>to</div>
             <div><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: MUTED, marginBottom: 5 }}>What would feel right?*</label><input type="number" value={sForm.expectedCtc} onChange={e => sF("expectedCtc", e.target.value)} placeholder="e.g. 13" style={tinp} /></div>
           </div>
-          {g && <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "9px 14px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}><span style={{ fontSize: 13, color: MUTED }}>Gap from offer</span><div style={{ display: "flex", gap: 10 }}><span style={{ fontWeight: 700, color: O }}>+{g.lpa} LPA</span><span style={{ background: O, color: "#fff", fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 20 }}>{g.pct}% above offer</span></div></div>}
+          {g && <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "9px 14px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}><span style={{ fontSize: 13, color: MUTED }}>Gap from offer</span><div style={{ display: "flex", gap: 10 }}><span style={{ fontWeight: 700, color: O }}>+{g.lpa} LPA</span><span style={{ background: N1, color: "#fff", fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 20 }}>{g.pct}% above offer</span></div></div>}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
             <div><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: MUTED, marginBottom: 5 }}>Which role is this for?</label><input value={sForm.role} onChange={e => sF("role", e.target.value)} placeholder="e.g. HRBP Manager" style={tinp} /></div>
             <div><label style={{ display: "block", fontSize: 11, fontWeight: 700, color: MUTED, marginBottom: 5 }}>Which company is it with?</label><input value={sForm.company} onChange={e => sF("company", e.target.value)} placeholder="e.g. Target Company" style={tinp} /></div>
@@ -3886,7 +3896,7 @@ function NegotiatePage({ user, setPage, sessionToken }) {
             <div style={{ fontSize: 20, fontWeight: 800, color: DARK }}>Negotiate</div>
             <div style={{ fontSize: 13, color: MUTED }}>Salary &amp; notice period scripts — oral and email ready</div>
           </div>
-          <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: "#fff", background: O, padding: "3px 10px", borderRadius: 20, textTransform: "uppercase", whiteSpace: "nowrap" }}>Unlimited</span>
+          <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, letterSpacing: 0.7, color: "#fff", background: N1, padding: "3px 10px", borderRadius: 20, textTransform: "uppercase", whiteSpace: "nowrap" }}>Unlimited</span>
         </div>
       </div>
 
@@ -4329,7 +4339,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                             <div style={{ fontSize: 34 }}><i className="fa-solid fa-wand-magic-sparkles" /></div>
                             <div style={{ fontSize: 14, fontWeight: 700, color: DARK }}>Bring in your current resume</div>
                             <div style={{ fontSize: 13, color: MUTED }}>PDF, DOCX or TXT — we’ll take it from here</div>
-                            <div style={{ background: O, color: "#fff", borderRadius: 14, padding: "10px 22px", fontSize: 13, fontWeight: 600 }}>Select Resume</div>
+                            <div style={{ background: N1, color: "#fff", borderRadius: 14, padding: "10px 22px", fontSize: 13, fontWeight: 600 }}>Select Resume</div>
                           </>
                         )}
                       </div>
@@ -4602,7 +4612,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
                   <div style={{ fontSize: 13, color: MUTED, maxWidth: 320, lineHeight: 1.7 }}>
                     Upgrade your plan to unlock this output and generate a complete kit for every application.
                   </div>
-                  <button onClick={() => setPage("payment")} style={{ background: O, color: "#fff", border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 2px 10px rgba(249,115,22,0.25)", marginTop: 4 }}>
+                  <button onClick={() => setPage("payment")} style={{ background: N1, color: "#fff", border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 2px 10px rgba(249,115,22,0.25)", marginTop: 4 }}>
                     View Plans & Upgrade
                   </button>
                 </div>
@@ -4793,7 +4803,7 @@ function ResetPasswordPage({ setPage }) {
               <div style={{ fontSize: 36, marginBottom: 16 }}><i className="fa-solid fa-check" /></div>
               <div style={{ fontSize: 15, fontWeight: 700, color: DARK, marginBottom: 8 }}>Password updated</div>
               <div style={{ fontSize: 13, color: MUTED, lineHeight: 1.7, marginBottom: 24 }}>Your password has been reset successfully. You can now sign in normally.</div>
-              <button onClick={() => setPage("auth")} style={{ background: O, color: "#fff", border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Back to Sign In</button>
+              <button onClick={() => setPage("auth")} style={{ background: N1, color: "#fff", border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Back to Sign In</button>
             </div>
           ) : (
             <>
@@ -4846,7 +4856,7 @@ function ForgotPasswordPage({ setPage }) {
               <div style={{ fontSize: 40, marginBottom: 16 }}>📬</div>
               <div style={{ fontSize: 15, fontWeight: 700, color: DARK, marginBottom: 8 }}>Check your inbox</div>
               <div style={{ fontSize: 13, color: MUTED, lineHeight: 1.7, marginBottom: 24 }}>We sent a password reset link to <strong>{email}</strong>. Open it on this device to set a new password. If you do not see it within a minute, please check Spam or Promotions.</div>
-              <button onClick={() => setPage("auth")} style={{ background: O, color: "#fff", border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Back to Sign In</button>
+              <button onClick={() => setPage("auth")} style={{ background: N1, color: "#fff", border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Back to Sign In</button>
             </div>
           ) : (
             <>
@@ -5474,7 +5484,7 @@ function PaymentPage({ user, setUser, setPage, sessionToken }) {
         <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, fontWeight: 500, color: DARK, marginBottom: 10 }}>Payment successful!</div>
         <div style={{ fontSize: 15, color: MUTED, marginBottom: 8 }}>{success.synced ? <>You're now on the <strong style={{ color: O }}>{success.name}</strong> plan.</> : <>We are verifying your <strong style={{ color: O }}>{success.name}</strong> payment.</>}</div>
         <div style={{ fontSize: 14, color: MUTED, marginBottom: 32 }}>{success.synced ? (success.type === "subscription" ? "Unlimited kits unlocked." : `${success.credits} credit${success.credits > 1 ? "s" : ""} added to your account.`) : "If the browser closed during checkout, your verified payment will still sync automatically when you reopen Rezolt."}</div>
-        <button onClick={() => setPage("generate")} style={{ background: O, color: "#fff", border: "none", borderRadius: 10, padding: "14px 32px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 2px 12px rgba(249,115,22,0.3)" }}>
+        <button onClick={() => setPage("generate")} style={{ background: N1, color: "#fff", border: "none", borderRadius: 10, padding: "14px 32px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 2px 12px rgba(249,115,22,0.3)" }}>
           Generate Your Kit
         </button>
       </div>
@@ -5497,7 +5507,7 @@ function PaymentPage({ user, setUser, setPage, sessionToken }) {
       <div className="pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20, maxWidth: 860, margin: "0 auto" }}>
         {PLANS.map((p) => (
           <div key={p.id} style={{ background: p.popular ? "rgba(249,115,22,0.04)" : WHITE, border: `1.5px solid ${p.popular ? O : BORDER}`, borderRadius: 16, padding: "32px 26px", position: "relative", display: "flex", flexDirection: "column" }}>
-            {p.popular && <div style={{ position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)", background: O, color: "#fff", fontSize: 11, fontWeight: 700, padding: "3px 14px", borderRadius: 20 }}>BEST VALUE</div>}
+            {p.popular && <div style={{ position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)", background: N1, color: "#fff", fontSize: 11, fontWeight: 700, padding: "3px 14px", borderRadius: 20 }}>BEST VALUE</div>}
             <div style={{ fontSize: 12, fontWeight: 700, color: FAINT, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>{p.name}</div>
             <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: 38, fontWeight: 500, color: p.popular ? O : DARK, lineHeight: 1, marginBottom: 4 }}>₹{p.price}</div>
             <div style={{ fontSize: 13, color: FAINT, marginBottom: 20 }}>{p.tag}</div>
