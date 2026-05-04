@@ -2047,82 +2047,106 @@ function BrandLogo({ height = 100, style = {}, alt = "Rezolt" }) {
 
 // ─── TOP BAR ─────────────────────────────────────────────────────────────────
 
+function NavLink({ label, active, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      background: "none", border: "none", padding: "6px 14px", fontSize: 13.5,
+      color: active ? "var(--text)" : "var(--text-muted)",
+      cursor: "pointer", borderRadius: 8, fontFamily: "inherit",
+      fontWeight: active ? 700 : 500, position: "relative",
+      transition: "color 0.15s",
+    }}>
+      {label}
+      {active && <span style={{ position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)", width: 18, height: 2.5, borderRadius: 2, background: PB }} />}
+    </button>
+  );
+}
+
 function TopBar({ page, setPage, user, onSignOut }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
   const creditCount = user?.credits ?? 0;
-  const creditLabel = !user
-    ? ""
-    : user?.plan === "unlimited"
-      ? "Unlimited kits"
-      : creditCount === 0
-        ? "No credits left"
-        : user?.plan === "Free"
-          ? `${creditCount} free resume left`
-          : `${creditCount} kit${creditCount === 1 ? "" : "s"} left`;
-  const creditTone = !user ? AC : user?.plan === "unlimited" || creditCount > 0 ? AC : ER;
+  const isUnlimited = (user?.plan || "").toLowerCase() === "unlimited";
+  const creditTone = !user ? "var(--text-muted)" : isUnlimited || creditCount > 0 ? G : ER;
+  const creditLabel = !user ? "" : isUnlimited ? "∞" : String(creditCount);
 
   return (
     <>
-      <div style={{ height: 3, background: "linear-gradient(90deg, #001B48, #031D40, #08284F)" }} />
+      <div style={{ height: 3, background: "linear-gradient(90deg, #001B48 0%, #031D40 40%, #08284F 70%, #E4BE47 100%)" }} />
       <div style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
-        height: 74,
+        backdropFilter: "blur(18px) saturate(160%)",
+        WebkitBackdropFilter: "blur(18px) saturate(160%)",
+        height: 68,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "0 clamp(14px,2.8vw,22px)",
+        padding: "0 clamp(14px,2.8vw,24px)",
         position: "sticky",
         top: 10,
         zIndex: 100,
-        boxShadow: "0 18px 40px rgba(6,26,53,0.08)",
+        boxShadow: "0 12px 32px rgba(6,26,53,0.07)",
       }} className="topbar-pad">
 
         {/* Logo */}
-        <div onClick={() => setPage("landing")} style={{ display: "flex", alignItems: "center", cursor: "pointer", userSelect: "none" }}>
-          <BrandLogo height={50} />
+        <div onClick={() => setPage("landing")} style={{ display: "flex", alignItems: "center", cursor: "pointer", userSelect: "none", flexShrink: 0 }}>
+          <BrandLogo height={46} />
         </div>
 
         {/* Desktop nav */}
         {!user ? (
-          <div className="desktop-only" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <button onClick={() => setPage("landing")} className="nav-item" style={{ background: "none", border: "none", padding: "8px 14px", fontSize: 14, color: "var(--text-muted)", cursor: "pointer", borderRadius: 8, fontFamily: "inherit", fontWeight: 500 }}>Home</button>
-            <button onClick={() => setPage("articles")} className="nav-item" style={{ background: "none", border: "none", padding: "8px 14px", fontSize: 14, color: page === "articles" ? AC : "var(--text-muted)", cursor: "pointer", borderRadius: 8, fontFamily: "inherit", fontWeight: page === "articles" ? 700 : 500 }}>Articles</button>
-            <button onClick={() => { setPage("landing"); setTimeout(() => { document.getElementById("pricing-section")?.scrollIntoView({ behavior: "smooth" }); }, 120); }} className="nav-item" style={{ background: "none", border: "none", padding: "8px 14px", fontSize: 14, color: "var(--text-muted)", cursor: "pointer", borderRadius: 8, fontFamily: "inherit", fontWeight: 500 }}>Pricing</button>
-            <button onClick={() => setPage("auth")} className="btn-primary" style={{ background: "var(--grad)", color: "#fff", border: "none", borderRadius: 10, padding: "10px 22px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", boxShadow: "var(--shadow-accent)" }}>Get Started</button>
+          <div className="desktop-only" style={{ display: "flex", gap: 2, alignItems: "center" }}>
+            <NavLink label="Home" active={page === "landing"} onClick={() => setPage("landing")} />
+            <NavLink label="Articles" active={page === "articles"} onClick={() => setPage("articles")} />
+            <NavLink label="Pricing" active={false} onClick={() => { setPage("landing"); setTimeout(() => document.getElementById("pricing-section")?.scrollIntoView({ behavior: "smooth" }), 120); }} />
+            <div style={{ width: 1, height: 20, background: "var(--border)", margin: "0 8px" }} />
+            <button onClick={() => setPage("auth")} style={{ background: "none", border: "1px solid var(--border)", borderRadius: 9, padding: "7px 16px", fontSize: 13.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", color: "var(--text-muted)", transition: "all 0.15s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--text)"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-muted)"; }}>
+              Sign In
+            </button>
+            <button onClick={() => setPage("auth")} style={{ background: "var(--grad)", color: "#fff", border: "none", borderRadius: 9, padding: "8px 18px", fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", marginLeft: 4, boxShadow: "0 4px 14px rgba(3,29,64,0.18)" }}>
+              Get Started
+            </button>
           </div>
         ) : (
-          <div className="desktop-only" style={{ display: "flex", gap: 4, alignItems: "center" }}>
-            {[
-              { key: "home", label: "Home", page: "landing" },
-              { key: "articles", label: "Articles", page: "articles" },
-              { key: "pricing", label: "Pricing", page: "landing", scroll: "pricing-section" },
-              { key: "dashboard", label: "Dashboard", page: "dashboard" },
-              { key: "create", label: "Create Kit", page: "generate" },
-              ...(user?.email?.trim()?.toLowerCase() === ADMIN_EMAIL.trim().toLowerCase() ? [{ key: "admin", label: "Admin", page: "admin" }] : []),
-            ].map(item => (
-              <button key={item.key} onClick={() => { setPage(item.page); if (item.scroll) setTimeout(() => document.getElementById(item.scroll)?.scrollIntoView({ behavior: "smooth" }), 100); }} className="nav-item" style={{
-                background: page === item.page && !item.scroll ? "var(--accent-soft)" : "none",
-                border: "none", padding: "8px 14px", fontSize: 14,
-                color: page === item.page && !item.scroll ? AC : "var(--text-muted)",
-                cursor: "pointer", borderRadius: 8, fontFamily: "inherit",
-                fontWeight: page === item.page && !item.scroll ? 700 : 500,
-              }}>{item.label}</button>
-            ))}
-            <div style={{ width: 1, height: 24, background: "var(--border)", margin: "0 6px" }} />
-            <div style={{ position: "relative" }}>
+          <div className="desktop-only" style={{ display: "flex", gap: 2, alignItems: "center" }}>
+            <NavLink label="Home" active={page === "landing"} onClick={() => setPage("landing")} />
+            <NavLink label="Articles" active={page === "articles"} onClick={() => setPage("articles")} />
+            <NavLink label="Dashboard" active={page === "dashboard"} onClick={() => setPage("dashboard")} />
+            <NavLink label="Negotiate" active={page === "negotiate"} onClick={() => setPage("negotiate")} />
+            {user?.email?.trim()?.toLowerCase() === ADMIN_EMAIL.trim().toLowerCase() && (
+              <NavLink label="Admin" active={page === "admin"} onClick={() => setPage("admin")} />
+            )}
+            <div style={{ width: 1, height: 20, background: "var(--border)", margin: "0 10px" }} />
+
+            {/* Credits pill */}
+            <div onClick={() => setPage("payment")} style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 999, padding: "5px 12px", cursor: "pointer", transition: "all 0.15s" }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = "var(--accent)"}
+              onMouseLeave={e => e.currentTarget.style.borderColor = "var(--border)"}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: creditTone, flexShrink: 0 }} />
+              <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)" }}>
+                {isUnlimited ? "Unlimited" : `${creditLabel} credit${creditCount === 1 ? "" : "s"}`}
+              </span>
+            </div>
+
+            {/* Create Kit CTA */}
+            <button onClick={() => setPage("generate")} style={{ background: "var(--grad)", color: "#fff", border: "none", borderRadius: 9, padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", marginLeft: 4, whiteSpace: "nowrap", boxShadow: "0 4px 14px rgba(3,29,64,0.18)" }}>
+              + Create Kit
+            </button>
+
+            {/* Avatar + dropdown */}
+            <div style={{ position: "relative", marginLeft: 4 }}>
               <div onClick={() => setMenuOpen(p => !p)} style={{
-                width: 36, height: 36, borderRadius: "50%",
+                width: 34, height: 34, borderRadius: "50%",
                 background: "var(--grad)", cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 14, fontWeight: 800, color: "white",
-                boxShadow: "var(--shadow-accent)", userSelect: "none",
-                transition: "transform 0.2s ease",
+                fontSize: 13, fontWeight: 800, color: "#fff",
+                boxShadow: "0 2px 8px rgba(3,29,64,0.22)", userSelect: "none",
+                transition: "transform 0.2s",
               }}
-                onMouseEnter={e => e.currentTarget.style.transform = "scale(1.08)"}
+                onMouseEnter={e => e.currentTarget.style.transform = "scale(1.1)"}
                 onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
               >
                 {user.name?.[0]?.toUpperCase()}
@@ -2131,33 +2155,40 @@ function TopBar({ page, setPage, user, onSignOut }) {
                 <>
                   <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 98 }} />
                   <div style={{
-                    position: "absolute", top: 46, right: 0,
+                    position: "absolute", top: 42, right: 0,
                     background: "var(--surface)", border: "1px solid var(--border)",
-                    borderRadius: 16, padding: "8px", minWidth: 220,
+                    borderRadius: 16, padding: "6px", minWidth: 210,
                     boxShadow: "var(--shadow-lg)", zIndex: 99,
                     animation: "scaleIn 0.15s ease",
                   }}>
-                    <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)", marginBottom: 6 }}>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{user.name}</div>
-                      <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>{user.email}</div>
+                    <div style={{ padding: "10px 14px 10px", borderBottom: "1px solid var(--border)", marginBottom: 4 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{user.name}</div>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 1 }}>{user.email}</div>
+                      <div style={{ marginTop: 6, display: "inline-flex", alignItems: "center", gap: 5, background: "var(--surface2)", borderRadius: 999, padding: "3px 9px" }}>
+                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: creditTone }} />
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "capitalize" }}>
+                          {user.plan || "Free"} plan · {isUnlimited ? "∞ credits" : `${creditLabel} credit${creditCount === 1 ? "" : "s"}`}
+                        </span>
+                      </div>
                     </div>
                     {[
-                      { key: "plans", label: (<><i className="fa-solid fa-dollar-sign" style={{ marginRight: 8 }} />Plans & Billing</>), action: () => { setPage("payment"); setMenuOpen(false); } },
-                      { key: "dashboard", label: (<><FiLayout style={{ marginRight: 8 }} />Dashboard</>), action: () => { setPage("dashboard"); setMenuOpen(false); } },
-                      { key: "create", label: (<><FiEdit3 style={{ marginRight: 8 }} />Create Kit</>), action: () => { setPage("generate"); setMenuOpen(false); } },
-                      { key: "negotiate", label: (<><i className="fa-solid fa-handshake-angle" style={{ marginRight: 8 }} />Negotiate</>), action: () => { setPage("negotiate"); setMenuOpen(false); } },
+                      { key: "dashboard", icon: <FiLayout />, label: "Dashboard", action: () => { setPage("dashboard"); setMenuOpen(false); } },
+                      { key: "create", icon: <FiEdit3 />, label: "Create Kit", action: () => { setPage("generate"); setMenuOpen(false); } },
+                      { key: "negotiate", icon: <i className="fa-solid fa-handshake-angle" />, label: "Negotiate", action: () => { setPage("negotiate"); setMenuOpen(false); } },
+                      { key: "plans", icon: <i className="fa-solid fa-dollar-sign" />, label: "Plans & Billing", action: () => { setPage("payment"); setMenuOpen(false); } },
                     ].map(item => (
-                      <button key={item.key} onClick={item.action} style={{ width: "100%", textAlign: "left", background: "none", border: "none", padding: "10px 16px", fontSize: 13, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", display: "block", transition: "all 0.15s ease" }}
-                        onMouseEnter={e => { e.currentTarget.style.background = "var(--accent-soft)"; e.currentTarget.style.color = AC; }}
+                      <button key={item.key} onClick={item.action} style={{ width: "100%", textAlign: "left", background: "none", border: "none", padding: "9px 14px", fontSize: 13, color: "var(--text-mid)", cursor: "pointer", borderRadius: 9, fontFamily: "inherit", display: "flex", alignItems: "center", gap: 10, transition: "all 0.12s" }}
+                        onMouseEnter={e => { e.currentTarget.style.background = "var(--accent-soft)"; e.currentTarget.style.color = "var(--text)"; }}
                         onMouseLeave={e => { e.currentTarget.style.background = "none"; e.currentTarget.style.color = "var(--text-mid)"; }}>
+                        <span style={{ width: 16, opacity: 0.7, display: "inline-flex", alignItems: "center" }}>{item.icon}</span>
                         {item.label}
                       </button>
                     ))}
-                    <div style={{ borderTop: "1px solid var(--border)", marginTop: 6, paddingTop: 6 }}>
-                      <button onClick={() => { onSignOut(); setMenuOpen(false); }} style={{ width: "100%", textAlign: "left", background: "none", border: "none", padding: "10px 16px", fontSize: 13, color: ER, cursor: "pointer", borderRadius: 10, fontFamily: "inherit", transition: "all 0.15s ease" }}
-                        onMouseEnter={e => e.currentTarget.style.background = "rgba(239,68,68,0.08)"}
+                    <div style={{ borderTop: "1px solid var(--border)", marginTop: 4, paddingTop: 4 }}>
+                      <button onClick={() => { onSignOut(); setMenuOpen(false); }} style={{ width: "100%", textAlign: "left", background: "none", border: "none", padding: "9px 14px", fontSize: 13, color: ER, cursor: "pointer", borderRadius: 9, fontFamily: "inherit", display: "flex", alignItems: "center", gap: 10, transition: "background 0.12s" }}
+                        onMouseEnter={e => e.currentTarget.style.background = "rgba(239,68,68,0.07)"}
                         onMouseLeave={e => e.currentTarget.style.background = "none"}>
-                        <i className="fa-solid fa-right-from-bracket" style={{ marginRight: 8 }} />Sign Out
+                        <i className="fa-solid fa-right-from-bracket" style={{ width: 16 }} />Sign Out
                       </button>
                     </div>
                   </div>
@@ -2167,15 +2198,15 @@ function TopBar({ page, setPage, user, onSignOut }) {
           </div>
         )}
 
-        {/* Mobile hamburger */}
+        {/* Mobile: credits pill + hamburger */}
         <div className="mobile-only" style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {user && (
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 999, padding: "5px 9px" }}>
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: creditTone, flexShrink: 0 }} />
-              <span style={{ fontSize: 11, fontWeight: 700, color: creditTone }}>{user.plan === "unlimited" ? "∞ kits" : `${creditCount} kit${creditCount === 1 ? "" : "s"}`}</span>
+            <div onClick={() => setPage("payment")} style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 999, padding: "5px 10px", cursor: "pointer" }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: creditTone, flexShrink: 0 }} />
+              <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)" }}>{isUnlimited ? "∞" : creditLabel}</span>
             </div>
           )}
-          <button className="menu-toggle" onClick={() => setMobileNav(p => !p)} style={{ background: "none", border: "1px solid var(--border)", borderRadius: 8, padding: "6px 10px", cursor: "pointer", fontSize: 18, color: "var(--text)" }}>
+          <button className="menu-toggle" onClick={() => setMobileNav(p => !p)} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 8, padding: "7px 11px", cursor: "pointer", fontSize: 16, color: "var(--text)", transition: "all 0.15s" }}>
             <i className={mobileNav ? "fa-solid fa-xmark" : "fa-solid fa-bars"} />
           </button>
         </div>
@@ -2183,39 +2214,65 @@ function TopBar({ page, setPage, user, onSignOut }) {
 
       {/* Mobile nav drawer */}
       {mobileNav && (
-        <div className="mobile-only" style={{ background: "var(--surface)", borderBottom: "1px solid var(--border)", padding: "8px 16px 16px", boxShadow: "var(--shadow-md)", zIndex: 99, position: "relative" }}>
+        <div className="mobile-only" style={{ background: "var(--surface)", borderBottom: "1px solid var(--border)", padding: "10px 14px 18px", boxShadow: "var(--shadow-md)", zIndex: 99, position: "relative" }}>
           {!user ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <button onClick={() => { setPage("landing"); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 15, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 600 }}><i className="fa-solid fa-house" style={{ marginRight: 8 }} />Home</button>
-              <button onClick={() => { setPage("articles"); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 15, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 600 }}><i className="fa-solid fa-newspaper" style={{ marginRight: 8 }} />Articles</button>
-              <button onClick={() => { setPage("landing"); setTimeout(() => document.getElementById("pricing-section")?.scrollIntoView({ behavior: "smooth" }), 120); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 15, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 600 }}><i className="fa-solid fa-dollar-sign" style={{ marginRight: 8 }} />Pricing</button>
-              <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
-              <button onClick={() => { setPage("auth"); setMobileNav(false); }} style={{ background: "var(--grad)", color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Get Started Free</button>
-              <button onClick={() => { setPage("auth"); setMobileNav(false); }} style={{ background: "none", border: "1px solid var(--border)", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", color: "var(--text-muted)" }}>Sign In</button>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              {[
+                { label: "Home", icon: "fa-house", action: () => { setPage("landing"); setMobileNav(false); } },
+                { label: "Articles", icon: "fa-newspaper", action: () => { setPage("articles"); setMobileNav(false); } },
+                { label: "Pricing", icon: "fa-tag", action: () => { setPage("landing"); setTimeout(() => document.getElementById("pricing-section")?.scrollIntoView({ behavior: "smooth" }), 120); setMobileNav(false); } },
+              ].map(item => (
+                <button key={item.label} onClick={item.action} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 14, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 500, display: "flex", alignItems: "center", gap: 12 }}>
+                  <i className={`fa-solid ${item.icon}`} style={{ width: 16, opacity: 0.6 }} />{item.label}
+                </button>
+              ))}
+              <div style={{ height: 1, background: "var(--border)", margin: "6px 0" }} />
+              <button onClick={() => { setPage("auth"); setMobileNav(false); }} style={{ background: "var(--grad)", color: "#fff", border: "none", borderRadius: 12, padding: "14px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+                Get Started Free
+              </button>
+              <button onClick={() => { setPage("auth"); setMobileNav(false); }} style={{ background: "none", border: "1px solid var(--border)", borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", color: "var(--text-muted)" }}>
+                Sign In
+              </button>
             </div>
           ) : (
             <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: "var(--surface2)", borderRadius: 12, marginBottom: 8 }}>
-                <div style={{ width: 40, height: 40, borderRadius: "50%", background: "var(--grad)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, color: "white", flexShrink: 0 }}>{user.name?.[0]?.toUpperCase()}</div>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{user.name}</div>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, textTransform: "capitalize", marginTop: 2 }}>{user.plan || "starter"} plan</div>
+              {/* User card */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: "var(--surface2)", borderRadius: 14, marginBottom: 10 }}>
+                <div style={{ width: 38, height: 38, borderRadius: "50%", background: "var(--grad)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 800, color: "#fff", flexShrink: 0 }}>{user.name?.[0]?.toUpperCase()}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name}</div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2, textTransform: "capitalize" }}>{user.plan || "Free"} plan · {isUnlimited ? "∞ credits" : `${creditLabel} credit${creditCount === 1 ? "" : "s"}`}</div>
                 </div>
               </div>
+
+              {/* Primary actions */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+                <button onClick={() => { setPage("generate"); setMobileNav(false); }} style={{ background: "var(--grad)", color: "#fff", border: "none", borderRadius: 12, padding: "12px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 7 }}>
+                  <FiEdit3 style={{ fontSize: 14 }} />Create Kit
+                </button>
+                <button onClick={() => { setPage("negotiate"); setMobileNav(false); }} style={{ background: "var(--surface2)", color: "var(--text)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 7 }}>
+                  <i className="fa-solid fa-handshake-angle" style={{ fontSize: 13 }} />Negotiate
+                </button>
+              </div>
+
+              {/* Nav links */}
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {[
-                  { key: "dashboard", label: (<><FiLayout style={{ marginRight: 8 }} />Dashboard</>), page: "dashboard" },
-                  { key: "create", label: (<><FiEdit3 style={{ marginRight: 8 }} />Create Kit</>), page: "generate" },
-                  { key: "home", label: (<><i className="fa-solid fa-house" style={{ marginRight: 8 }} />Home</>), page: "landing" },
-                  { key: "pricing", label: (<><i className="fa-solid fa-dollar-sign" style={{ marginRight: 8 }} />Pricing</>), page: "landing", scroll: "pricing-section" },
-                  { key: "articles", label: (<><FiBookOpen style={{ marginRight: 8 }} />Articles</>), page: "articles" },
-                  { key: "plans", label: (<><i className="fa-solid fa-dollar-sign" style={{ marginRight: 8 }} />Plans & Billing</>), page: "payment" },
-                  ...(user?.email?.trim()?.toLowerCase() === ADMIN_EMAIL.trim().toLowerCase() ? [{ key: "admin", label: (<><i className="fa-solid fa-sliders" style={{ marginRight: 8 }} />Admin</>), page: "admin" }] : []),
+                  { key: "dashboard", icon: <FiLayout />, label: "Dashboard", pg: "dashboard" },
+                  { key: "home", icon: <i className="fa-solid fa-house" />, label: "Home", pg: "landing" },
+                  { key: "articles", icon: <FiBookOpen />, label: "Articles", pg: "articles" },
+                  { key: "payment", icon: <i className="fa-solid fa-dollar-sign" />, label: "Plans & Billing", pg: "payment" },
+                  ...(user?.email?.trim()?.toLowerCase() === ADMIN_EMAIL.trim().toLowerCase() ? [{ key: "admin", icon: <i className="fa-solid fa-sliders" />, label: "Admin", pg: "admin" }] : []),
                 ].map(item => (
-                  <button key={item.key} onClick={() => { setPage(item.page); if (item.scroll) setTimeout(() => document.getElementById(item.scroll)?.scrollIntoView({ behavior: "smooth" }), 100); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 14, color: "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: 500 }}>{item.label}</button>
+                  <button key={item.key} onClick={() => { setPage(item.pg); setMobileNav(false); }} style={{ background: page === item.pg ? "var(--accent-soft)" : "none", border: "none", padding: "11px 14px", fontSize: 14, color: page === item.pg ? "var(--text)" : "var(--text-mid)", cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", fontWeight: page === item.pg ? 700 : 500, display: "flex", alignItems: "center", gap: 12, transition: "all 0.12s" }}>
+                    <span style={{ width: 16, opacity: 0.65, display: "inline-flex", alignItems: "center" }}>{item.icon}</span>{item.label}
+                    {page === item.pg && <span style={{ marginLeft: "auto", width: 6, height: 6, borderRadius: "50%", background: PB }} />}
+                  </button>
                 ))}
-                <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
-                <button onClick={() => { onSignOut(); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "12px 14px", fontSize: 14, color: ER, cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left" }}><i className="fa-solid fa-right-from-bracket" style={{ marginRight: 8 }} />Sign Out</button>
+                <div style={{ height: 1, background: "var(--border)", margin: "6px 0" }} />
+                <button onClick={() => { onSignOut(); setMobileNav(false); }} style={{ background: "none", border: "none", padding: "11px 14px", fontSize: 14, color: ER, cursor: "pointer", borderRadius: 10, fontFamily: "inherit", textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}>
+                  <i className="fa-solid fa-right-from-bracket" style={{ width: 16 }} />Sign Out
+                </button>
               </div>
             </div>
           )}
