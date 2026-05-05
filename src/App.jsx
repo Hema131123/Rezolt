@@ -2044,6 +2044,17 @@ const GLOBAL_CSS = `
       color: #FFFFFF !important;
       background: rgba(228,190,71,0.10) !important;
     }
+    .feature-card {
+      background: linear-gradient(180deg, #031D40, #08284F) !important;
+      border-color: rgba(228,190,71,0.16) !important;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.30) !important;
+    }
+    .feature-card::before {
+      opacity: 0 !important;
+    }
+    .feature-plan {
+      backdrop-filter: none !important;
+    }
   }
 `;
 
@@ -2074,12 +2085,18 @@ const inp = {
 };
 
 function BrandLogo({ height = 100, style = {}, alt = "Rezolt" }) {
+  const iconSize = height * 0.78;
   return (
-    <img
-      src="/rezolt-brand.svg"
-      alt={alt}
-      style={{ height, width: "auto", display: "block", objectFit: "contain", ...style }}
-    />
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 120" role="img" aria-label={alt}
+      style={{ height, width: "auto", display: "block", ...style }}>
+      <g transform="translate(10 14)">
+        <rect x="0" y="0" width="90" height="90" rx="24" fill="#FFFFFF" stroke="#031D40" strokeWidth="4.5"/>
+        <path d="M27 74V18h23c12 0 19 6 19 16 0 8-5 13-14 15l15 24" fill="none" stroke="#031D40" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M27 45h20" fill="none" stroke="#E4BE47" strokeWidth="4.5" strokeLinecap="round"/>
+      </g>
+      <text x="120" y="59" fill="var(--text)" fontFamily="Raleway, 'Segoe UI', Arial, sans-serif" fontSize="46" fontWeight="800" letterSpacing="1.1">Rezolt</text>
+      <text x="122" y="82" fill="var(--text-muted)" fontFamily="'Open Sans', 'Segoe UI', Arial, sans-serif" fontSize="12.5" fontWeight="600" letterSpacing="2.2">HUMAN CAREER PARTNER</text>
+    </svg>
   );
 }
 
