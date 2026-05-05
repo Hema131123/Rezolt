@@ -2008,6 +2008,43 @@ const GLOBAL_CSS = `
     .dash-stats { grid-template-columns: 1fr !important; }
     .stats-bar { grid-template-columns: repeat(2,1fr) !important; }
   }
+
+  /* ── DARK MODE FINAL OVERRIDES (must be last to win) ──────────────── */
+  @media (prefers-color-scheme: dark) {
+    body, #root {
+      background: #020B1E !important;
+      color: #FFFFFF !important;
+    }
+    .topbar-pad {
+      background: linear-gradient(180deg, #02132D, #031D40) !important;
+      border-color: rgba(228,190,71,0.22) !important;
+      box-shadow: 0 16px 34px rgba(0,0,0,0.50) !important;
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, #02132D 0%, #031D40 50%, #08284F 100%) !important;
+      border-color: rgba(228,190,71,0.18) !important;
+    }
+    .hero-gradient::before {
+      opacity: 0.06 !important;
+    }
+    .marine-hero {
+      background: linear-gradient(135deg, #020B1E 0%, #031D40 60%, #08284F 100%) !important;
+    }
+    .section-pad, .page-pad, .section-h2 {
+      background: none !important;
+    }
+    .section-h2 {
+      -webkit-text-fill-color: #FFFFFF !important;
+      color: #FFFFFF !important;
+    }
+    .nav-item {
+      color: rgba(255,255,255,0.70) !important;
+    }
+    .nav-item:hover {
+      color: #FFFFFF !important;
+      background: rgba(228,190,71,0.10) !important;
+    }
+  }
 `;
 
 
@@ -2477,12 +2514,12 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
               {user ? (
                 <>
                   <button className="hero-btn btn-primary" onClick={() => setPage("dashboard")} style={{ background: "linear-gradient(135deg,#E4BE47,#F2D46C,#E4BE47)", backgroundSize: "200% auto", color: N1, border: "none", borderRadius: 12, padding: "14px 28px", fontSize: 14, fontWeight: 800, cursor: "pointer", fontFamily: "inherit" }}>Go to Dashboard</button>
-                  <button className="ghost-btn" onClick={() => setPage("generate")} style={{ background: "rgba(255,255,255,.86)", color: "var(--text)", border: "1px solid rgba(3,29,64,.10)", borderRadius: 12, padding: "13px 22px", fontSize: 14, cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>Create New Kit</button>
+                  <button className="ghost-btn" onClick={() => setPage("generate")} style={{ background: WHITE, color: DARK, border: `1px solid ${BORDER}`, borderRadius: 12, padding: "13px 22px", fontSize: 14, cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>Create New Kit</button>
                 </>
               ) : (
                 <>
                   <button className="hero-btn btn-primary" onClick={() => setPage("auth")} style={{ background: "linear-gradient(135deg,#E4BE47,#F2D46C,#E4BE47)", backgroundSize: "200% auto", color: N1, border: "none", borderRadius: 12, padding: "14px 28px", fontSize: 14, fontWeight: 800, cursor: "pointer", fontFamily: "inherit" }}>Get Started Free</button>
-                  <button className="ghost-btn" onClick={() => setPage("auth")} style={{ background: "rgba(255,255,255,.86)", color: "var(--text)", border: "1px solid rgba(3,29,64,.10)", borderRadius: 12, padding: "13px 22px", fontSize: 14, cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>Sign In</button>
+                  <button className="ghost-btn" onClick={() => setPage("auth")} style={{ background: WHITE, color: DARK, border: `1px solid ${BORDER}`, borderRadius: 12, padding: "13px 22px", fontSize: 14, cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>Sign In</button>
                 </>
               )}
             </div>
@@ -2500,7 +2537,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
             </div>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
               {[["4.8/5", " average rating from early users"], ["60s", "average turnaround"], ["3 free", "starter career kits"]].map(([v, l]) => (
-                <div key={v} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", background: "rgba(255,255,255,.82)", border: "1px solid rgba(3,29,64,.06)", borderRadius: 999 }}>
+                <div key={v} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 999 }}>
                   <span style={{ fontSize: 18, fontWeight: 700, color: PB }}>{v}</span>
                   <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{l}</span>
                 </div>
@@ -2512,8 +2549,8 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
           <div className="hero-ba-right" style={{ position: "relative" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 8, alignItems: "start" }}>
               {/* Before */}
-              <div style={{ background: "rgba(255,255,255,.92)", border: "1px solid rgba(3,29,64,.08)", borderRadius: 14, overflow: "hidden", animation: "fadeUp 0.5s ease both", boxShadow: "0 10px 24px rgba(3,29,64,.08)" }}>
-                <div style={{ padding: "8px 12px", borderBottom: "1px solid rgba(3,29,64,.08)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#F8FAFC" }}>
+              <div style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 14, overflow: "hidden", animation: "fadeUp 0.5s ease both", boxShadow: "0 10px 24px rgba(3,29,64,.08)" }}>
+                <div style={{ padding: "8px 12px", borderBottom: `1px solid ${BORDER}`, display: "flex", justifyContent: "space-between", alignItems: "center", background: BG }}>
                   <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>Before</span>
                   <span style={{ fontSize: 9, color: "var(--text-faint)" }}>resume_old.docx</span>
                 </div>
@@ -2538,7 +2575,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
               </div>
 
               {/* After */}
-              <div style={{ background: "white", borderRadius: 14, overflow: "hidden", animation: "fadeUp 0.5s ease 0.2s both", boxShadow: "0 0 24px rgba(3,29,64,.28)" }}>
+              <div style={{ background: WHITE, borderRadius: 14, overflow: "hidden", animation: "fadeUp 0.5s ease 0.2s both", boxShadow: "0 0 24px rgba(3,29,64,.28)" }}>
                 <div style={{ padding: "8px 12px", background: "linear-gradient(135deg,#001B48,#02457A)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,.7)", textTransform: "uppercase", letterSpacing: ".08em" }}>After</span>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -2563,14 +2600,14 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
                     {[100, 80].map((w, i) => <div key={i} style={{ height: 2, background: "#E2E8F0", borderRadius: 1, marginBottom: 2, width: w + "%" }} />)}
                   </div>
                 </div>
-                <div style={{ padding: "7px 10px", background: "#F4F7FB", borderTop: "1px solid rgba(3,29,64,.1)", display: "flex", alignItems: "center", gap: 5 }}>
+                <div style={{ padding: "7px 10px", background: BG, borderTop: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 5 }}>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                   <span style={{ fontSize: 9, color: "#02457A", fontWeight: 600 }}>ATS Optimized ✓</span>
                 </div>
               </div>
             </div>
             <div style={{ textAlign: "center", marginTop: 12 }}>
-              <span style={{ background: "rgba(255,255,255,.92)", border: "1px solid rgba(3,29,64,.08)", borderRadius: 20, padding: "4px 14px", fontSize: 10, color: "var(--text-muted)", boxShadow: "0 8px 20px rgba(3,29,64,.06)" }}>Same experience. Clearer positioning. Better first impression.</span>
+              <span style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "4px 14px", fontSize: 10, color: "var(--text-muted)", boxShadow: "0 8px 20px rgba(3,29,64,.06)" }}>Same experience. Clearer positioning. Better first impression.</span>
             </div>
           </div>
         </div>
@@ -4947,7 +4984,7 @@ function FAQPage({ setPage, user }) {
               { value: "ATS", label: "resume guidance" },
               { value: "24/7", label: "email enquiry option" },
             ].map(item => (
-              <div key={item.label} style={{ background: "rgba(255,255,255,0.84)", border: "1px solid rgba(3,29,64,0.08)", borderRadius: 18, padding: "14px 16px", boxShadow: "var(--soft-shadow)" }}>
+              <div key={item.label} style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 18, padding: "14px 16px", boxShadow: "var(--soft-shadow)" }}>
                 <div style={{ fontSize: 22, fontWeight: 700, color: AC, marginBottom: 2 }}>{item.value}</div>
                 <div style={{ fontSize: 12, color: MUTED }}>{item.label}</div>
               </div>
@@ -5066,7 +5103,7 @@ function ContactPage({ setPage, user }) {
               "Product feedback",
               "Partnerships",
             ].map(item => (
-              <span key={item} style={{ padding: "7px 12px", borderRadius: 999, background: "rgba(255,255,255,0.84)", border: "1px solid rgba(3,29,64,0.08)", fontSize: 12, color: MID, fontWeight: 600 }}>
+              <span key={item} style={{ padding: "7px 12px", borderRadius: 999, background: WHITE, border: `1px solid ${BORDER}`, fontSize: 12, color: MID, fontWeight: 600 }}>
                 {item}
               </span>
             ))}
@@ -5962,7 +5999,7 @@ export default function App() {
   if (booting) return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: N1 }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
-        <div style={{ padding: "12px 18px", borderRadius: 18, background: "rgba(255,255,255,0.96)", boxShadow: "0 10px 30px rgba(0,0,0,0.12)" }}>
+        <div style={{ padding: "12px 18px", borderRadius: 18, background: WHITE, boxShadow: "0 10px 30px rgba(0,0,0,0.12)" }}>
           <BrandLogo height={90} />
         </div>
         <div style={{ display: "flex", gap: 6 }}>
