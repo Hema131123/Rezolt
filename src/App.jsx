@@ -2055,6 +2055,21 @@ const GLOBAL_CSS = `
     .feature-plan {
       backdrop-filter: none !important;
     }
+    .paper-preview {
+      background: #FFFFFF !important;
+      color: #1F2937 !important;
+      border-color: rgba(31,41,55,0.08) !important;
+      --text: #1F2937;
+      --text-primary: #1F2937;
+      --text-secondary: #374151;
+      --text-mid: #374151;
+      --text-muted: #6B7280;
+      --text-faint: #94A3B8;
+      --accent: #031D40;
+      --border: rgba(31,41,55,0.08);
+      --surface: rgba(255,255,255,0.94);
+      --surface2: #F3F4F6;
+    }
   }
 `;
 
