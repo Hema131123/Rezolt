@@ -4302,7 +4302,8 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
   const regenerateTab = async (tabId) => {
     if (loading[tabId] || generating) return;
     setLoading(prev => ({ ...prev, [tabId]: true }));
-    try {
+
+    const attemptCall = async () => {
       try { await Promise.race([supabase.auth.refreshSession(), new Promise((_, r) => setTimeout(r, 1500))]); } catch (e) { console.warn(e); }
       const safeResume = prepareInputForAi(resume, MAX_RESUME_CHARS, "Resume");
       const safeJd = prepareInputForAi(jd, MAX_JD_CHARS, "Job description");
@@ -4314,18 +4315,41 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         const e = new Error(data.error || "Generation failed");
-        e.diagnostic = data.diagnostic;
         throw e;
       }
-      setOutputs(prev => ({ ...prev, [tabId]: data.text || "Something went wrong. Please try again." }));
+      return data.text || null;
+    };
+
+    let text = null;
+    let finalErr = null;
+    try {
+      text = await attemptCall();
     } catch (err) {
-      const msg = err?.message || "";
-      const isOutage = /overloaded|capacity|service.*unavailable|too many requests|rate.?limit/i.test(msg);
+      // One automatic silent retry (skip retry for auth errors)
+      if (!/sign in|session|auth/i.test(err?.message || "")) {
+        try {
+          await new Promise(r => setTimeout(r, 3000));
+          text = await attemptCall();
+        } catch (retryErr) {
+          finalErr = retryErr;
+        }
+      } else {
+        finalErr = err;
+      }
+    }
+
+    if (text) {
+      setOutputs(prev => ({ ...prev, [tabId]: text }));
+    } else {
+      const msg = finalErr?.message || "";
+      const isOutage = /overloaded|capacity|service.*unavailable|too many requests|rate.?limit|timed out/i.test(msg);
       const errText = isOutage
         ? "Claude AI is temporarily busy — please try again in a few minutes."
-        : msg && msg !== "Generation failed" && msg !== "AI Service Error"
-          ? `Generation error: ${msg}`
-          : "Couldn't regenerate. Please try again.";
+        : /sign in|session|auth/i.test(msg)
+          ? "Your session expired. Please sign in again."
+          : msg && msg !== "Generation failed" && msg !== "AI Service Error"
+            ? `Generation error: ${msg}`
+            : "Couldn't regenerate. Please try again.";
       setOutputs(prev => ({ ...prev, [tabId]: errText }));
     }
     setLoading(prev => ({ ...prev, [tabId]: false }));
@@ -4655,7 +4679,7 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: 20 }}>{TABS.find(t => t.id === activeTab)?.icon}</span>
                 <span style={{ fontSize: 15, fontWeight: 700, color: DARK }}>{TABS.find(t => t.id === activeTab)?.label}</span>
-                {outputs[activeTab] && <span style={{ background: "var(--accent-soft)", color: O, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>Ready to review</span>}
+                {outputs[activeTab] && !/temporarily busy|session expired|Generation error:|couldn't regenerate|something went wrong|Please use the Retry|timed out/i.test(outputs[activeTab]) && <span style={{ background: "var(--accent-soft)", color: O, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>Ready to review</span>}
                 {outputs[activeTab] && !loading[activeTab] && canAccess(user?.plan, TABS.find(t => t.id === activeTab)?.minPlan ?? "starter") && (
                   <button onClick={() => regenerateTab(activeTab)} title="Regenerate this output" style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: 7, padding: "3px 9px", fontSize: 11, color: MUTED, cursor: "pointer", fontFamily: "inherit", transition: "all .15s" }}>↺ Retry</button>
                 )}

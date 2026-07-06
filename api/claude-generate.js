@@ -47,9 +47,15 @@ export default async function handler(req, res) {
   const { prompt } = req.body || {};
   if (!prompt) return res.status(400).json({ error: "Empty prompt received." });
 
+  // AbortController gives us a hard 55-second ceiling under Vercel's 60-second limit
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 55000);
+
   try {
-    // Use streaming so bytes flow immediately — prevents Node.js fetch from
-    // timing out on long generations (interview prep can take 35–50 seconds).
+    // stream: true causes Anthropic to send HTTP headers immediately (200 OK),
+    // which prevents Node.js undici's 30-second headersTimeout from firing.
+    // The SSE body then flows over the full generation time (~35-50s for
+    // Interview Prep), well within undici's 300-second bodyTimeout.
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -63,50 +69,55 @@ export default async function handler(req, res) {
         stream: true,
         messages: [{ role: "user", content: prompt }],
       }),
+      signal: controller.signal,
     });
 
     if (!response.ok) {
+      clearTimeout(timeoutId);
       const errText = await response.text();
       console.error(`Anthropic Error [${response.status}]:`, errText);
       let errMessage = "AI Service Error";
       try {
         const errJson = JSON.parse(errText);
+        // Anthropic error shape: { type, error: { type, message } }
         if (errJson?.error?.message) errMessage = errJson.error.message;
+        else if (typeof errJson?.error === "string") errMessage = errJson.error;
+        else if (errJson?.message) errMessage = errJson.message;
       } catch {}
-      return res.status(502).json({ error: errMessage, status: response.status, details: errText });
+      return res.status(502).json({ error: errMessage, status: response.status });
     }
 
-    // Read the SSE stream and collect all text_delta chunks
+    // Accumulate the full SSE response body as a string.
+    // response.text() is simpler and equally correct here — the stream: true
+    // flag already triggered the immediate-headers behaviour we need.
+    const streamBody = await response.text();
+    clearTimeout(timeoutId);
+
     let fullText = "";
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
+    for (const line of streamBody.split("\n")) {
+      if (!line.startsWith("data: ")) continue;
+      const data = line.slice(6).trim();
+      if (data === "[DONE]") continue;
+      try {
+        const event = JSON.parse(data);
+        if (event.type === "content_block_delta" && event.delta?.type === "text_delta") {
+          fullText += event.delta.text;
+        }
+      } catch {}
+    }
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-
-      // Process complete SSE lines
-      const lines = buffer.split("\n");
-      buffer = lines.pop(); // keep the last incomplete line
-
-      for (const line of lines) {
-        if (!line.startsWith("data: ")) continue;
-        const data = line.slice(6).trim();
-        if (data === "[DONE]") continue;
-        try {
-          const event = JSON.parse(data);
-          if (event.type === "content_block_delta" && event.delta?.type === "text_delta") {
-            fullText += event.delta.text;
-          }
-        } catch {}
-      }
+    if (!fullText) {
+      console.warn("Empty text extracted from stream body. First 500 chars:", streamBody.slice(0, 500));
+      return res.status(500).json({ error: "Empty response from AI. Please try again." });
     }
 
     return res.status(200).json({ text: fullText });
   } catch (err) {
-    console.error("API Crash:", err);
-    return res.status(500).json({ error: "Server API Crash", details: err.message });
+    clearTimeout(timeoutId);
+    console.error("API Error:", err.name, err.message);
+    if (err.name === "AbortError") {
+      return res.status(504).json({ error: "Request timed out after 55 seconds. Please try again." });
+    }
+    return res.status(500).json({ error: "Server error: " + err.message });
   }
 }
