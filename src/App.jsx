@@ -462,45 +462,49 @@ ${jd}`,
 
 CRITICAL COMPANY RULE: The company the candidate is interviewing at is named in the JOB DESCRIPTION. All questions and answers must be tailored to that company. Resume companies are past employers.
 
-FORMATTING: Plain text only. No markdown. No em dashes. Use exact labels. All answers are written in FIRST PERSON — as if the candidate is speaking ("I did...", "I led...", "In my role at X, I..."). Never write in third person.
+FORMATTING: Plain text only. No markdown. No em dashes. Use exact labels. All answers are written in FIRST PERSON as if the candidate is speaking. Keep each STAR answer focused and tight — 2-3 sentences per section maximum.
 
 FAANG/MAANG INTERVIEW PREP STANDARDS:
 - Questions must be the ones THIS company actually asks for THIS type of role
-- STAR answers must use REAL details from the resume, written in first person, no generic examples
-- Every answer must include a real metric from the resume in the Result
-- The TIE-BACK must connect explicitly to a JD requirement
-- Smart questions must show strategic thinking and company knowledge
-- Include one curveball or values-based question that top companies commonly ask
+- STAR answers must use REAL details from the resume, written in first person
+- Every Result must include a real metric from the resume
+- Cover one behavioural, one role-specific, and one values/culture question
 
 OUTPUT FORMAT:
 
 SELF INTRODUCTION
-[Write a compelling 45-60 second self-introduction in first person that the candidate can say at the start of the interview. Structure: 1 sentence on current/most recent role and years of experience. 2 sentences on the strongest 2 achievements from the resume (with real metrics). 1 sentence on why they are specifically excited about this role at this company (inferred from the JD). 1 closing sentence on what they bring to the team. Make it warm, confident, and conversational — not robotic.]
+[Write a 45-second self-introduction in first person. Include: current/recent role + years of experience, 2 key achievements with metrics from the resume, why excited about this specific role at this company, what they bring to the team. Conversational, not robotic. 4-5 sentences total.]
 
-SECTION 1: TOP 5 QUESTIONS THEY WILL ASK
+SECTION 1: TOP 3 QUESTIONS THEY WILL ASK
 
-Q1: [Most likely first question for this specific role and company]
-WHY THEY ASK: [One sentence — what competency or signal are they testing]
-SITUATION: [First person — "In my role at [Company], I was responsible for..." — name the specific project or initiative from the resume]
-ACTION: [First person — "I did X by doing Y and Z..." — specific steps, decisions, methods taken]
-RESULT: [First person — "As a result, I achieved..." — real metric from the resume]
-TIE-BACK: [One sentence — "This directly maps to [JD requirement] because..."]
+Q1: [Most likely question for this role at this company]
+SITUATION: [2-3 sentences first person — specific project or initiative from the resume]
+ACTION: [2-3 sentences first person — key steps, decisions, methods]
+RESULT: [1-2 sentences first person — real metric from the resume and impact]
 
-[Repeat for Q2, Q3, Q4, Q5. Include at least one behavioural, one situational, one role-specific, and one values/culture question.]
+Q2: [Second most likely question — different competency from Q1]
+SITUATION: [2-3 sentences first person — specific project or initiative from the resume]
+ACTION: [2-3 sentences first person — key steps, decisions, methods]
+RESULT: [1-2 sentences first person — real metric from the resume and impact]
+
+Q3: [Values, culture-fit, or behavioural question this company is known for]
+SITUATION: [2-3 sentences first person — specific project or initiative from the resume]
+ACTION: [2-3 sentences first person — key steps, decisions, methods]
+RESULT: [1-2 sentences first person — real metric from the resume and impact]
 
 SECTION 2: 2 POWER QUESTIONS TO ASK THE INTERVIEWER
 
-Q1: [Strategic question showing deep knowledge of the company's current priorities, inferred from JD]
-WHY THIS WORKS: [One sentence — what signal this sends about the candidate]
+Q1: [Strategic question showing knowledge of the company's current priorities from JD]
+WHY THIS WORKS: [One sentence]
 
-Q2: [Forward-looking question about growth, team, or impact — shows genuine interest and ambition]
+Q2: [Forward-looking question about growth or impact]
 WHY THIS WORKS: [One sentence]
 
 SECTION 3: 3 WATCH-OUTS FOR THIS INTERVIEW
 
-1. [Specific trap or common mistake candidates make for this role or company — how to avoid it]
-2. [Second watch-out — tone, format, or common interview bias for this role]
-3. [Practical tip for standing out in the final few minutes]
+1. [Specific trap or mistake candidates make for this role or company]
+2. [Tone, format, or bias to watch for]
+3. [Tip for standing out in the final few minutes]
 
 RESUME:
 ${r}
@@ -2883,7 +2887,7 @@ function LandingPage({ setPage, user, selectedTemplate, setSelectedTemplate, set
             { title: "Resume Rewrite", desc: "ATS-optimized, role-specific, quantified achievements. Ready to send.", plan: "Starter", planColor: LB, planBg: "rgba(3,29,64,0.08)", grad: "linear-gradient(135deg,#001B48,#031D40)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14,2 14,8 20,8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg> },
             { title: "Cover Letter", desc: "3 paragraphs, confident tone. Reads like you wrote it, not a template.", plan: "Starter", planColor: LB, planBg: "rgba(3,29,64,0.08)", grad: "linear-gradient(135deg,#031D40,#031D40)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg> },
             { title: "Referral Message", desc: "LinkedIn note and DM. Makes it easy for your contact to say yes.", plan: "Starter", planColor: LB, planBg: "rgba(3,29,64,0.08)", grad: "linear-gradient(135deg,#031D40,#08284F)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg> },
-            { title: "Interview Prep", desc: "Top 5 questions with STAR answers based on your actual experience.", plan: "Pro+", planColor: AC, planBg: "var(--accent-soft)", grad: "linear-gradient(135deg,#001B48,#031D40)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg> },
+            { title: "Interview Prep", desc: "Top 3 STAR answers tailored to the company + power questions and watch-outs.", plan: "Pro+", planColor: AC, planBg: "var(--accent-soft)", grad: "linear-gradient(135deg,#001B48,#031D40)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg> },
             { title: "Find & Reach", desc: "Exact LinkedIn search query and cold outreach to find the right recruiter.", plan: "Pro+", planColor: AC, planBg: "var(--accent-soft)", grad: "linear-gradient(135deg,#031D40,#08284F)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg> },
             { title: "Salary Negotiation", desc: "Enter offer vs expectation — get a ready-to-use negotiation script.", plan: "Unlimited", planColor: N2, planBg: "rgba(3,29,64,0.08)", grad: "linear-gradient(135deg,#001B48,#031D40,#08284F)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg> },
             { title: "Notice Period", desc: "Verbal script, HR email, LinkedIn — all tailored to your notice period.", plan: "Unlimited", planColor: N2, planBg: "rgba(3,29,64,0.08)", grad: "linear-gradient(135deg,#031D40,#08284F)", svg: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg> },

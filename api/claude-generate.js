@@ -47,9 +47,9 @@ export default async function handler(req, res) {
   const { prompt } = req.body || {};
   if (!prompt) return res.status(400).json({ error: "Empty prompt received." });
 
-  // AbortController gives us a hard 55-second ceiling under Vercel's 60-second limit
+  // AbortController gives us a hard 58-second ceiling under Vercel's 60-second limit
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 55000);
+  const timeoutId = setTimeout(() => controller.abort(), 58000);
 
   try {
     // stream: true causes Anthropic to send HTTP headers immediately (200 OK),
