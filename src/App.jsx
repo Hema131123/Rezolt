@@ -4188,12 +4188,14 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
           results[tab.id] = data.text || "Something went wrong. Please try again.";
         } catch (err) {
           const msg = err?.message || "";
-          const isOutage = /overloaded|capacity|service.*unavailable|too many requests/i.test(msg);
+          const isOutage = /overloaded|capacity|service.*unavailable|too many requests|rate.?limit/i.test(msg);
           results[tab.id] = isOutage
             ? "Claude AI is temporarily busy — please try again in a few minutes. Your credits have not been used."
             : /sign in|session/i.test(msg)
               ? "Your session expired. Please sign in again."
-              : "Network error. Please try again.";
+              : msg && msg !== "Generation failed" && msg !== "AI Service Error"
+                ? `Generation error: ${msg}`
+                : "Something went wrong generating this section. Please use the Retry button.";
         }
         setOutputs(prev => ({ ...prev, [tab.id]: results[tab.id] }));
         setLoading(prev => ({ ...prev, [tab.id]: false }));
@@ -4318,8 +4320,13 @@ Must have: 4+ years in talent acquisition or HRBP, strong Excel/Power BI exposur
       setOutputs(prev => ({ ...prev, [tabId]: data.text || "Something went wrong. Please try again." }));
     } catch (err) {
       const msg = err?.message || "";
-      const isOutage = /overloaded|capacity|service.*unavailable|too many requests/i.test(msg);
-      setOutputs(prev => ({ ...prev, [tabId]: isOutage ? "Claude AI is temporarily busy — please try again in a few minutes." : "Couldn't regenerate. Please try again." }));
+      const isOutage = /overloaded|capacity|service.*unavailable|too many requests|rate.?limit/i.test(msg);
+      const errText = isOutage
+        ? "Claude AI is temporarily busy — please try again in a few minutes."
+        : msg && msg !== "Generation failed" && msg !== "AI Service Error"
+          ? `Generation error: ${msg}`
+          : "Couldn't regenerate. Please try again.";
+      setOutputs(prev => ({ ...prev, [tabId]: errText }));
     }
     setLoading(prev => ({ ...prev, [tabId]: false }));
   };
